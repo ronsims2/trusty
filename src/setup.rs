@@ -6,6 +6,7 @@ use std::process::exit;
 use std::string::ToString;
 use clap::builder::Str;
 use clap::Parser;
+use sqlite::Connection;
 
 
 fn get_win_home_drive() -> String {
@@ -78,15 +79,32 @@ pub(crate) fn get_crusty_db_path() -> PathBuf {
     config_path.join("crusty.db")
 }
 
+pub(crate) fn get_crusty_db_conn() -> Connection {
+    let db_path = get_crusty_db_path();
+    sqlite::open(db_path.as_path()).unwrap()
+}
+
+pub(crate) fn create_main_crusty_table() {
+    let conn = get_crusty_db_conn();
+    let sql = "CREATE TABLE IF NOT EXISTS \
+    content (content_id NCHAR(36) PRIMARY KEY, body TEXT); \
+    CREATE TABLE IF NOT EXISTS notes (note_id INTEGER PRIMARY KEY AUTOINCREMENT, \
+    title VARCHAR(64), created DATETIME, updated DATETIME, content_id NCHAR(36), \
+    CONSTRAINT fk_content_id FOREIGN KEY (content_id) REFERENCES content(content_id));";
+
+    conn.execute(sql).unwrap();
+}
+
 pub(crate) fn init_crusty_db() {
     let db_path = get_crusty_db_path();
     let db_created = fs::File::create(db_path.as_path());
     match db_created {
         Ok(_) => {
-            println!("cRusty DB created.")
+            create_main_crusty_table();
+            println!("cRusty DB created.");
         }
         Err(_) => {
-            println!("Could not create cRusty DB.")
+            println!("Could not create cRusty DB.");
         }
     }
 }
