@@ -4,9 +4,11 @@ use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::process::exit;
 use std::string::ToString;
+use std::time::SystemTime;
 use clap::builder::Str;
 use clap::Parser;
 use sqlite::Connection;
+use uuid::Uuid;
 
 
 fn get_win_home_drive() -> String {
@@ -84,15 +86,44 @@ pub(crate) fn get_crusty_db_conn() -> Connection {
     sqlite::open(db_path.as_path()).unwrap()
 }
 
-pub(crate) fn create_main_crusty_table() {
+pub(crate) fn create_crusty_sys_tables() {
     let conn = get_crusty_db_conn();
     let sql = "CREATE TABLE IF NOT EXISTS \
     content (content_id NCHAR(36) PRIMARY KEY, body TEXT); \
     CREATE TABLE IF NOT EXISTS notes (note_id INTEGER PRIMARY KEY AUTOINCREMENT, \
     title VARCHAR(64), created DATETIME, updated DATETIME, content_id NCHAR(36), \
-    CONSTRAINT fk_content_id FOREIGN KEY (content_id) REFERENCES content(content_id));";
+    CONSTRAINT fk_content_id FOREIGN KEY (content_id) REFERENCES content(content_id)); \
+    CREATE TABLE IF NOT EXISTS config (key VARCHAR(36) PRIMARY KEY, value VARCHAR(140));";
 
     conn.execute(sql).unwrap();
+    println!("Initialized empty cRusty tables.");
+}
+
+pub(crate) fn sql_exec(sql: String) {
+    let conn = get_crusty_db_conn();
+    conn.execute(sql).unwrap();
+}
+
+pub(crate) fn get_unix_epoch_ts() -> u64 {
+    let ts = match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
+        Ok(n) => n.as_secs(),
+        Err(_) => panic!("SystemTime before UNIX EPOCH!"),
+    };
+
+    ts
+}
+
+pub(crate) fn populate_crusty_sys_tables() {
+    let content_id = Uuid::new_v4();
+    let crusty_app_id = Uuid::new_v4();
+    let note_insert = format!("INSERT INTO notes (title, created, updated, content_id) VALUES \
+    ('Get Started with cRusty', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '{}');", content_id);
+    let content_insert = format!("INSERT INTO content (content_id, body) VALUES ('{}', 'Welcome to cRusty the CLI notes app. -Ron');", content_id);
+    let config_insert = format!("INSERT INTO config (key, value) VALUES ('crusty_app_id', '{}');", crusty_app_id);
+    let sql = format!("{}{}{}",note_insert, config_insert, content_insert);
+
+    sql_exec(sql);
+    println!("Configurations added.");
 }
 
 pub(crate) fn init_crusty_db() {
@@ -100,8 +131,8 @@ pub(crate) fn init_crusty_db() {
     let db_created = fs::File::create(db_path.as_path());
     match db_created {
         Ok(_) => {
-            create_main_crusty_table();
-            println!("cRusty DB created.");
+            create_crusty_sys_tables();
+            populate_crusty_sys_tables();
         }
         Err(_) => {
             println!("Could not create cRusty DB.");
