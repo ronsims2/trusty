@@ -1,10 +1,12 @@
 mod setup;
 mod cli;
+mod sql;
 
 use std::env;
 use std::fmt::Arguments;
 use std::path::Path;
 use clap::Parser;
+use sqlite::Type::String;
 use crate::cli::Cli;
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db};
 
@@ -25,10 +27,18 @@ fn main() {
     // read the args
     let args = Cli::parse();
 
-    if let Some(note) = args.note.as_deref() {
-        println!("Note: {}", note)
-    }
+
+    let mut new_note = Vec::new();
+
     if let Some(title) = args.title.as_deref() {
-        println!("Title: {}", title)
+        println!("Title: {}", title);
+        new_note.push(title);
     }
+
+    if let Some(note) = args.note.as_deref() {
+        println!("Note: {}", note);
+        new_note.push(note);
+    }
+
+    println!("{}::{}", new_note.get(0).unwrap(), new_note.get(1).unwrap());
 }
