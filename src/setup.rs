@@ -113,13 +113,14 @@ pub(crate) fn get_unix_epoch_ts() -> u64 {
 pub(crate) fn populate_crusty_sys_tables() {
     let content_id = Uuid::new_v4();
     let crusty_app_id = Uuid::new_v4();
-    let note_insert = format!("INSERT INTO notes (title, protected, created, updated, content_id) VALUES \
+    let note_insert_sql = format!("INSERT INTO notes (title, protected, created, updated, content_id) VALUES \
     ('Get Started with cRusty', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '{}');", content_id);
     let content_insert_sql = format!("INSERT INTO content (content_id, body) VALUES ('{}', 'Welcome to cRusty the CLI notes app. -Ron');", content_id);
     let config_insert_sql = format!("INSERT INTO config (key, value) VALUES ('crusty_app_id', '{}');", crusty_app_id);
 
     let conn = get_crusty_db_conn();
     conn.execute(&content_insert_sql, ()).unwrap();
+    conn.execute(&note_insert_sql, ()).unwrap();
     conn.execute(&config_insert_sql, ()).unwrap();
     println!("Configurations added.");
 }

@@ -7,4 +7,6 @@ pub(crate) struct Cli {
     pub note: Option<String>,
     #[arg(short, long)]
     pub title: Option<String>,
+    #[arg(short, long)]
+    pub quick: Option<String>
 }

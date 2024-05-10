@@ -33,9 +33,17 @@ fn main() {
 
     let note = args.note.as_deref();
 
+    // if there is a title and note param insert a proper note
     if title.is_some() && note.is_some() {
         println!("2 args found");
         // println!("{}::{}", new_note.get(0).unwrap(), new_note.get(1).unwrap());
         insert_note(title.unwrap(), note.unwrap(), false);
     }
+
+    // add an untitled quick note
+    let quick_note = args.quick.as_deref();
+    if (quick_note.is_some() && title.is_none() && note.is_none()) {
+        insert_note("Untitled", quick_note.unwrap(), false);
+    }
+    // @todo if there is no input at all show the menu
 }
