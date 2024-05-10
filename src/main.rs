@@ -28,20 +28,14 @@ fn main() {
     let args = Cli::parse();
 
 
-    let mut new_note = Vec::new();
 
-    if let Some(title) = args.title.as_deref() {
-        println!("Title: {}", title);
-        new_note.push(title);
-    }
+    let title = args.title.as_deref();
 
-    if let Some(note) = args.note.as_deref() {
-        println!("Note: {}", note);
-        new_note.push(note);
-    }
+    let note = args.note.as_deref();
 
-    if new_note.iter().count() == 2 {
+    if title.is_some() && note.is_some() {
         println!("2 args found");
-        println!("{}::{}", new_note.get(0).unwrap(), new_note.get(1).unwrap());
+        // println!("{}::{}", new_note.get(0).unwrap(), new_note.get(1).unwrap());
+        insert_note(title.unwrap(), note.unwrap(), false);
     }
 }
