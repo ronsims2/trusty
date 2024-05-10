@@ -9,6 +9,6 @@ authors = ["Ron Sims II", "Bisky"]
 [dependencies]
 clap = { version = "4.5.4", features = ["derive"] }
 homedir = "0.2.1"
-sqlite = "0.36.0"
+rusqlite = {version = "0.31.0", features = ["bundled"]}
 termcolor = "1.4.1"
 uuid = { version = "1.8.0", features = ["serde", "v4"] }

@@ -7,7 +7,7 @@ use std::string::ToString;
 use std::time::SystemTime;
 use clap::builder::Str;
 use clap::Parser;
-use sqlite::Connection;
+use rusqlite::{Connection, params, Params};
 use uuid::Uuid;
 
 
@@ -83,25 +83,22 @@ pub(crate) fn get_crusty_db_path() -> PathBuf {
 
 pub(crate) fn get_crusty_db_conn() -> Connection {
     let db_path = get_crusty_db_path();
-    sqlite::open(db_path.as_path()).unwrap()
+    Connection::open(db_path.as_path()).unwrap()
 }
 
 pub(crate) fn create_crusty_sys_tables() {
     let conn = get_crusty_db_conn();
-    let sql = "CREATE TABLE IF NOT EXISTS \
-    content (content_id NCHAR(36) PRIMARY KEY, body TEXT); \
-    CREATE TABLE IF NOT EXISTS notes (note_id INTEGER PRIMARY KEY AUTOINCREMENT, \
+    let create_content_sql = "CREATE TABLE IF NOT EXISTS \
+    content (content_id NCHAR(36) PRIMARY KEY, body TEXT);";
+    let create_notes_sql = "CREATE TABLE IF NOT EXISTS notes (note_id INTEGER PRIMARY KEY AUTOINCREMENT, \
     protected BOOLEAN, title VARCHAR(64), created DATETIME, updated DATETIME, content_id NCHAR(36), \
-    CONSTRAINT fk_content_id FOREIGN KEY (content_id) REFERENCES content(content_id)); \
-    CREATE TABLE IF NOT EXISTS config (key VARCHAR(36) PRIMARY KEY, value VARCHAR(140));";
+    CONSTRAINT fk_content_id FOREIGN KEY (content_id) REFERENCES content(content_id));";
+    let create_config_sql = "CREATE TABLE IF NOT EXISTS config (key VARCHAR(36) PRIMARY KEY, value VARCHAR(140));";
 
-    conn.execute(sql).unwrap();
+    conn.execute(create_content_sql, ()).unwrap();
+    conn.execute(create_notes_sql, ()).unwrap();
+    conn.execute(create_config_sql, ()).unwrap();
     println!("Initialized empty cRusty tables.");
-}
-
-pub(crate) fn sql_exec(sql: String) {
-    let conn = get_crusty_db_conn();
-    conn.execute(sql).unwrap();
 }
 
 pub(crate) fn get_unix_epoch_ts() -> u64 {
@@ -118,11 +115,12 @@ pub(crate) fn populate_crusty_sys_tables() {
     let crusty_app_id = Uuid::new_v4();
     let note_insert = format!("INSERT INTO notes (title, protected, created, updated, content_id) VALUES \
     ('Get Started with cRusty', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '{}');", content_id);
-    let content_insert = format!("INSERT INTO content (content_id, body) VALUES ('{}', 'Welcome to cRusty the CLI notes app. -Ron');", content_id);
-    let config_insert = format!("INSERT INTO config (key, value) VALUES ('crusty_app_id', '{}');", crusty_app_id);
-    let sql = format!("{}{}{}",note_insert, config_insert, content_insert);
+    let content_insert_sql = format!("INSERT INTO content (content_id, body) VALUES ('{}', 'Welcome to cRusty the CLI notes app. -Ron');", content_id);
+    let config_insert_sql = format!("INSERT INTO config (key, value) VALUES ('crusty_app_id', '{}');", crusty_app_id);
 
-    sql_exec(sql);
+    let conn = get_crusty_db_conn();
+    conn.execute(&content_insert_sql, ()).unwrap();
+    conn.execute(&config_insert_sql, ()).unwrap();
     println!("Configurations added.");
 }
 

@@ -6,7 +6,6 @@ use std::env;
 use std::fmt::Arguments;
 use std::path::Path;
 use clap::Parser;
-use sqlite::Type::String;
 use crate::cli::Cli;
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db};
 
@@ -40,5 +39,8 @@ fn main() {
         new_note.push(note);
     }
 
-    println!("{}::{}", new_note.get(0).unwrap(), new_note.get(1).unwrap());
+    if new_note.iter().count() == 2 {
+        println!("2 args found");
+        println!("{}::{}", new_note.get(0).unwrap(), new_note.get(1).unwrap());
+    }
 }
