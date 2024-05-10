@@ -8,6 +8,7 @@ use std::path::Path;
 use clap::Parser;
 use crate::cli::Cli;
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db};
+use crate::sql::insert_note;
 
 fn main() {
     // check for a crusty home directory, if it doesn't exist show setup prompt
