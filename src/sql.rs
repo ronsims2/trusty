@@ -3,6 +3,13 @@ use rusqlite::named_params;
 use uuid::Uuid;
 use crate::setup::get_crusty_db_conn;
 
+#[derive(Debug)]
+pub(crate) struct NoteSummary {
+    id: i32,
+    title: String,
+    updated: String
+}
+
 pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
     let conn = get_crusty_db_conn();
     let protected_val = if protected {1} else {0};
@@ -23,5 +30,21 @@ pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
         ":protected": protected,
         ":content_id": content_id,
     }).unwrap();
+}
 
+pub(crate) fn list_note_titles() {
+    let sql = "SELECT note_id, title, updated FROM notes WHERE protected = FALSE ORDER BY updated;";
+    let conn = get_crusty_db_conn();
+    let mut stmt = conn.prepare(sql).unwrap();
+    let results = stmt.query_map([], |row| {
+        Ok(NoteSummary {
+            id: row.get(0)?,
+            title: row.get(1)?,
+            updated: row.get(2)?,
+        })
+    }).unwrap();
+
+    for res in results {
+        println!("Results: {:?}", res.unwrap());
+    }
 }
