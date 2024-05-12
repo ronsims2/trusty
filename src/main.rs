@@ -6,7 +6,7 @@ use std::env;
 use std::fmt::Arguments;
 use std::path::Path;
 use clap::Parser;
-use crate::cli::Cli;
+use crate::cli::{Cli, read_from_std_in};
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db};
 use crate::sql::{insert_note, list_note_titles};
 
@@ -29,6 +29,17 @@ fn main() {
 
     let title = args.title.as_deref();
     let note = args.note.as_deref();
+
+    match read_from_std_in() {
+        None => {}
+        Some(piped_input) => {
+            println!("The piped input: {}", piped_input);
+            // do somethign with the input here
+            return
+        }
+    }
+
+    // check for piped input first, handle if found and then exit after
 
     // if there is a title and note param insert a proper note
     if title.is_some() && note.is_some() {
