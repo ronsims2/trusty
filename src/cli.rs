@@ -9,7 +9,9 @@ pub(crate) struct Cli {
     #[arg(short, long)]
     pub title: Option<String>,
     #[arg(short, long)]
-    pub quick: Option<String>
+    pub quick: Option<String>,
+    #[arg(short, long)]
+    pub(crate) input: Option<bool>
 }
 
 pub(crate) fn read_from_std_in() -> Option<String> {

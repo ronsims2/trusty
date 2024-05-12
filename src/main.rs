@@ -29,13 +29,23 @@ fn main() {
 
     let title = args.title.as_deref();
     let note = args.note.as_deref();
+    let quick_note = args.quick.as_deref();
+    //@ todo figure out if input should be a subcommand
+    let input = args.input;
 
-    match read_from_std_in() {
-        None => {}
-        Some(piped_input) => {
-            println!("The piped input: {}", piped_input);
-            // do somethign with the input here
-            return
+
+    if input.unwrap_or(false) {
+        match read_from_std_in() {
+            None => {
+                println!("No stdin found");
+            }
+            Some(piped_input) => {
+                if !piped_input.trim().is_empty() {
+                    println!("The piped input: {}", piped_input);
+                    insert_note(title.unwrap_or("Untitled"), &piped_input, false);
+                    return
+                }
+            }
         }
     }
 
@@ -50,7 +60,6 @@ fn main() {
     }
 
     // add an untitled quick note
-    let quick_note = args.quick.as_deref();
     if (quick_note.is_some() && title.is_none() && note.is_none()) {
         insert_note("Untitled", quick_note.unwrap(), false);
         return
