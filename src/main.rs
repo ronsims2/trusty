@@ -34,18 +34,25 @@ fn main() {
     let input = args.input;
 
 
+    // @todo refactor to check for input and warn if there is piped input but no flag to tell it to read from thr std in
     if input.unwrap_or(false) {
-        match read_from_std_in() {
+        let result = match read_from_std_in() {
             None => {
                 println!("No stdin found");
+                false
             }
             Some(piped_input) => {
                 if !piped_input.trim().is_empty() {
                     println!("The piped input: {}", piped_input);
                     insert_note(title.unwrap_or("Untitled"), &piped_input, false);
-                    return
+                    true
+                } else {
+                    false
                 }
             }
+        };
+        if result {
+            return
         }
     }
 

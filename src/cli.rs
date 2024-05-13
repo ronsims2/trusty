@@ -10,7 +10,8 @@ pub(crate) struct Cli {
     pub title: Option<String>,
     #[arg(short, long)]
     pub quick: Option<String>,
-    #[arg(short, long)]
+    // must use number of args with default missing value to create flags
+    #[arg(short, long, default_missing_value = "true", num_args = 0)]
     pub(crate) input: Option<bool>
 }
 
