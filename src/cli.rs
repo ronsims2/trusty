@@ -1,5 +1,6 @@
 use std::io;
 use clap::Parser;
+use crate::sql::insert_note;
 
 #[derive(Debug, Parser)]
 #[command(author, version, about)]
@@ -24,4 +25,25 @@ pub(crate) fn read_from_std_in() -> Option<String> {
     } else {
         None
     }
+}
+
+pub(crate) fn insert_note_from_std_in(flag_set: bool, title: &str) -> bool {
+    let result = match read_from_std_in() {
+        None => {
+            println!("No stdin found");
+            false
+        }
+        Some(piped_input) => {
+            if !piped_input.trim().is_empty() && flag_set {
+                println!("The piped input: {}", piped_input);
+                insert_note(title, &piped_input, false);
+                true
+            } else {
+                println!("Input was either empty or flag was not specified, please fix your command.");
+                false
+            }
+        }
+    };
+
+    result
 }

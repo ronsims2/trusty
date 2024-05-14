@@ -6,7 +6,7 @@ use std::env;
 use std::fmt::Arguments;
 use std::path::Path;
 use clap::Parser;
-use crate::cli::{Cli, read_from_std_in};
+use crate::cli::{Cli, insert_note_from_std_in, read_from_std_in};
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db};
 use crate::sql::{insert_note, list_note_titles};
 
@@ -33,25 +33,10 @@ fn main() {
     //@ todo figure out if input should be a subcommand
     let input = args.input;
 
-
-    // @todo refactor to check for input and warn if there is piped input but no flag to tell it to read from thr std in
-    if input.unwrap_or(false) {
-        let result = match read_from_std_in() {
-            None => {
-                println!("No stdin found");
-                false
-            }
-            Some(piped_input) => {
-                if !piped_input.trim().is_empty() {
-                    println!("The piped input: {}", piped_input);
-                    insert_note(title.unwrap_or("Untitled"), &piped_input, false);
-                    true
-                } else {
-                    false
-                }
-            }
-        };
-        if result {
+    if let input_flag_set = input.unwrap_or(false) {
+        let title_val = title.unwrap_or("Untitled");
+        let result = insert_note_from_std_in(input_flag_set, title_val);
+        if result || (result && !input_flag_set){
             return
         }
     }
