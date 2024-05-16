@@ -41,8 +41,6 @@ fn main() {
         }
     }
 
-    // check for piped input first, handle if found and then exit after
-
     // if there is a title and note param insert a proper note
     if title.is_some() && note.is_some() {
         println!("2 args found");
