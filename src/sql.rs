@@ -1,13 +1,14 @@
 use std::fmt::format;
 use rusqlite::named_params;
 use uuid::Uuid;
+use crate::render::print_note_summary;
 use crate::setup::get_crusty_db_conn;
 
 #[derive(Debug)]
 pub(crate) struct NoteSummary {
-    id: i32,
-    title: String,
-    updated: String
+    pub(crate) id: i32,
+    pub(crate) title: String,
+    pub(crate) updated: String
 }
 
 pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
@@ -45,6 +46,6 @@ pub(crate) fn list_note_titles() {
     }).unwrap();
 
     for res in results {
-        println!("Results: {:?}", res.unwrap());
+        print_note_summary(res.unwrap());
     }
 }

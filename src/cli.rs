@@ -19,7 +19,7 @@ pub(crate) struct Cli {
 pub(crate) fn read_from_std_in() -> Option<String> {
     let mut buffer = String::new();
     io::stdin().read_line(&mut buffer).ok()?;
-    if (!buffer.is_empty()) {
+    if !buffer.is_empty() {
         println!("Standard in: {}", buffer.as_str());
         Some(buffer.to_string())
     } else {

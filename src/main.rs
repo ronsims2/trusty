@@ -1,6 +1,7 @@
 mod setup;
 mod cli;
 mod sql;
+mod render;
 
 use std::env;
 use std::fmt::Arguments;
@@ -43,14 +44,13 @@ fn main() {
 
     // if there is a title and note param insert a proper note
     if title.is_some() && note.is_some() {
-        println!("2 args found");
         // println!("{}::{}", new_note.get(0).unwrap(), new_note.get(1).unwrap());
         insert_note(title.unwrap(), note.unwrap(), false);
         return
     }
 
     // add an untitled quick note
-    if (quick_note.is_some() && title.is_none() && note.is_none()) {
+    if quick_note.is_some() && title.is_none() && note.is_none() {
         insert_note("Untitled", quick_note.unwrap(), false);
         return
     }
