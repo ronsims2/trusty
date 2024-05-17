@@ -9,6 +9,7 @@ use clap::builder::Str;
 use clap::Parser;
 use rusqlite::{Connection, params, Params};
 use uuid::Uuid;
+use crate::render::cr_println;
 
 
 fn get_win_home_drive() -> String {
@@ -17,7 +18,7 @@ fn get_win_home_drive() -> String {
             val.to_string()
         }
         Err(_) => {
-            println!("Could not determine Windows user drive.");
+            cr_println(format!("{}", "Could not determine Windows user drive."));
             exit(501)
         }
     };
@@ -40,7 +41,7 @@ pub(crate) fn get_home_dir() -> String {
             }
         }
         Err(_) => {
-            println!("Could not determine home path during config.");
+            cr_println(format!("{}", "Could not determine home path during config."));
             exit(502)
         }
     };
@@ -67,10 +68,10 @@ pub(crate) fn create_crusty_dir() {
     let config_path = get_crusty_dir();
     match fs::create_dir(&config_path) {
         Ok(_) => {
-            println!("Created cRusty config at: {:?}", config_path);
+            cr_println(format!("Created cRusty config at: {:?}", config_path));
         }
         Err(_) => {
-            println!("Could not create cRusty config directory.");
+            cr_println(format!("{}", "Could not create cRusty config directory."));
             exit(503)
         }
     }
@@ -98,7 +99,7 @@ pub(crate) fn create_crusty_sys_tables() {
     conn.execute(create_content_sql, ()).unwrap();
     conn.execute(create_notes_sql, ()).unwrap();
     conn.execute(create_config_sql, ()).unwrap();
-    println!("Initialized empty cRusty tables.");
+    cr_println(format!("{}", "Initialized empty cRusty tables."));
 }
 
 pub(crate) fn get_unix_epoch_ts() -> u64 {
@@ -122,7 +123,7 @@ pub(crate) fn populate_crusty_sys_tables() {
     conn.execute(&content_insert_sql, ()).unwrap();
     conn.execute(&note_insert_sql, ()).unwrap();
     conn.execute(&config_insert_sql, ()).unwrap();
-    println!("Configurations added.");
+    cr_println(format!("{}", "Configurations added."));
 }
 
 pub(crate) fn init_crusty_db() {
@@ -134,7 +135,7 @@ pub(crate) fn init_crusty_db() {
             populate_crusty_sys_tables();
         }
         Err(_) => {
-            println!("Could not create cRusty DB.");
+            cr_println(format!("{}", "Could not create cRusty DB."));
         }
     }
 }
