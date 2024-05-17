@@ -17,7 +17,7 @@ pub(crate) struct Cli {
     pub quick: Option<String>,
     // must use number of args with default missing value to create flags
     //#[arg(short, long, default_missing_value = "true", num_args = 0)]
-    #[arg(short, long, help = "When specified this will read text from the standard input.  Use this to pipe in a note.")]
+    #[arg(short, long, default_missing_value = "true", num_args = 0, help = "When specified this will read text from the standard input.  Use this to pipe in a note.")]
     pub(crate) input: Option<bool>,
     #[arg(short, long, help = "Use this flag to specify an ID to print a saved note.")]
     pub read: Option<usize>,
