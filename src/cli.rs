@@ -4,21 +4,25 @@ use clap::Parser;
 use crate::render::cr_println;
 use crate::sql::insert_note;
 
+
+
 #[derive(Debug, Parser)]
-#[command(author, version, about)]
+#[command(author, version, about = "cRusty: a command Line note app  🦀")]
 pub(crate) struct Cli {
-    #[arg(short, long)]
+    #[arg(short, long, help = "Use this flag to specify note text (requires a title).")]
     pub note: Option<String>,
-    #[arg(short, long)]
+    #[arg(short, long, help = "Use this flag to a title for a note.")]
     pub title: Option<String>,
-    #[arg(short, long)]
+    #[arg(short, long, help = "Use this flag to specify a quick note without a title.")]
     pub quick: Option<String>,
     // must use number of args with default missing value to create flags
     //#[arg(short, long, default_missing_value = "true", num_args = 0)]
-    #[arg(short, long)]
+    #[arg(short, long, help = "When specified this will read text from the standard input.  Use this to pipe in a note.")]
     pub(crate) input: Option<bool>,
-    #[arg(short, long)]
+    #[arg(short, long, help = "Use this flag to specify an ID to print a saved note.")]
     pub read: Option<usize>,
+    #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Prints a summary list of all note (default behavior if no flags are specified.")]
+    pub list: Option<bool>
 }
 
 pub(crate) fn read_from_std_in() -> Option<String> {
