@@ -7,7 +7,7 @@ use crate::sql::insert_note;
 
 
 #[derive(Debug, Parser)]
-#[command(author, version, about = "cRusty: a command Line note app  🦀")]
+#[command(author, version, about = "cRusty: a command Line notes app  🦀")]
 pub(crate) struct Cli {
     #[arg(short, long, help = "Use this flag to specify note text (requires a title).")]
     pub note: Option<String>,
