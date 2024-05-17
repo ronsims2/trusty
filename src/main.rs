@@ -10,7 +10,7 @@ use clap::Parser;
 use crate::cli::{Cli, insert_note_from_std_in, read_from_std_in};
 use crate::render::{print_note_summary, print_simple_note};
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db};
-use crate::sql::{get_note_by_id, insert_note, list_note_titles};
+use crate::sql::{get_note_by_id, get_note_from_menu_line, insert_note, list_note_titles};
 
 fn main() {
     // check for a crusty home directory, if it doesn't exist show setup prompt
@@ -33,7 +33,8 @@ fn main() {
     let note = args.note.as_deref();
     let quick_note = args.quick.as_deref();
     let input = args.input;
-    let read = args.read;
+    let find = args.find;
+    let find_from = args.find_from;
 
     if input.is_some() {
         let title_val = title.unwrap_or("Untitled");
@@ -49,8 +50,14 @@ fn main() {
         return
     }
 
-    if read.is_some() {
-        let note = get_note_by_id(read.unwrap());
+    if find.is_some() {
+        let note = get_note_by_id(find.unwrap());
+        print_simple_note(note);
+        return
+    }
+
+    if find_from.is_some() {
+        let note = get_note_from_menu_line();
         print_simple_note(note);
         return
     }

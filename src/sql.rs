@@ -1,7 +1,9 @@
+use std::convert::Infallible;
 use std::fmt::format;
 use std::process::exit;
 use rusqlite::named_params;
 use uuid::Uuid;
+use crate::cli::read_from_std_in;
 use crate::render::{cr_println, print_note_summary};
 use crate::setup::get_crusty_db_conn;
 
@@ -73,5 +75,39 @@ pub(crate) fn get_note_by_id(id: usize) -> SimpleNoteView {
         }
     };
 
+    result
+}
+
+pub(crate) fn get_note_from_menu_line() -> SimpleNoteView {
+    let result = match read_from_std_in() {
+        None => {
+            cr_println(format!("{}", "No menu line specified, could not lookup record."));
+            exit(506);
+        }
+        Some(ln) => {
+            let trimmed_ln = ln.trim();
+            if trimmed_ln.is_empty() {
+                cr_println(format!("{}", "Menu line input is empty, could not lookup record."));
+                exit(507);
+            } else {
+                return get_note_id_from_menu_line(ln.as_str());
+            }
+        }
+    };
+    result
+}
+
+fn get_note_id_from_menu_line(line: &str) -> SimpleNoteView {
+    let mut id_segment = &line[0..9];
+    id_segment = id_segment.trim();
+    let result = match id_segment.parse::<i32>(){
+        Ok(id) => {
+            get_note_by_id(id as usize)
+        }
+        Err(_) => {
+            cr_println(format!("{}", "Menu line input is malformed, please check your input."));
+            exit(507);
+        }
+    };
     result
 }

@@ -18,8 +18,9 @@ pub(crate) fn cr_println(text: String) {
 }
 
 pub(crate) fn print_simple_note(note: SimpleNoteView) {
-    cr_println(note.title);
-    cr_println(format!("{}", "_".repeat(80)));
+    // @todo Right now it is bette rto not render the title so that using things liked saved data are easier
+    // cr_println(note.title);
+    // cr_println(format!("{}", "_".repeat(80)));
     cr_println(note.body);
 }
 

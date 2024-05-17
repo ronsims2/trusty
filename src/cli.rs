@@ -20,9 +20,11 @@ pub(crate) struct Cli {
     #[arg(short, long, default_missing_value = "true", num_args = 0, help = "When specified this will read text from the standard input.  Use this to pipe in a note.")]
     pub(crate) input: Option<bool>,
     #[arg(short, long, help = "Use this flag to specify an ID to print a saved note.")]
-    pub read: Option<usize>,
+    pub find: Option<usize>,
     #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Prints a summary list of all note (default behavior if no flags are specified.")]
-    pub list: Option<bool>
+    pub list: Option<bool>,
+    #[arg(short = 'g', long, default_missing_value = "true", num_args = 0, help = "Use this flag to find a note by piping in a menu row. Think -g like grep.")]
+    pub find_from: Option<bool>,
 }
 
 pub(crate) fn read_from_std_in() -> Option<String> {
