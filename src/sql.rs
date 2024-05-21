@@ -1,5 +1,6 @@
 use std::convert::Infallible;
 use std::fmt::format;
+use std::num::ParseIntError;
 use std::process::exit;
 use rusqlite::named_params;
 use uuid::Uuid;
@@ -110,4 +111,18 @@ fn get_note_id_from_menu_line(line: &str) -> SimpleNoteView {
         }
     };
     result
+}
+
+pub(crate) fn update_last_touched(note_id:&str){
+    let sql = "UPDATE app SET value = :last_touched WHERE key = 'last_touched';";
+    match note_id.parse::<i32>() {
+        Ok(id) => {
+            let conn = get_crusty_db_conn();
+            conn.execute(&sql, named_params! {":last_touched": id as usize}).unwrap();
+        }
+        Err(_) => {
+            cr_println(format!("{}", "note ID is malformed, please check your input."));
+            exit(508)
+        }
+    }
 }

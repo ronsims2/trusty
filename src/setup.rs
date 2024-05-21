@@ -95,10 +95,18 @@ pub(crate) fn create_crusty_sys_tables() {
     protected BOOLEAN, title VARCHAR(64), created DATETIME, updated DATETIME, content_id NCHAR(36), \
     CONSTRAINT fk_content_id FOREIGN KEY (content_id) REFERENCES content(content_id));";
     let create_config_sql = "CREATE TABLE IF NOT EXISTS config (key VARCHAR(36) PRIMARY KEY, value VARCHAR(140));";
+    let create_app_sql = "CREATE TABLE IF NOT EXISTS app (key VARCHAR(36) PRIMARY KEY, value TEXT);";
+
+    // populate app state
+    let insert_last_touched_sql = "INSERT INTO app (key, value) VALUES ('last_touched', 0);";
 
     conn.execute(create_content_sql, ()).unwrap();
     conn.execute(create_notes_sql, ()).unwrap();
     conn.execute(create_config_sql, ()).unwrap();
+    conn.execute(create_app_sql, ()).unwrap();
+    // state inserts
+    conn.execute(insert_last_touched_sql, ()).unwrap();
+
     cr_println(format!("{}", "Initialized empty cRusty tables."));
 }
 
