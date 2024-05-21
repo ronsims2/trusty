@@ -40,6 +40,9 @@ pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
         ":protected": protected,
         ":content_id": content_id,
     }).unwrap();
+
+    let last_inserted_sql = "UPDATE app SET value = (SELECT last_insert_rowid()) WHERE key = 'last_touched';";
+    conn.execute(last_inserted_sql, ()).unwrap();
 }
 
 pub(crate) fn list_note_titles() {
@@ -69,7 +72,10 @@ pub(crate) fn get_note_by_id(id: usize) -> SimpleNoteView {
             body: row.get(1)?,
         })
     }) {
-        Ok(res) => res,
+        Ok(res) => {
+            update_last_touched(id.to_string().as_str());
+            res
+        },
         Err(err) => {
             cr_println(format!("Could not find note for id: {}", id));
             exit(504);
@@ -91,14 +97,14 @@ pub(crate) fn get_note_from_menu_line() -> SimpleNoteView {
                 cr_println(format!("{}", "Menu line input is empty, could not lookup record."));
                 exit(507);
             } else {
-                return get_note_id_from_menu_line(ln.as_str());
+                get_note_from_menu_line_by_id(ln.as_str())
             }
         }
     };
     result
 }
 
-fn get_note_id_from_menu_line(line: &str) -> SimpleNoteView {
+fn get_note_from_menu_line_by_id(line: &str) -> SimpleNoteView {
     let mut id_segment = &line[0..9];
     id_segment = id_segment.trim();
     let result = match id_segment.parse::<i32>(){
