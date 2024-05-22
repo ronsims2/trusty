@@ -2,7 +2,7 @@ use std::io;
 use std::process::exit;
 use clap::Parser;
 use crate::render::cr_println;
-use crate::sql::{get_last_touched_note, insert_note};
+use crate::sql::{get_last_touched_note, insert_note, update_note};
 
 
 
@@ -64,6 +64,5 @@ pub(crate) fn edit_note() {
     let note = get_last_touched_note();
     let body = note.body.as_str();
     let edited = edit::edit(body).unwrap();
-    println!("EDITED NOTE:: {}", edited);
-    // @todo add function to update edited note
+    update_note(None, edited.as_str());
 }

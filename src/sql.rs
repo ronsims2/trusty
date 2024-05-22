@@ -154,3 +154,36 @@ pub(crate) fn get_last_touched_note() -> SimpleNoteView {
     };
     result
 }
+
+pub(crate) fn update_note(id: Option<usize>, text: &str) {
+    let note_id = match id {
+        None => {
+            0
+        }
+        Some(nid) => {
+            nid
+        }
+    };
+
+    let conn = get_crusty_db_conn();
+    match note_id > 0 {
+        true => {
+            println!("We are in the true block");
+            let sql = "UPDATE content SET body = :body WHERE content_id = (SELECT content_id FROM notes WHERE note_id = :note_id);";
+            let stmt = conn.prepare(sql);
+            stmt.unwrap().execute(named_params! {":note_id": note_id, ":body": text}).unwrap();
+        }
+        false => {
+            let sql = "UPDATE content SET body = :body WHERE content_id = (SELECT content_id FROM notes WHERE note_id = (SELECT last_insert_rowid()));";
+            let stmt = conn.prepare(sql);
+            match stmt.unwrap().execute(named_params! {":body": text}){
+                Ok(_) => {
+                    println!("All is well")
+                }
+                Err(err) => {
+                    println!("Epic fail: {}", err)
+                }
+            };
+        }
+    };
+}
