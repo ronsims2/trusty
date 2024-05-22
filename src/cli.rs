@@ -2,7 +2,7 @@ use std::io;
 use std::process::exit;
 use clap::Parser;
 use crate::render::cr_println;
-use crate::sql::insert_note;
+use crate::sql::{get_last_touched_note, insert_note};
 
 
 
@@ -25,6 +25,10 @@ pub(crate) struct Cli {
     pub list: Option<bool>,
     #[arg(short = 'g', long, default_missing_value = "true", num_args = 0, help = "Use this flag to find a note by piping in a menu row. Think -g like grep.")]
     pub find_from: Option<bool>,
+    #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Use this flag to edit the last touched note.")]
+    pub edit: Option<bool>,
+    #[arg(short, long, help = "Use this flag to open a note by its ID.")]
+    pub open: Option<usize>
 }
 
 pub(crate) fn read_from_std_in() -> Option<String> {
@@ -54,4 +58,12 @@ pub(crate) fn insert_note_from_std_in(title: &str) -> bool {
     };
 
     result
+}
+
+pub(crate) fn edit_note() {
+    let note = get_last_touched_note();
+    let body = note.body.as_str();
+    let edited = edit::edit(body).unwrap();
+    println!("EDITED NOTE:: {}", edited);
+    // @todo add function to update edited note
 }

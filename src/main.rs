@@ -7,7 +7,7 @@ use std::env;
 use std::fmt::Arguments;
 use std::path::Path;
 use clap::Parser;
-use crate::cli::{Cli, insert_note_from_std_in, read_from_std_in};
+use crate::cli::{Cli, edit_note, insert_note_from_std_in, read_from_std_in};
 use crate::render::{print_note_summary, print_simple_note};
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db};
 use crate::sql::{get_note_by_id, get_note_from_menu_line, insert_note, list_note_titles};
@@ -35,6 +35,8 @@ fn main() {
     let input = args.input;
     let find = args.find;
     let find_from = args.find_from;
+    let edit = args.edit;
+    let open = args.open;
 
     if input.is_some() {
         let title_val = title.unwrap_or("Untitled");
@@ -65,6 +67,11 @@ fn main() {
     // add an untitled quick note, this needs to stay near the bottom
     if quick_note.is_some() && title.is_none() && note.is_none() {
         insert_note("Untitled", quick_note.unwrap(), false);
+        return
+    }
+
+    if edit.is_some() {
+        edit_note();
         return
     }
 

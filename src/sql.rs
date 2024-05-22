@@ -132,3 +132,25 @@ pub(crate) fn update_last_touched(note_id:&str){
         }
     }
 }
+
+pub(crate) fn get_last_touched_note() -> SimpleNoteView {
+    let sql = "SELECT notes.title, content.body FROM notes JOIN content on notes.content_id = content.content_id \
+    WHERE notes.note_id = CAST((SELECT value FROM app WHERE key = 'last_touched') AS INTEGER); ";
+    let conn = get_crusty_db_conn();
+    let mut stmt = conn.prepare(sql).unwrap();
+    let result = match stmt.query_row([], |row| {
+        Ok(SimpleNoteView {
+            title: row.get(0)?,
+            body: row.get(1)?,
+        })
+    }) {
+        Ok(res) => {
+            res
+        }
+        Err(_) => {
+            cr_println(format!("{}", "Could not fetch the last touched note."));
+            exit(509)
+        }
+    };
+    result
+}

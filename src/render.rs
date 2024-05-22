@@ -8,7 +8,7 @@ pub(crate) fn print_note_summary(note: NoteSummary) {
     let mut handle = stdout.lock();
     let text = format!("{:width$} | {:title_width$} | {}", note.id, note.title, note.updated, width = 9, title_width = 45);
     writeln!(&mut handle, "{}", text).unwrap();
-    writeln!(&mut handle, "{}", "-".repeat(80)).unwrap();
+    writeln!(&mut handle, "{}+{}+{}", "-".repeat(10), "-".repeat(47), "-".repeat(21)).unwrap();
 }
 
 pub(crate) fn cr_println(text: String) {
