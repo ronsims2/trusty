@@ -64,5 +64,5 @@ pub(crate) fn edit_note() {
     let note = get_last_touched_note();
     let body = note.body.as_str();
     let edited = edit::edit(body).unwrap();
-    update_note(None, edited.as_str());
+    update_note(&note.id, &edited);
 }

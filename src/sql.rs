@@ -20,6 +20,12 @@ pub(crate)struct SimpleNoteView {
     pub(crate) body: String,
 }
 
+pub(crate)struct UpdateNoteView {
+    pub(crate) title: String,
+    pub(crate) body: String,
+    pub(crate) id: String,
+}
+
 pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
     let conn = get_crusty_db_conn();
     let protected_val = if protected {1} else {0};
@@ -133,15 +139,16 @@ pub(crate) fn update_last_touched(note_id:&str){
     }
 }
 
-pub(crate) fn get_last_touched_note() -> SimpleNoteView {
-    let sql = "SELECT notes.title, content.body FROM notes JOIN content on notes.content_id = content.content_id \
+pub(crate) fn get_last_touched_note() -> UpdateNoteView {
+    let sql = "SELECT notes.content_id, notes.title, content.body FROM notes JOIN content on notes.content_id = content.content_id \
     WHERE notes.note_id = CAST((SELECT value FROM app WHERE key = 'last_touched') AS INTEGER); ";
     let conn = get_crusty_db_conn();
     let mut stmt = conn.prepare(sql).unwrap();
     let result = match stmt.query_row([], |row| {
-        Ok(SimpleNoteView {
-            title: row.get(0)?,
-            body: row.get(1)?,
+        Ok(UpdateNoteView {
+            id: row.get(0)?,
+            title: row.get(1)?,
+            body: row.get(2)?,
         })
     }) {
         Ok(res) => {
@@ -155,35 +162,9 @@ pub(crate) fn get_last_touched_note() -> SimpleNoteView {
     result
 }
 
-pub(crate) fn update_note(id: Option<usize>, text: &str) {
-    let note_id = match id {
-        None => {
-            0
-        }
-        Some(nid) => {
-            nid
-        }
-    };
-
+pub(crate) fn update_note(id: &str, text: &str) {
     let conn = get_crusty_db_conn();
-    match note_id > 0 {
-        true => {
-            println!("We are in the true block");
-            let sql = "UPDATE content SET body = :body WHERE content_id = (SELECT content_id FROM notes WHERE note_id = :note_id);";
-            let stmt = conn.prepare(sql);
-            stmt.unwrap().execute(named_params! {":note_id": note_id, ":body": text}).unwrap();
-        }
-        false => {
-            let sql = "UPDATE content SET body = :body WHERE content_id = (SELECT content_id FROM notes WHERE note_id = (SELECT last_insert_rowid()));";
-            let stmt = conn.prepare(sql);
-            match stmt.unwrap().execute(named_params! {":body": text}){
-                Ok(_) => {
-                    println!("All is well")
-                }
-                Err(err) => {
-                    println!("Epic fail: {}", err)
-                }
-            };
-        }
-    };
+    let sql = "UPDATE content SET body = :body WHERE content_id = :content_id;";
+    let stmt = conn.prepare(sql);
+    stmt.unwrap().execute(named_params! {":content_id": id, ":body": &text}).unwrap();
 }
