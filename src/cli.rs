@@ -2,7 +2,7 @@ use std::io;
 use std::process::exit;
 use clap::Parser;
 use crate::render::cr_println;
-use crate::sql::{get_last_touched_note, insert_note, update_note};
+use crate::sql::{get_last_touched_note, get_note_by_id, insert_note, update_note_by_content_id, update_note_by_note_id};
 
 
 
@@ -64,5 +64,23 @@ pub(crate) fn edit_note() {
     let note = get_last_touched_note();
     let body = note.body.as_str();
     let edited = edit::edit(body).unwrap();
-    update_note(&note.id, &edited);
+    update_note_by_content_id(&note.id, &edited);
+}
+
+pub(crate) fn open_note(id: usize) {
+    // let parse_id = id.trime().parse::<i32>().unwrap_or(0) as usize;
+    // if parse_id > 0 {
+    //     let note = get_note_by_id(parse_id);
+    //     let body = note.body.as_str();
+    //     let edited = edit::edit(body).unwrap();
+    //     update_note_by_note_id(parse_id, &edited);
+    // } else {
+    //     cr_println(format!("{}", "Supplied note ID is invalid."));
+    //     exit(510);
+    // }
+
+    let note = get_note_by_id(id);
+    let body = note.body.as_str();
+    let edited = edit::edit(body).unwrap();
+    update_note_by_note_id(id, &edited);
 }

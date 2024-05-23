@@ -162,9 +162,16 @@ pub(crate) fn get_last_touched_note() -> UpdateNoteView {
     result
 }
 
-pub(crate) fn update_note(id: &str, text: &str) {
+pub(crate) fn update_note_by_content_id(id: &str, text: &str) {
     let conn = get_crusty_db_conn();
     let sql = "UPDATE content SET body = :body WHERE content_id = :content_id;";
     let stmt = conn.prepare(sql);
     stmt.unwrap().execute(named_params! {":content_id": id, ":body": &text}).unwrap();
+}
+
+pub(crate) fn update_note_by_note_id(id: usize, text: &str) {
+    let conn = get_crusty_db_conn();
+    let sql = "UPDATE content SET body = :body WHERE content_id = (SELECT content_id FROM notes WHERE note_id = :note_id);";
+    let stmt = conn.prepare(sql);
+    stmt.unwrap().execute(named_params! {":note_id": id, ":body": &text}).unwrap();
 }

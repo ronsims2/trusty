@@ -7,7 +7,7 @@ use std::env;
 use std::fmt::Arguments;
 use std::path::Path;
 use clap::Parser;
-use crate::cli::{Cli, edit_note, insert_note_from_std_in, read_from_std_in};
+use crate::cli::{Cli, edit_note, insert_note_from_std_in, open_note, read_from_std_in};
 use crate::render::{print_note_summary, print_simple_note};
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db};
 use crate::sql::{get_note_by_id, get_note_from_menu_line, insert_note, list_note_titles};
@@ -73,6 +73,13 @@ fn main() {
     if edit.is_some() {
         edit_note();
         return
+    }
+
+    if open.is_some() {
+        let note_id = open.unwrap();
+        open_note(note_id);
+
+        return;
     }
 
 
