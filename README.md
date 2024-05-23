@@ -32,6 +32,8 @@ Pipe a note into crusty.
 echo "Sometimes you need to save the output of a program with a title | crusty -i -t "Saved Output $(date)"
 ```
 
+### View Notes
+
 List all your notes.
 
 `crusty -m` or just `crusty`
@@ -40,9 +42,13 @@ Get a specific note using its ID:
 
 `crusty -r 10`
 
+### Search Notes
+
 Use the full power of the command line to filter notes.
 
 `crusty | grep -i untitled`
+
+### Edit Notes
 
 Edit the last note created, read or edited.
 
