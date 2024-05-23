@@ -1,5 +1,5 @@
 # cRusty
-An open-sourced CLI notes app written in Rust.
+An lightweight open-sourced CLI notes app written in Rust.
 
 This simple tool allows people (and scripts) to take notes from a terminal.
 
