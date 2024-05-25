@@ -2,6 +2,7 @@ mod setup;
 mod cli;
 mod sql;
 mod render;
+mod utils;
 
 use std::env;
 use std::fmt::Arguments;
@@ -11,6 +12,7 @@ use crate::cli::{Cli, edit_note, insert_note_from_std_in, open_note, read_from_s
 use crate::render::{print_note_summary, print_simple_note};
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db};
 use crate::sql::{get_note_by_id, get_note_from_menu_line, insert_note, list_note_titles};
+use crate::utils::slice_text;
 
 fn main() {
     // check for a crusty home directory, if it doesn't exist show setup prompt
@@ -66,7 +68,9 @@ fn main() {
 
     // add an untitled quick note, this needs to stay near the bottom
     if quick_note.is_some() && title.is_none() && note.is_none() {
-        insert_note("Untitled", quick_note.unwrap(), false);
+        let note = quick_note.unwrap();
+        let title = slice_text(0, 64, note);
+        insert_note(title.as_str(), note, false);
         return
     }
 
