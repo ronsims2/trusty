@@ -28,7 +28,9 @@ pub(crate) struct Cli {
     #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Use this flag to edit the last touched note.")]
     pub edit: Option<bool>,
     #[arg(short, long, help = "Use this flag to open a note by its ID.")]
-    pub open: Option<usize>
+    pub open: Option<usize>,
+    #[arg(short, long, help = "Use this flag to delete a note by its ID.")]
+    pub delete: Option<usize>
 }
 
 pub(crate) fn read_from_std_in() -> Option<String> {

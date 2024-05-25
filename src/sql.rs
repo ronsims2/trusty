@@ -175,3 +175,10 @@ pub(crate) fn update_note_by_note_id(id: usize, text: &str) {
     let stmt = conn.prepare(sql);
     stmt.unwrap().execute(named_params! {":note_id": id, ":body": &text}).unwrap();
 }
+
+pub(crate) fn delete_note(id: usize) {
+    let conn = get_crusty_db_conn();
+    let sql = "DELETE FROM notes WHERE note_id = :note_id";
+    let stmt = conn.prepare(sql);
+    stmt.unwrap().execute(named_params! {":note_id": id}).unwrap();
+}
