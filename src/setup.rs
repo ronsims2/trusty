@@ -92,7 +92,7 @@ pub(crate) fn create_crusty_sys_tables() {
     let create_content_sql = "CREATE TABLE IF NOT EXISTS \
     content (content_id NCHAR(36) PRIMARY KEY, body TEXT);";
     let create_notes_sql = "CREATE TABLE IF NOT EXISTS notes (note_id INTEGER PRIMARY KEY AUTOINCREMENT, \
-    protected BOOLEAN, title VARCHAR(64), created DATETIME, updated DATETIME, content_id NCHAR(36), \
+    protected BOOLEAN, title VARCHAR(64), created DATETIME, updated DATETIME, content_id NCHAR(36), trashed BOOLEAN DEFAULT FALSE, \
     CONSTRAINT fk_content_id FOREIGN KEY (content_id) REFERENCES content(content_id));";
     let create_config_sql = "CREATE TABLE IF NOT EXISTS config (key VARCHAR(36) PRIMARY KEY, value VARCHAR(140));";
     let create_app_sql = "CREATE TABLE IF NOT EXISTS app (key VARCHAR(36) PRIMARY KEY, value TEXT);";
@@ -125,13 +125,17 @@ pub(crate) fn populate_crusty_sys_tables() {
     let note_insert_sql = format!("INSERT INTO notes (title, protected, created, updated, content_id) VALUES \
     ('Get Started with cRusty', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '{}');", content_id);
     let content_insert_sql = format!("INSERT INTO content (content_id, body) VALUES ('{}', 'Welcome to cRusty the CLI notes app. -Ron');", content_id);
-    let config_insert_sql = format!("INSERT INTO config (key, value) VALUES ('crusty_app_id', '{}');", crusty_app_id);
+    let config_insert_app_id_sql = format!("INSERT INTO config (key, value) VALUES ('crusty_app_id', '{}');", crusty_app_id);
+    let config_insert_version_sql = format!("INSERT INTO config (key, value) VALUES ('crusty_version', '{}');", env!("CARGO_PKG_VERSION"));
 
     let conn = get_crusty_db_conn();
     conn.execute(&content_insert_sql, ()).unwrap();
     conn.execute(&note_insert_sql, ()).unwrap();
-    conn.execute(&config_insert_sql, ()).unwrap();
+    conn.execute(&config_insert_app_id_sql, ()).unwrap();
+    conn.execute(&config_insert_version_sql, ()).unwrap();
     cr_println(format!("{}", "Configurations added."));
+
+
 }
 
 pub(crate) fn init_crusty_db() {
