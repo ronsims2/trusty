@@ -39,7 +39,7 @@ fn main() {
     let find_from = args.find_from;
     let edit = args.edit;
     let open = args.open;
-    let delete = args.delete;
+    let hard_delete = args.hard_delete;
 
     if input.is_some() {
         let title_val = title.unwrap_or("Untitled");
@@ -87,8 +87,8 @@ fn main() {
         return;
     }
 
-    if delete.is_some() {
-        let note_id = delete.unwrap();
+    if hard_delete.is_some() {
+        let note_id = hard_delete.unwrap();
         delete_note(note_id)
     }
 
