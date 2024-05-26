@@ -2,7 +2,7 @@ use std::io;
 use std::process::exit;
 use clap::Parser;
 use crate::render::cr_println;
-use crate::sql::{get_last_touched_note, get_note_by_id, insert_note, update_note_by_content_id, update_note_by_note_id};
+use crate::sql::{get_last_touched_note, get_note_by_id, insert_note, set_note_trash, update_note_by_content_id, update_note_by_note_id};
 
 
 
@@ -32,7 +32,13 @@ pub(crate) struct Cli {
     #[arg(short='D', long, help = "Use this flag to delete an unprotected note by its ID.")]
     pub hard_delete: Option<usize>,
     #[arg(short='F', long, help = "DANGER: This is a will indiscriminately delete a note. Use this flag to force delete a note by its ID.")]
-    pub force_delete: Option<usize>
+    pub force_delete: Option<usize>,
+    #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Permanently delete all notes that have place din the trash.")]
+    pub clean: Option<bool>,
+    #[arg(long, help = "Use this flag to soft delete a note by its ID.")]
+    pub trash: Option<usize>,
+    #[arg(long, help = "Use this flag to restore a soft deleted a note by its ID.")]
+    pub restore: Option<usize>,
 }
 
 pub(crate) fn read_from_std_in() -> Option<String> {
@@ -87,4 +93,12 @@ pub(crate) fn open_note(id: usize) {
     let body = note.body.as_str();
     let edited = edit::edit(body).unwrap();
     update_note_by_note_id(id, &edited);
+}
+
+pub(crate) fn trash_note(id: usize) {
+    set_note_trash(id, true);
+}
+
+pub(crate) fn restore_note(id: usize) {
+    set_note_trash(id, false);
 }

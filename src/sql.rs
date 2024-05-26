@@ -52,7 +52,7 @@ pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
 }
 
 pub(crate) fn list_note_titles() {
-    let sql = "SELECT note_id, title, updated FROM notes WHERE protected = FALSE ORDER BY updated;";
+    let sql = "SELECT note_id, title, updated FROM notes WHERE protected = FALSE AND TRASHED IS FALSE ORDER BY updated;";
     let conn = get_crusty_db_conn();
     let mut stmt = conn.prepare(sql).unwrap();
     let results = stmt.query_map([], |row| {
@@ -188,4 +188,17 @@ pub(crate) fn delete_note(id: usize, force: bool) {
     };
     let stmt = conn.prepare(sql);
     stmt.unwrap().execute(named_params! {":note_id": id}).unwrap();
+}
+
+pub(crate) fn empty_trash() {
+    let conn = get_crusty_db_conn();
+    let sql = "DELETE FROM notes WHERE trashed is TRUE;";
+    conn.execute(&sql, ()).unwrap();
+}
+
+pub(crate) fn set_note_trash(id: usize, trash_state: bool) {
+    let conn = get_crusty_db_conn();
+    let sql = "UPDATE notes SET trashed = :trashed WHERE note_id = :note_id;";
+    let stmt = conn.prepare(sql);
+    stmt.unwrap().execute(named_params! {":note_id": id, ":trashed": trash_state}).unwrap();
 }
