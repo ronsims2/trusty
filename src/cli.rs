@@ -29,8 +29,10 @@ pub(crate) struct Cli {
     pub edit: Option<bool>,
     #[arg(short, long, help = "Use this flag to open a note by its ID.")]
     pub open: Option<usize>,
-    #[arg(short='D', long, help = "Use this flag to delete a note by its ID.")]
-    pub hard_delete: Option<usize>
+    #[arg(short='D', long, help = "Use this flag to delete an unprotected note by its ID.")]
+    pub hard_delete: Option<usize>,
+    #[arg(short='F', long, help = "DANGER: This is a will indiscriminately delete a note. Use this flag to force delete a note by its ID.")]
+    pub force_delete: Option<usize>
 }
 
 pub(crate) fn read_from_std_in() -> Option<String> {

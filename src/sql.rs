@@ -176,9 +176,16 @@ pub(crate) fn update_note_by_note_id(id: usize, text: &str) {
     stmt.unwrap().execute(named_params! {":note_id": id, ":body": &text}).unwrap();
 }
 
-pub(crate) fn delete_note(id: usize) {
+pub(crate) fn delete_note(id: usize, force: bool) {
     let conn = get_crusty_db_conn();
-    let sql = "DELETE FROM notes WHERE note_id = :note_id AND protect is FALSE";
+    let sql = match force {
+        true => {
+            "DELETE FROM notes WHERE note_id = :note_id;"
+        }
+        false => {
+            "DELETE FROM notes WHERE note_id = :note_id AND protect is FALSE;"
+        }
+    };
     let stmt = conn.prepare(sql);
     stmt.unwrap().execute(named_params! {":note_id": id}).unwrap();
 }

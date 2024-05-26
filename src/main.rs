@@ -40,6 +40,7 @@ fn main() {
     let edit = args.edit;
     let open = args.open;
     let hard_delete = args.hard_delete;
+    let force_delete = args.force_delete;
 
     if input.is_some() {
         let title_val = title.unwrap_or("Untitled");
@@ -89,7 +90,16 @@ fn main() {
 
     if hard_delete.is_some() {
         let note_id = hard_delete.unwrap();
-        delete_note(note_id)
+        delete_note(note_id, false);
+        list_note_titles();
+        return
+    }
+
+    if force_delete.is_some() {
+        let note_id = force_delete.unwrap();
+        delete_note(note_id, true);
+        list_note_titles();
+        return
     }
 
 
