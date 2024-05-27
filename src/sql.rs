@@ -176,6 +176,13 @@ pub(crate) fn update_note_by_note_id(id: usize, text: &str) {
     stmt.unwrap().execute(named_params! {":note_id": id, ":body": &text}).unwrap();
 }
 
+pub(crate) fn update_title_by_content_id(id: &str, text: &str) {
+    let conn = get_crusty_db_conn();
+    let sql = "UPDATE notes SET title = :title, updated = CURRENT_TIMESTAMP WHERE content_id = :content_id;";
+    let stmt = conn.prepare(sql);
+    stmt.unwrap().execute(named_params! {":content_id": id, ":title": &text}).unwrap();
+}
+
 pub(crate) fn delete_note(id: usize, force: bool) {
     let conn = get_crusty_db_conn();
     let sql = match force {

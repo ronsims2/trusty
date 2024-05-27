@@ -2,7 +2,7 @@ use std::io;
 use std::process::exit;
 use clap::Parser;
 use crate::render::cr_println;
-use crate::sql::{get_last_touched_note, get_note_by_id, insert_note, set_note_trash, update_note_by_content_id, update_note_by_note_id};
+use crate::sql::{get_last_touched_note, get_note_by_id, insert_note, set_note_trash, update_note_by_content_id, update_note_by_note_id, update_title_by_content_id};
 use crate::utils::slice_text;
 
 
@@ -27,7 +27,7 @@ pub(crate) struct Cli {
     pub find_from: Option<bool>,
     #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Use this flag to edit the last touched note.")]
     pub edit: Option<bool>,
-    #[arg(short, long, default_missing_value= "0", num_args = 0..=1, help = "Use this flag to open a note by its ID.")]
+    #[arg(short, long, default_missing_value= "0", num_args(0..=1), help = "Use this flag to open a note by its ID.")]
     pub open: Option<usize>,
     #[arg(short='D', long, help = "Use this flag to delete an unprotected note by its ID.")]
     pub hard_delete: Option<usize>,
@@ -39,6 +39,8 @@ pub(crate) struct Cli {
     pub trash: Option<usize>,
     #[arg(long, help = "Use this flag to restore a soft deleted a note by its ID.")]
     pub restore: Option<usize>,
+    #[arg(short='A', long, default_missing_value = "true", num_args = 0, help = "When editing, this modifier will allow you to edit a title.")]
+    pub all: Option<bool>,
 }
 
 pub(crate) fn read_from_std_in() -> Option<String> {
@@ -75,6 +77,13 @@ pub(crate) fn edit_note() {
     let body = note.body.as_str();
     let edited = edit::edit(body).unwrap();
     update_note_by_content_id(&note.id, &edited);
+}
+
+pub(crate) fn edit_title() {
+    let note = get_last_touched_note();
+    let title = note.title.as_str();
+    let edited = edit::edit(title).unwrap();
+    update_title_by_content_id(&note.id, &edited);
 }
 
 pub(crate) fn open_note(id: usize) {
