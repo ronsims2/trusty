@@ -78,17 +78,6 @@ pub(crate) fn edit_note() {
 }
 
 pub(crate) fn open_note(id: usize) {
-    // let parse_id = id.trime().parse::<i32>().unwrap_or(0) as usize;
-    // if parse_id > 0 {
-    //     let note = get_note_by_id(parse_id);
-    //     let body = note.body.as_str();
-    //     let edited = edit::edit(body).unwrap();
-    //     update_note_by_note_id(parse_id, &edited);
-    // } else {
-    //     cr_println(format!("{}", "Supplied note ID is invalid."));
-    //     exit(510);
-    // }
-
     if id > 0 {
         let note = get_note_by_id(id);
         let body = note.body.as_str();
