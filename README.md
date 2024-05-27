@@ -4,19 +4,19 @@ A lightweight open-sourced CLI notes app written in Rust.
 This simple tool allows people (and scripts) to take notes from a terminal.
 
 If you are like me, you desktop is cluttered with random text files that contain all sorts of program output. 
-For me, using other notes apps has always painful for working with things that are machine-readable text.
-This app is designed to give you just enough organization to make your command line Kung Fu a bit easier.
+For me, using other notes apps has always been painful for working with things that are machine-readable text.
+This app is designed to give you just enough organization to make your command line kung fu a bit easier.
 
-cRusty is meant to be your catalog of notes that allows you to use other CLI tools to create, edit, search and parse your notes.
+cRusty is meant to be a catalog that allows you to use other CLI tools to create, edit, search and parse your notes.
 
 Its pretty good for:
 
 * Taking quick notes
 * Bookmarking URLs
-* Saving JSON responses from curl/httpie
+* Saving responses from curl/httpie
 * Jotting down program output and error messages
 * Building a glossary of hard to remember CLI incantations
-* Cataloging small base64 data files/images
+* Cataloging small base64 data (files/images)
 * Drafting haikus
 
 ## Usage

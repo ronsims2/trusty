@@ -1,11 +1,18 @@
-name: Build then Upload
-run-name: ${{ github.actor }} is building cRusty and then uploading to rsims2.com
-on: [push]
+name: Build and Upload
+run-name: Build cRusty and upload to rsims2.com/downloads
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+env:
+  CARGO_TERM_COLOR: always
 jobs:
-  build-binary:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout cRusty Source
-        uses: actions/checkout@v4
-      - name: Install Rust toolchain
-        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    - uses: actions/checkout@v4
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
