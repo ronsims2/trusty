@@ -2,7 +2,7 @@ use std::convert::Infallible;
 use std::fmt::format;
 use std::num::ParseIntError;
 use std::process::exit;
-use rusqlite::named_params;
+use rusqlite::{Connection, named_params};
 use uuid::Uuid;
 use crate::cli::read_from_std_in;
 use crate::render::{cr_println, print_note_summary};
@@ -28,6 +28,7 @@ pub(crate)struct UpdateNoteView {
 }
 
 pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
+    let formatted_title = make_text_single_line(title);
     let conn = get_crusty_db_conn();
     let protected_val = if protected {1} else {0};
     // create the new note id
@@ -36,14 +37,14 @@ pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
     VALUES (:title, :protected, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, :content_id);";
     let content_insert = "INSERT INTO content (content_id, body) VALUES (:content_id, :body);";
 
-
+    // The integrity of these 2 inserts needs to be guaranteed.
     conn.execute(&content_insert, named_params! {
         ":content_id": content_id,
         ":body": note,
     }).unwrap();
 
     conn.execute(&note_insert, named_params! {
-        ":title": title,
+        ":title": formatted_title,
         ":protected": protected,
         ":content_id": content_id,
     }).unwrap();
@@ -163,11 +164,24 @@ pub(crate) fn get_last_touched_note() -> UpdateNoteView {
     result
 }
 
+pub(crate) fn update_note_ts_by_content_id(id: &str, conn: &Connection) {
+    let sql = "UPDATE notes SET updated = CURRENT_TIMESTAMP WHERE content_id = :content_id;";
+    let stmt = conn.prepare(sql);
+    stmt.unwrap().execute(named_params! {":content_id": id}).unwrap();
+}
+
+pub(crate) fn update_note_ts_by_note_id(id: usize, conn: &Connection) {
+    let sql = "UPDATE notes SET updated = CURRENT_TIMESTAMP WHERE note_id = :note_id;";
+    let stmt = conn.prepare(sql);
+    stmt.unwrap().execute(named_params! {":note_id": id}).unwrap();
+}
+
 pub(crate) fn update_note_by_content_id(id: &str, text: &str) {
     let conn = get_crusty_db_conn();
     let sql = "UPDATE content SET body = :body WHERE content_id = :content_id;";
     let stmt = conn.prepare(sql);
     stmt.unwrap().execute(named_params! {":content_id": id, ":body": &text}).unwrap();
+    update_note_ts_by_content_id(id, &conn)
 }
 
 pub(crate) fn update_note_by_note_id(id: usize, text: &str) {
@@ -175,6 +189,7 @@ pub(crate) fn update_note_by_note_id(id: usize, text: &str) {
     let sql = "UPDATE content SET body = :body WHERE content_id = (SELECT content_id FROM notes WHERE note_id = :note_id);";
     let stmt = conn.prepare(sql);
     stmt.unwrap().execute(named_params! {":note_id": id, ":body": &text}).unwrap();
+    update_note_ts_by_note_id(id, &conn)
 }
 
 pub(crate) fn update_title_by_content_id(id: &str, text: &str) {
