@@ -30,7 +30,7 @@ pub(crate) struct Cli {
     #[arg(short, long, default_missing_value= "0", num_args(0..=1), help = "Use this flag to open a note by its ID.")]
     pub open: Option<usize>,
     #[arg(short='D', long, help = "Use this flag to delete an unprotected note by its ID.")]
-    pub hard_delete: Option<usize>,
+    pub delete: Option<usize>,
     #[arg(short='F', long, help = "DANGER: This is a will indiscriminately delete a note. Use this flag to force delete a note by its ID.")]
     pub force_delete: Option<usize>,
     #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Permanently delete all notes that have place din the trash.")]
@@ -41,6 +41,8 @@ pub(crate) struct Cli {
     pub restore: Option<usize>,
     #[arg(short='A', long, default_missing_value = "true", num_args = 0, help = "When editing, this modifier will allow you to edit a title.")]
     pub all: Option<bool>,
+    #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Print all notes, very good for using grep to search or less to review.")]
+    pub dump: Option<bool>,
 }
 
 pub(crate) fn read_from_std_in() -> Option<String> {

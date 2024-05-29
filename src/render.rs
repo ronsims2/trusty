@@ -1,6 +1,6 @@
 use std::io;
 use std::io::Write;
-use crate::sql::{NoteSummary, SimpleNoteView};
+use crate::sql::{NoteSummary, NoteView, SimpleNoteView};
 use crate::utils::slice_text;
 
 pub(crate) fn print_note_summary(note: NoteSummary) {
@@ -27,3 +27,13 @@ pub(crate) fn print_simple_note(note: SimpleNoteView) {
 }
 
 // @todo create print error
+
+pub(crate) fn print_dump(notes: Vec<NoteView>) {
+    for note in notes {
+        cr_println(format!("{:width$} | {} | {} | {}", note.note_id, note.content_id, note.created, note.updated, width = 9));
+        let lines = note.body.lines();
+        for line in lines {
+            cr_println(format!("{:width$} | {} | {}", note.note_id, note.content_id, line, width = 9));
+        }
+    }
+}

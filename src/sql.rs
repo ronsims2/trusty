@@ -2,7 +2,7 @@ use std::convert::Infallible;
 use std::fmt::format;
 use std::num::ParseIntError;
 use std::process::exit;
-use rusqlite::{Connection, named_params};
+use rusqlite::{Connection, MappedRows, named_params, Row};
 use uuid::Uuid;
 use crate::cli::read_from_std_in;
 use crate::render::{cr_println, print_note_summary};
@@ -16,12 +16,21 @@ pub(crate) struct NoteSummary {
     pub(crate) updated: String,
 }
 
-pub(crate)struct SimpleNoteView {
+pub(crate) struct SimpleNoteView {
     pub(crate) title: String,
     pub(crate) body: String,
 }
 
-pub(crate)struct UpdateNoteView {
+pub(crate) struct NoteView {
+    pub(crate) title: String,
+    pub(crate) body: String,
+    pub(crate) note_id: i32,
+    pub(crate) content_id: String,
+    pub(crate) updated: String,
+    pub(crate) created: String,
+}
+
+pub(crate) struct UpdateNoteView {
     pub(crate) title: String,
     pub(crate) body: String,
     pub(crate) id: String,
@@ -224,5 +233,44 @@ pub(crate) fn set_note_trash(id: usize, trash_state: bool) {
     let conn = get_crusty_db_conn();
     let sql = "UPDATE notes SET trashed = :trashed WHERE note_id = :note_id;";
     let stmt = conn.prepare(sql);
-    stmt.unwrap().execute(named_params! {":note_id": id, ":trashed": trash_state}).unwrap();
+    stmt.unwrap().execute(named_params! {":note_id": id}).unwrap();
+}
+
+pub(crate) fn dump_notes() -> Vec<NoteView> {
+    let conn = get_crusty_db_conn();
+    let sql = "SELECT note_id, title, created, updated, notes.content_id, content.body from \
+    notes JOIN content on notes.content_id = content.content_id WHERE 1;";
+    let mut stmt = conn.prepare(sql).unwrap();
+
+    let result_set = stmt.query_map([],|row| {
+        Ok(NoteView{
+            note_id: row.get(0)?,
+            title: row.get(1)?,
+            created: row.get(2)?,
+            updated: row.get(3)?,
+            content_id: row.get(4)?,
+            body: row.get(5)?,
+        })
+    }).unwrap();
+
+    let mut results = vec![];
+    for result in result_set {
+        match result {
+            Ok(res) => {
+                results.push(res);
+            }
+            Err(_) => {
+                results.push(NoteView{
+                    title: "Error: could not fetch result".to_string(),
+                    body: "".to_string(),
+                    note_id: 0,
+                    content_id: "".to_string(),
+                    updated: "".to_string(),
+                    created: "".to_string(),
+                })
+            }
+        }
+    }
+
+    results
 }

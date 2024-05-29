@@ -9,9 +9,9 @@ use std::fmt::Arguments;
 use std::path::Path;
 use clap::Parser;
 use crate::cli::{Cli, edit_note, edit_title, insert_note_from_std_in, open_note, read_from_std_in, restore_note, trash_note};
-use crate::render::{print_note_summary, print_simple_note};
+use crate::render::{print_dump, print_note_summary, print_simple_note};
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db};
-use crate::sql::{delete_note, empty_trash, get_note_by_id, get_note_from_menu_line, insert_note, list_note_titles};
+use crate::sql::{delete_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, insert_note, list_note_titles};
 use crate::utils::slice_text;
 
 fn main() {
@@ -39,12 +39,13 @@ fn main() {
     let find_from = args.find_from;
     let edit = args.edit;
     let open = args.open;
-    let hard_delete = args.hard_delete;
+    let delete = args.delete;
     let force_delete = args.force_delete;
     let clean = args.clean;
     let trash = args.trash;
     let restore = args.restore;
     let all = args.all;
+    let dump = args.dump;
 
     if input.is_some() {
         let title_val = title.unwrap_or("Untitled");
@@ -95,8 +96,8 @@ fn main() {
         return;
     }
 
-    if hard_delete.is_some() {
-        let note_id = hard_delete.unwrap();
+    if delete.is_some() {
+        let note_id = delete.unwrap();
         delete_note(note_id, false);
         list_note_titles();
         return
@@ -126,6 +127,12 @@ fn main() {
         let note_id = restore.unwrap();
         restore_note(note_id);
         list_note_titles();
+        return
+    }
+
+    if dump.is_some() {
+        let notes = dump_notes();
+        print_dump(notes);
         return
     }
 
