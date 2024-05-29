@@ -55,6 +55,10 @@ Use the full power of the command line to filter notes.
 
 `crusty | grep -i untitled`
 
+Dump all your notes and search:
+
+`crusty --dump | grep -i foobar`
+
 Use more or less to page through menu results.
 
 `crusty | less`
