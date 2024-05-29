@@ -27,7 +27,7 @@ Add a note with a title.
 
 `crusty -t 'Foobar' -n "Who doesn't take notes in the terminal?🤷🏾"`
 
-Add a quick note without with an derived title.
+Add a quick note with a derived title.
 
 `crusty -q "The coolest kids use the terminal for everything."`
 
