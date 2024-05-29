@@ -239,7 +239,7 @@ pub(crate) fn set_note_trash(id: usize, trash_state: bool) {
 pub(crate) fn dump_notes() -> Vec<NoteView> {
     let conn = get_crusty_db_conn();
     let sql = "SELECT note_id, title, created, updated, notes.content_id, content.body from \
-    notes JOIN content on notes.content_id = content.content_id WHERE 1;";
+    notes JOIN content on notes.content_id = content.content_id WHERE protected is FALSE AND trashed IS FALSE;";
     let mut stmt = conn.prepare(sql).unwrap();
 
     let result_set = stmt.query_map([],|row| {
