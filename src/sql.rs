@@ -7,6 +7,7 @@ use uuid::Uuid;
 use crate::cli::read_from_std_in;
 use crate::render::{cr_println, print_note_summary};
 use crate::setup::get_crusty_db_conn;
+use crate::utils::make_text_single_line;
 
 #[derive(Debug)]
 pub(crate) struct NoteSummary {
@@ -177,10 +178,11 @@ pub(crate) fn update_note_by_note_id(id: usize, text: &str) {
 }
 
 pub(crate) fn update_title_by_content_id(id: &str, text: &str) {
+    let title = make_text_single_line(&text);
     let conn = get_crusty_db_conn();
     let sql = "UPDATE notes SET title = :title, updated = CURRENT_TIMESTAMP WHERE content_id = :content_id;";
     let stmt = conn.prepare(sql);
-    stmt.unwrap().execute(named_params! {":content_id": id, ":title": &text}).unwrap();
+    stmt.unwrap().execute(named_params! {":content_id": id, ":title": &title}).unwrap();
 }
 
 pub(crate) fn delete_note(id: usize, force: bool) {

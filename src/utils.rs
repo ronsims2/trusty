@@ -11,3 +11,13 @@ pub(crate) fn slice_text(start: usize, stop: usize, text: &str) -> String {
         text.to_string()
     }
 }
+
+pub(crate) fn make_text_single_line(text: &str) -> String {
+    let lines = text.lines();
+    let mut new_text = lines.map(|ln| {
+        let content = ln.trim();
+        format!("{} ", content)
+    });
+
+    new_text.collect::<String>().trim().to_string()
+}

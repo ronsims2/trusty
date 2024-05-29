@@ -3,7 +3,7 @@ use std::process::exit;
 use clap::Parser;
 use crate::render::cr_println;
 use crate::sql::{get_last_touched_note, get_note_by_id, insert_note, set_note_trash, update_note_by_content_id, update_note_by_note_id, update_title_by_content_id};
-use crate::utils::slice_text;
+use crate::utils::{make_text_single_line, slice_text};
 
 
 #[derive(Debug, Parser)]
