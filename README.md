@@ -1,10 +1,10 @@
 # cRusty 🦀📝
-A lightweight open-sourced CLI notes app written in Rust.
+A lightweight CLI notes app written in Rust.
 
 This simple tool allows people (and scripts) to take notes from a terminal.
 
-If you are like me, you desktop is cluttered with random text files that contain all sorts of program output. 
-For me, using other notes apps has always been painful for working with things that are machine-readable text.
+If you are like me, your desktop is cluttered with random text files that contain all sorts of program output. 
+For me, using other note apps has always been painful for working with things like machine-readable text.
 This app is designed to give you just enough organization to make your command line kung fu a bit easier.
 
 cRusty is meant to be a catalog that allows you to use other CLI tools to create, edit, search and parse your notes.
@@ -39,21 +39,30 @@ Pipe a note into crusty.
 echo "Sometimes you need to save the output of a program with a title | crusty -i -t "Saved Output $(date)"
 ```
 
+Save a requests response.
+
+`http -b https://dog.ceo/api/breeds/list/all | crusty -i -t 'Dog Breed JSON'`
+
+
 ### View Notes
 
-List all your notes.
+List a summary of all your notes.
 
-`crusty -m` or just `crusty`
+`crusty` or `crusty -l`
 
 Get a specific note using its ID:
 
-`crusty -r 10`
+`crusty -f 10`
 
 ### Search Notes
 
-Use the full power of the command line to filter notes.
+Use the full power of the command line to filter note titles.
 
 `crusty | grep -i untitled`
+
+Open the first note that matches a search.
+
+`crusty | grep -i untitled | crusty -g`
 
 Dump all your notes and search:
 
@@ -77,6 +86,28 @@ Edit a note using the noted ID listed in the menu.
 
 `crusty -o 2`
 
-Open a blank note in an editor.
+Open a new blank note in an editor.
 
 `crusty -o`
+
+### Remove Notes
+
+Soft delete (trash) an unprotected note by note ID.
+
+`crusty --trash 2`
+
+Permanently delete an unprotected note by ID.
+
+`crusty --delete 2`
+
+Hard delete a protected note a note by ID.☢️☢️☢️ 
+
+`crusty --force-delete 2`
+
+Hard delete all notes in the trash.
+
+`crusty --clean`
+
+Untrash a note by note ID.
+
+`crusty --restore 2`
