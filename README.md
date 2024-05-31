@@ -1,6 +1,13 @@
 # cRusty 🦀📝
 A lightweight CLI notes app written in Rust.
 
+## Download
+[Windows x86_64](https://rsims2.com/downloads/crusty-0.8.2-win64.zip)
+
+[MacOS Apple Silicon](https://rsims2.com/downloads/crusty-0.8.2-macos.zip)
+
+[Ubuntu x86_64](https://rsims2.com/downloads/crusty-0.8.2-ubuntu.zip)
+
 This simple tool allows people (and scripts) to take notes from a terminal.
 
 If you are like me, your desktop is cluttered with random text files that contain all sorts of program output. 
@@ -92,7 +99,7 @@ Open a new blank note in an editor.
 
 ### Remove Notes
 
-Soft delete (trash) an unprotected note by note ID.
+Soft delete (trash) an unprotected note by ID.
 
 `crusty --trash 2`
 
@@ -100,7 +107,7 @@ Permanently delete an unprotected note by ID.
 
 `crusty --delete 2`
 
-Hard delete a protected note a note by ID.☢️☢️☢️ 
+Hard delete a protected note by ID.☢️☢️☢️ 
 
 `crusty --force-delete 2`
 
@@ -108,6 +115,6 @@ Hard delete all notes in the trash.
 
 `crusty --clean`
 
-Untrash a note by note ID.
+Untrash a note by ID.
 
 `crusty --restore 2`
