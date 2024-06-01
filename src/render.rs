@@ -1,6 +1,7 @@
+use std::fmt::format;
 use std::io;
 use std::io::Write;
-use crate::sql::{NoteSummary, NoteView, SimpleNoteView};
+use crate::sql::{NoteSummary, NoteView, SimpleNoteView, SummaryStats};
 use crate::utils::slice_text;
 
 pub(crate) fn print_note_summary(note: NoteSummary) {
@@ -36,4 +37,43 @@ pub(crate) fn print_dump(notes: Vec<NoteView>) {
             cr_println(format!("{:width$} | {} | {}", note.note_id, note.content_id, line, width = 9));
         }
     }
+}
+
+pub(crate) fn print_app_summary(summary: SummaryStats) {
+    let total = summary.db_stats.total;
+    let trashed = summary.db_stats.trashed;
+    let stale = summary.state_note_stats;
+    let fresh = summary.fresh_note_stats
+    let largest_note = summary.large_note_stats;
+    cr_println(format!("{}", "cRusty 🦀📝 Summary"));
+    cr_println(format!("{}", "=".repeat(80)));
+
+    cr_println(format!("Total Notes: {} :: Trashed Notes: {}", total, trashed));
+    cr_println(format!("{}", "=".repeat(80)));
+
+    cr_println(format!("{}", "Largest Note:"));
+    cr_println(format!("{:width$} :: {} :: {}",
+                       largest_note.note_id,
+                       largest_note.content_id, width = 9);)
+    cr_println(format!("Notes Size: {} (chars) :: Title: {}",
+                       largest_note.content_size,
+                       largest_note.title));
+    cr_println(format!("{}", "=".repeat(80)));
+
+    cr_println(format!("{}", "Freshest Note"));
+    cr_println(format!("{:width$} | {} | {}",
+                       fresh.note_id,
+                       fresh.content_id,
+                       fresh.updated,
+                       width = 9));
+    cr_println(format!("Title: {}", fresh.title));
+    cr_println(format!("{}", "=".repeat(80)));
+
+    cr_println(format!("{:width$} | {} | {}",
+                       stale.note_id,
+                       stale.content_id,
+                       stale.updated,
+                       width = 9));
+    cr_println(format!("Title: {}", stale.title));
+    cr_println(format!("{}", "=".repeat(80)));
 }

@@ -36,6 +36,25 @@ pub(crate) struct UpdateNoteView {
     pub(crate) id: String,
 }
 
+pub(crate) struct LargeNoteSummary {
+    pub note_id: i32,
+    pub title: String,
+    pub content_id: String,
+    pub content_size: i32
+}
+
+pub(crate) struct DBStats {
+    pub total: i32,
+    pub trashed: i32
+}
+
+pub(crate) struct SummaryStats {
+    pub db_stats: DBStats,
+    pub large_note_stats: LargeNoteSummary,
+    pub state_note_stats: NoteView,
+    pub fresh_note_stats: NoteView
+}
+
 pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
     let formatted_title = make_text_single_line(title);
     let conn = get_crusty_db_conn();
@@ -273,4 +292,98 @@ pub(crate) fn dump_notes() -> Vec<NoteView> {
     }
 
     results
+}
+
+pub(crate) fn get_summary() -> SummaryStats {
+    let largest_note_sql = "SELECT note_id, title, content.content_id, \
+    MAX(length(body)) from content JOIN notes on content.content_id = notes.content_id;";
+    let stalest_note_sql = "SELECT note_id, title, content_id, MIN(updated) from notes;";
+    let freshest_note_sql = "SELECT note_id, title, content_id, MAX(updated) from notes;";
+    let total_trashed_sql = "SELECT (SELECT COUNT(note_id) from notes), \
+    (SELECT COUNT(note_id) from notes WHERE trashed is TRUE);";
+
+    let mut errors = vec![];
+
+    let conn = get_crusty_db_conn();
+    let mut largest_stmt = conn.prepare(largest_note_sql).unwrap();
+    let largest_result = match largest_stmt.query_row([], |row| {
+        Ok(LargeNoteSummary{
+            note_id: row.get(0)?,
+            title: row.get(1)?,
+            content_id: row.get(2)?,
+            content_size: row.get(3)?,
+        })
+    }) {
+        Ok(data) => {
+            Some(data)
+        }
+        Err(err) => {
+            errors.push("Error querying to determine largest note for summary.");
+            None
+        }
+    };
+
+    let mut stalest_stmt = conn.prepare(stalest_note_sql).unwrap();
+    let stalest_result = match largest_stmt.query_row([], |row| {
+        Ok(NoteView{
+            note_id: row.get(0)?,
+            title: row.get(1)?,
+            body: "".to_string(),
+            content_id: row.get(2)?,
+            updated: row.get(3)?,
+            created: "".to_string(),
+        })
+    }) {
+        Ok(data) => {
+            Some(data)
+        }
+        Err(error) => {
+            errors.push("Error querying oldest note for summary.");
+            None
+        }
+    };
+
+    let mut freshest_stmt = conn.prepare(freshest_note_sql).unwrap();
+    let freshest_result = match freshest_stmt.query_row([], |row| {
+        Ok(NoteView{
+            note_id: row.get(0)?,
+            title: row.get(1)?,
+            body: "".to_string(),
+            content_id: row.get(2)?,
+            updated: row.get(3)?,
+            created: "".to_string(),
+        })
+    }) {
+        Ok(data) => {
+            Some(data)
+        }
+        Err(error) => {
+            errors.push("Error querying oldest note for summary.");
+            None
+        }
+    };
+
+    let mut total_trashed_stmt = conn.prepare(total_trashed_sql).unwrap();
+    let total_trashed_result = match total_trashed_stmt.query_row([], |row| {
+        Ok(DBStats{
+            total: row.get(0)?,
+            trashed: row.get(1)?
+        })
+    }) {
+        Ok(data) => {
+            Some(data)
+        }
+        Err(error) => {
+            errors.push("Error querying stats.");
+            None
+        }
+    };
+
+    SummaryStats {
+        db_stats: total_trashed_result.unwrap(),
+        large_note_stats: largest_result.unwrap(),
+        state_note_stats: stalest_result.unwrap(),
+        fresh_note_stats: freshest_result.unwrap(),
+    }
+
 }
