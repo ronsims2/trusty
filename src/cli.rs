@@ -43,6 +43,8 @@ pub(crate) struct Cli {
     pub all: Option<bool>,
     #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Print all notes, very good for using grep to search or less to review.")]
     pub dump: Option<bool>,
+    #[arg(long, default_missing_value = "true", num_args = 0, help = "Print a summary of statistics about your notes.")]
+    pub summary: Option<bool>,
 }
 
 pub(crate) fn read_from_std_in() -> Option<String> {

@@ -6,6 +6,8 @@ A lightweight CLI notes app written in Rust.
 
 [MacOS Apple Silicon](https://rsims2.com/downloads/crusty-0.8.2-macos.zip)
 
+[MacOS Apple Intel](https://rsims2.com/downloads/crusty-0.8.2-macos-intel.zip)
+
 [Ubuntu x86_64](https://rsims2.com/downloads/crusty-0.8.2-ubuntu.zip)
 
 This simple tool allows people (and scripts) to take notes from a terminal.

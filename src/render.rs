@@ -43,7 +43,7 @@ pub(crate) fn print_app_summary(summary: SummaryStats) {
     let total = summary.db_stats.total;
     let trashed = summary.db_stats.trashed;
     let stale = summary.state_note_stats;
-    let fresh = summary.fresh_note_stats
+    let fresh = summary.fresh_note_stats;
     let largest_note = summary.large_note_stats;
     cr_println(format!("{}", "cRusty 🦀📝 Summary"));
     cr_println(format!("{}", "=".repeat(80)));
@@ -52,15 +52,14 @@ pub(crate) fn print_app_summary(summary: SummaryStats) {
     cr_println(format!("{}", "=".repeat(80)));
 
     cr_println(format!("{}", "Largest Note:"));
-    cr_println(format!("{:width$} :: {} :: {}",
-                       largest_note.note_id,
-                       largest_note.content_id, width = 9);)
-    cr_println(format!("Notes Size: {} (chars) :: Title: {}",
-                       largest_note.content_size,
-                       largest_note.title));
+    cr_println(format!("Note ID: {:width$}", largest_note.note_id, width = 9));
+    cr_println(format!("Content ID: {}", largest_note.content_id));
+    cr_println(format!("Notes Size: {} (chars)", largest_note.content_size));
+    cr_println(format!("Title: {}", largest_note.title));
     cr_println(format!("{}", "=".repeat(80)));
 
     cr_println(format!("{}", "Freshest Note"));
+    cr_println(format!("Note ID   | Content ID                           | Updated           "));
     cr_println(format!("{:width$} | {} | {}",
                        fresh.note_id,
                        fresh.content_id,
@@ -68,7 +67,7 @@ pub(crate) fn print_app_summary(summary: SummaryStats) {
                        width = 9));
     cr_println(format!("Title: {}", fresh.title));
     cr_println(format!("{}", "=".repeat(80)));
-
+    cr_println(format!("Note ID   | Content ID                           | Updated           "));
     cr_println(format!("{:width$} | {} | {}",
                        stale.note_id,
                        stale.content_id,

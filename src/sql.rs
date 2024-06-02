@@ -324,7 +324,7 @@ pub(crate) fn get_summary() -> SummaryStats {
     };
 
     let mut stalest_stmt = conn.prepare(stalest_note_sql).unwrap();
-    let stalest_result = match largest_stmt.query_row([], |row| {
+    let stalest_result = match stalest_stmt.query_row([], |row| {
         Ok(NoteView{
             note_id: row.get(0)?,
             title: row.get(1)?,
@@ -378,6 +378,13 @@ pub(crate) fn get_summary() -> SummaryStats {
             None
         }
     };
+
+    if errors.len() > 0 {
+        for err in errors {
+            cr_println(format!("{}", err));
+        }
+        exit(511);
+    }
 
     SummaryStats {
         db_stats: total_trashed_result.unwrap(),
