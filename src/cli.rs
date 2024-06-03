@@ -85,7 +85,7 @@ pub(crate) fn edit_note() {
 
 pub(crate) fn edit_title(note_id: Option<usize>) {
     let id = note_id.unwrap_or(0);
-    let note = if id > 0 {get_last_touched_note()} else {get_note_by_id(id)};
+    let note = if id > 0  {get_note_by_id(id)} else {get_last_touched_note()};
     let title = note.title.as_str();
     let edited = edit::edit(title).unwrap();
     update_title_by_content_id(&note.content_id, &edited);
