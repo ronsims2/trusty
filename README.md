@@ -95,6 +95,10 @@ Edit a note using the noted ID listed in the menu.
 
 `crusty -o 2`
 
+Similarly, open an editor to change the title and body of a note.
+
+`crusty -o 2 -A`
+
 Open a new blank note in an editor.
 
 `crusty -o`
