@@ -19,6 +19,7 @@ pub(crate) struct NoteSummary {
 pub(crate) struct SimpleNoteView {
     pub(crate) title: String,
     pub(crate) body: String,
+    pub(crate) content_id: String,
 }
 
 pub(crate) struct NoteView {
@@ -28,12 +29,6 @@ pub(crate) struct NoteView {
     pub(crate) content_id: String,
     pub(crate) updated: String,
     pub(crate) created: String,
-}
-
-pub(crate) struct UpdateNoteView {
-    pub(crate) title: String,
-    pub(crate) body: String,
-    pub(crate) id: String,
 }
 
 pub(crate) struct LargeNoteSummary {
@@ -99,13 +94,14 @@ pub(crate) fn list_note_titles() {
 }
 
 pub(crate) fn get_note_by_id(id: usize) -> SimpleNoteView {
-    let sql = "SELECT notes.title, content.body FROM notes JOIN content on notes.content_id = content.content_id WHERE notes.note_id = :note_id;";
+    let sql = "SELECT notes.title, content.body, notes.content_id FROM notes JOIN content on notes.content_id = content.content_id WHERE notes.note_id = :note_id;";
     let conn = get_crusty_db_conn();
     let mut stmt = conn.prepare(sql).unwrap();
     let result = match stmt.query_row(named_params! {":note_id": id as u32}, |row| {
         Ok(SimpleNoteView {
             title: row.get(0)?,
             body: row.get(1)?,
+            content_id: row.get(2)?
         })
     }) {
         Ok(res) => {
@@ -169,14 +165,14 @@ pub(crate) fn update_last_touched(note_id:&str){
     }
 }
 
-pub(crate) fn get_last_touched_note() -> UpdateNoteView {
+pub(crate) fn get_last_touched_note() -> SimpleNoteView {
     let sql = "SELECT notes.content_id, notes.title, content.body FROM notes JOIN content on notes.content_id = content.content_id \
     WHERE notes.note_id = CAST((SELECT value FROM app WHERE key = 'last_touched') AS INTEGER); ";
     let conn = get_crusty_db_conn();
     let mut stmt = conn.prepare(sql).unwrap();
     let result = match stmt.query_row([], |row| {
-        Ok(UpdateNoteView {
-            id: row.get(0)?,
+        Ok(SimpleNoteView {
+            content_id: row.get(0)?,
             title: row.get(1)?,
             body: row.get(2)?,
         })

@@ -90,7 +90,7 @@ fn main() {
 
     if edit.is_some() {
         if all.is_some() {
-            edit_title();
+            edit_title(None);
         }
         edit_note();
         return
@@ -98,6 +98,9 @@ fn main() {
 
     if open.is_some() {
         let note_id = open.unwrap();
+        if all.is_some() {
+            edit_title(Some(note_id));
+        }
         open_note(note_id);
 
         return;

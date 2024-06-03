@@ -1,4 +1,5 @@
 use unicode_segmentation::UnicodeSegmentation;
+use crate::sql::{SimpleNoteView};
 
 pub(crate) fn slice_text(start: usize, stop: usize, text: &str) -> String {
     let chars = text.graphemes(true).collect::<Vec<&str>>();

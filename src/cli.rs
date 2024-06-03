@@ -80,14 +80,15 @@ pub(crate) fn edit_note() {
     let note = get_last_touched_note();
     let body = note.body.as_str();
     let edited = edit::edit(body).unwrap();
-    update_note_by_content_id(&note.id, &edited);
+    update_note_by_content_id(&note.content_id, &edited);
 }
 
-pub(crate) fn edit_title() {
-    let note = get_last_touched_note();
+pub(crate) fn edit_title(note_id: Option<usize>) {
+    let id = note_id.unwrap_or(0);
+    let note = if id > 0 {get_last_touched_note()} else {get_note_by_id(id)};
     let title = note.title.as_str();
     let edited = edit::edit(title).unwrap();
-    update_title_by_content_id(&note.id, &edited);
+    update_title_by_content_id(&note.content_id, &edited);
 }
 
 pub(crate) fn open_note(id: usize) {
