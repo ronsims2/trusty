@@ -9,6 +9,7 @@ use clap::builder::Str;
 use clap::Parser;
 use rusqlite::{Connection, params, Params};
 use uuid::Uuid;
+use crate::errors::Errors;
 use crate::render::cr_println;
 
 
@@ -19,7 +20,7 @@ fn get_win_home_drive() -> String {
         }
         Err(_) => {
             cr_println(format!("{}", "Could not determine Windows user drive."));
-            exit(501)
+            exit(Errors::WinUserErr as i32)
         }
     };
 
@@ -42,7 +43,7 @@ pub(crate) fn get_home_dir() -> String {
         }
         Err(_) => {
             cr_println(format!("{}", "Could not determine home path during config."));
-            exit(502)
+            exit(Errors::HomePathErr as i32)
         }
     };
 
@@ -72,7 +73,7 @@ pub(crate) fn create_crusty_dir() {
         }
         Err(_) => {
             cr_println(format!("{}", "Could not create cRusty config directory."));
-            exit(503)
+            exit(Errors::ConfigDirErr as i32)
         }
     }
 }

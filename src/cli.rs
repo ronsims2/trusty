@@ -1,6 +1,7 @@
 use std::io;
 use std::process::exit;
 use clap::Parser;
+use crate::errors::Errors;
 use crate::render::cr_println;
 use crate::sql::{get_last_touched_note, get_note_by_id, insert_note, set_note_trash, update_note_by_content_id, update_note_by_note_id, update_title_by_content_id};
 use crate::utils::{make_text_single_line, slice_text};
@@ -68,7 +69,7 @@ pub(crate) fn insert_note_from_std_in(title: &str) -> bool {
                 true
             } else {
                 cr_println(format!("{}", "Input was either empty or flag was not specified, please fix your command."));
-                exit(505);
+                exit(Errors::InputFlagErr as i32);
             }
         }
     };

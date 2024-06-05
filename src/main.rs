@@ -3,6 +3,7 @@ mod cli;
 mod sql;
 mod render;
 mod utils;
+mod errors;
 
 use std::env;
 use std::fmt::Arguments;

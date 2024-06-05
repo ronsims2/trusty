@@ -5,6 +5,7 @@ use std::process::exit;
 use rusqlite::{Connection, MappedRows, named_params, Row};
 use uuid::Uuid;
 use crate::cli::read_from_std_in;
+use crate::errors::Errors;
 use crate::render::{cr_println, print_note_summary};
 use crate::setup::get_crusty_db_conn;
 use crate::utils::make_text_single_line;
@@ -110,7 +111,7 @@ pub(crate) fn get_note_by_id(id: usize) -> SimpleNoteView {
         },
         Err(err) => {
             cr_println(format!("Could not find note for id: {}", id));
-            exit(504);
+            exit(Errors::NoteIdErr as i32);
         }
     };
 
@@ -121,13 +122,13 @@ pub(crate) fn get_note_from_menu_line() -> SimpleNoteView {
     let result = match read_from_std_in() {
         None => {
             cr_println(format!("{}", "No menu line specified, could not lookup record."));
-            exit(506);
+            exit(Errors::MenuLineErr as i32);
         }
         Some(ln) => {
             let trimmed_ln = ln.trim();
             if trimmed_ln.is_empty() {
                 cr_println(format!("{}", "Menu line input is empty, could not lookup record."));
-                exit(507);
+                exit(Errors::MenuLineEmptyErr as i32);
             } else {
                 get_note_from_menu_line_by_id(ln.as_str())
             }
@@ -145,7 +146,7 @@ fn get_note_from_menu_line_by_id(line: &str) -> SimpleNoteView {
         }
         Err(_) => {
             cr_println(format!("{}", "Menu line input is malformed, please check your input."));
-            exit(507);
+            exit(Errors::MenuLineMalformedErr as i32);
         }
     };
     result
@@ -160,7 +161,7 @@ pub(crate) fn update_last_touched(note_id:&str){
         }
         Err(_) => {
             cr_println(format!("{}", "note ID is malformed, please check your input."));
-            exit(508)
+            exit(Errors::NoteIdMalformedErr as i32)
         }
     }
 }
@@ -182,7 +183,7 @@ pub(crate) fn get_last_touched_note() -> SimpleNoteView {
         }
         Err(_) => {
             cr_println(format!("{}", "Could not fetch the last touched note."));
-            exit(509)
+            exit(Errors::lastTouchFetchErr as i32)
         }
     };
     result
@@ -379,7 +380,7 @@ pub(crate) fn get_summary() -> SummaryStats {
         for err in errors {
             cr_println(format!("{}", err));
         }
-        exit(511);
+        exit(Errors::SummaryErr as i32);
     }
 
     SummaryStats {
