@@ -78,6 +78,7 @@ pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
 }
 
 pub(crate) fn list_note_titles() {
+    // @todo encrypt message here, add param to conditionally do
     let sql = "SELECT note_id, title, updated FROM notes WHERE protected = FALSE AND TRASHED IS FALSE ORDER BY updated;";
     let conn = get_crusty_db_conn();
     let mut stmt = conn.prepare(sql).unwrap();

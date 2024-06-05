@@ -48,6 +48,7 @@ fn main() {
     let all = args.all;
     let dump = args.dump;
     let summary = args.summary;
+    let protected = args.summary;
 
     if summary.is_some() {
         let summary = get_summary();
@@ -65,6 +66,7 @@ fn main() {
 
     // if there is a title and note param insert a proper note
     if title.is_some() && note.is_some() {
+        // @todo encrypt message here
         insert_note(title.unwrap(), note.unwrap(), false);
         return
     }
@@ -83,6 +85,7 @@ fn main() {
 
     // add an untitled quick note, this needs to stay near the bottom
     if quick_note.is_some() && title.is_none() && note.is_none() {
+        // @todo encrypt message here
         let note = quick_note.unwrap();
         let title = slice_text(0, 64, note);
         insert_note(title.as_str(), note, false);
@@ -90,6 +93,7 @@ fn main() {
     }
 
     if edit.is_some() {
+        // @todo encrypt message here
         if all.is_some() {
             edit_title(None);
         }
@@ -98,6 +102,7 @@ fn main() {
     }
 
     if open.is_some() {
+        // @todo encrypt message here
         let note_id = open.unwrap();
         if all.is_some() {
             edit_title(Some(note_id));
@@ -108,6 +113,7 @@ fn main() {
     }
 
     if delete.is_some() {
+        // @todo encrypt message here
         let note_id = delete.unwrap();
         delete_note(note_id, false);
         list_note_titles();
@@ -115,6 +121,7 @@ fn main() {
     }
 
     if force_delete.is_some() {
+        // @todo encrypt message here
         let note_id = force_delete.unwrap();
         delete_note(note_id, true);
         list_note_titles();
@@ -128,6 +135,7 @@ fn main() {
     }
 
     if trash.is_some() {
+        // @todo encrypt message here
         let note_id = trash.unwrap();
         trash_note(note_id);
         list_note_titles();
@@ -142,6 +150,7 @@ fn main() {
     }
 
     if dump.is_some() {
+        // @todo encrypt message here
         let notes = dump_notes();
         print_dump(notes);
         return
@@ -149,5 +158,6 @@ fn main() {
 
 
     // if there is no input at all show the menu
+    // @todo pass flag encrypt message here
     list_note_titles()
 }
