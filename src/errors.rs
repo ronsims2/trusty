@@ -9,5 +9,6 @@ pub enum Errors {
     NoteIdMalformedErr = 508,
     lastTouchFetchErr = 509,
     SummaryErr =  510,
-    MenuLineMalformedErr = 511
+    MenuLineMalformedErr = 511,
+    SetPasswordErr = 512,
 }

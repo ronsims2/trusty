@@ -392,3 +392,15 @@ pub(crate) fn get_summary() -> SummaryStats {
     }
 
 }
+
+pub(crate) fn add_key_value(table: &str, key: &str, value: &str) -> bool {
+    let conn = get_crusty_db_conn();
+    let sql = "INSERT INTO :table (key, value) VALUES (:key, :value);";
+    let stmt = conn.prepare(sql);
+    let code = stmt.unwrap().execute(named_params! {
+        ":table": table,
+        ":key": key,
+        ":value" : value}).unwrap_or(0);
+
+    code > 0
+}

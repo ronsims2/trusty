@@ -11,6 +11,8 @@ use rusqlite::{Connection, params, Params};
 use uuid::Uuid;
 use crate::errors::Errors;
 use crate::render::cr_println;
+use crate::sql::add_key_value;
+use crate::utils::validate_password;
 
 
 fn get_win_home_drive() -> String {
@@ -151,4 +153,20 @@ pub(crate) fn init_crusty_db() {
             cr_println(format!("{}", "Could not create cRusty DB."));
         }
     }
+}
+
+pub(crate) fn set_password(update: bool){
+    let password = rpassword::prompt_password("Create your password: ").unwrap();
+    let password2 = rpassword::prompt_password("Enter your password again: ").unwrap();
+
+    if (password.eq(&password2) && validate_password(&password)) {
+        if update {
+            // @todo Implement update
+        } else {
+            if !add_key_value("app", "password", &password) {
+                exit(Errors::SetPasswordErr as i32)
+            }
+        }
+    }
+    set_password(update)
 }
