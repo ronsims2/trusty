@@ -155,7 +155,8 @@ pub(crate) fn init_crusty_db() {
     }
 }
 
-pub(crate) fn set_password(update: bool){
+pub(crate) fn set_password(update: bool, current_count: i32){
+    let mut count = current_count;
     let password = rpassword::prompt_password("Create your password: ").unwrap();
     let password2 = rpassword::prompt_password("Enter your password again: ").unwrap();
 
@@ -163,10 +164,20 @@ pub(crate) fn set_password(update: bool){
         if update {
             // @todo Implement update
         } else {
-            if !add_key_value("app", "password", &password) {
+            if add_key_value("app", "password", &password) {
+                cr_println("Password set".to_string())
+            } else {
+                cr_println(format!("{}", "Could not set password."));
                 exit(Errors::SetPasswordErr as i32)
             }
         }
+        return
     }
-    set_password(update)
+    count += 1;
+    println!("Count: {}", count);
+    if count == 3 {
+        cr_println(format!("{}", "To many attempts to create a password."));
+        exit(Errors::createPasswordErr as i32)
+    }
+    set_password(update, count)
 }

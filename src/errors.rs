@@ -11,4 +11,5 @@ pub enum Errors {
     SummaryErr =  510,
     MenuLineMalformedErr = 511,
     SetPasswordErr = 512,
+    createPasswordErr = 513
 }
