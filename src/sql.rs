@@ -184,7 +184,7 @@ pub(crate) fn get_last_touched_note() -> SimpleNoteView {
         }
         Err(_) => {
             cr_println(format!("{}", "Could not fetch the last touched note."));
-            exit(Errors::lastTouchFetchErr as i32)
+            exit(Errors::LastTouchFetchErr as i32)
         }
     };
     result
@@ -393,12 +393,29 @@ pub(crate) fn get_summary() -> SummaryStats {
 
 }
 
+fn get_key_val_sql(table: &str) -> String {
+    format!("INSERT INTO {} (key, value) VALUES (:key, :value);", table)
+}
+
 pub(crate) fn add_key_value(table: &str, key: &str, value: &str) -> bool {
     let conn = get_crusty_db_conn();
-    let sql = "INSERT INTO :table (key, value) VALUES (:key, :value);";
-    let stmt = conn.prepare(sql);
+
+    let sql = match table.to_lowercase().as_str() {
+        // these match tables created during setup
+        "app" => {
+            get_key_val_sql(table)
+        },
+        "config" => {
+            get_key_val_sql(table)
+        }
+        _ => {
+            cr_println(format!("{}", "Could not create key val sql."));
+            exit(Errors::KeyValInsertErr as i32)
+        }
+    };
+
+    let stmt = conn.prepare(&sql);
     let code = stmt.unwrap().execute(named_params! {
-        ":table": table,
         ":key": key,
         ":value" : value}).unwrap_or(0);
 

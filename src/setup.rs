@@ -177,7 +177,7 @@ pub(crate) fn set_password(update: bool, current_count: i32){
     println!("Count: {}", count);
     if count == 3 {
         cr_println(format!("{}", "To many attempts to create a password."));
-        exit(Errors::createPasswordErr as i32)
+        exit(Errors::CreatePasswordErr as i32)
     }
     set_password(update, count)
 }
