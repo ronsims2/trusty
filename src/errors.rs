@@ -12,5 +12,6 @@ pub enum Errors {
     MenuLineMalformedErr = 511,
     SetPasswordErr = 512,
     CreatePasswordErr = 513,
-    KeyValInsertErr = 514
+    KeyValInsertErr = 514,
+    KeyValSelectErr = 515,
 }

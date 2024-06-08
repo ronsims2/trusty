@@ -403,6 +403,15 @@ fn get_key_val_select_sql(table: &str) -> String {
 
 pub(crate) fn get_value_from_attr_table(table: &str, key: &str) {
     let conn = get_crusty_db_conn();
+    let sql = match table.to_lowercase().as_str() {
+        "app" => {
+            get_key_val_select_sql(table)
+        }
+        _ => {
+            cr_println(format!("{}", "Could not get select val sql."));
+            exit(Errors::KeyValSelectErr as i32)
+        }
+    }
 }
 
 pub(crate) fn add_key_value(table: &str, key: &str, value: &str) -> bool {
