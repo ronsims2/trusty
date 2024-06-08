@@ -393,8 +393,16 @@ pub(crate) fn get_summary() -> SummaryStats {
 
 }
 
-fn get_key_val_sql(table: &str) -> String {
+fn get_key_val_insert_sql(table: &str) -> String {
     format!("INSERT INTO {} (key, value) VALUES (:key, :value);", table)
+}
+
+fn get_key_val_select_sql(table: &str) -> String {
+    format!("SELECT value from {} WHERE key = :key;", table)
+}
+
+pub(crate) fn get_value_from_attr_table(table: &str, key: &str) {
+    let conn = get_crusty_db_conn();
 }
 
 pub(crate) fn add_key_value(table: &str, key: &str, value: &str) -> bool {
@@ -403,10 +411,10 @@ pub(crate) fn add_key_value(table: &str, key: &str, value: &str) -> bool {
     let sql = match table.to_lowercase().as_str() {
         // these match tables created during setup
         "app" => {
-            get_key_val_sql(table)
+            get_key_val_insert_sql(table)
         },
         "config" => {
-            get_key_val_sql(table)
+            get_key_val_insert_sql(table)
         }
         _ => {
             cr_println(format!("{}", "Could not create key val sql."));

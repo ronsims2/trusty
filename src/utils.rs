@@ -2,6 +2,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use regex::Regex;
 use crate::sql::{SimpleNoteView};
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
+use crate::setup::get_crusty_db_conn;
 
 pub(crate) fn slice_text(start: usize, stop: usize, text: &str) -> String {
     let chars = text.graphemes(true).collect::<Vec<&str>>();
@@ -51,4 +52,8 @@ pub(crate) fn validate_password(password: &str) -> bool {
 pub(crate) fn encrypt_text(key: &str, text: &str) -> String {
     let mc = new_magic_crypt!(key, 256);
     mc.encrypt_str_to_base64(text)
+}
+
+pub(crate) fn check_password(password: &str) {
+    let conn = get_crusty_db_conn();
 }
