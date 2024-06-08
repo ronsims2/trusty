@@ -12,7 +12,7 @@ use uuid::Uuid;
 use crate::errors::Errors;
 use crate::render::cr_println;
 use crate::sql::add_key_value;
-use crate::utils::validate_password;
+use crate::utils::{encrypt_text, validate_password};
 
 
 fn get_win_home_drive() -> String {
@@ -161,6 +161,8 @@ pub(crate) fn set_password(update: bool, current_count: i32){
     let password2 = rpassword::prompt_password("Enter your password again: ").unwrap();
 
     if (password.eq(&password2) && validate_password(&password)) {
+        let encrypted_password = encrypt_text(&password, &password);
+        println!("The encrypted password is: {}", encrypted_password);
         if update {
             // @todo Implement update
         } else {
