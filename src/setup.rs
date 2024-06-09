@@ -162,11 +162,10 @@ pub(crate) fn set_password(update: bool, current_count: i32){
 
     if (password.eq(&password2) && validate_password(&password)) {
         let encrypted_password = encrypt_text(&password, &password);
-        println!("The encrypted password is: {}", encrypted_password);
         if update {
             // @todo Implement update
         } else {
-            if add_key_value("app", "password", &password) {
+            if add_key_value("app", "password", &encrypted_password) {
                 cr_println("Password set".to_string())
             } else {
                 cr_println(format!("{}", "Could not set password."));

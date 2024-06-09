@@ -26,8 +26,6 @@ fn main() {
             get_crusty_db_path()
         }
         Some(conf_path) => {
-            // @todo remove the password check just debugging
-            check_password("Ninja1");
             conf_path
         }
     };

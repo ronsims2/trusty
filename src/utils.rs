@@ -54,9 +54,9 @@ pub(crate) fn encrypt_text(key: &str, text: &str) -> String {
     mc.encrypt_str_to_base64(text)
 }
 
-pub(crate) fn check_password(password: &str) {
+pub(crate) fn check_password(password: &str) -> bool {
     let saved_encrypted_password = get_value_from_attr_table("app", "password");
     let encrypted_password = encrypt_text(password, password);
 
-    println!("saved: {} | attempted: {}", saved_encrypted_password.value, encrypted_password)
+    encrypted_password.eq(&saved_encrypted_password.value)
 }
