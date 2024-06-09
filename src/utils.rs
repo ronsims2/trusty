@@ -58,5 +58,5 @@ pub(crate) fn check_password(password: &str) {
     let saved_encrypted_password = get_value_from_attr_table("app", "password");
     let encrypted_password = encrypt_text(password, password);
 
-    println!("saved: {} | attempted: {}", saved_encrypted_password, encrypted_password)
+    println!("saved: {} | attempted: {}", saved_encrypted_password.value, encrypted_password)
 }

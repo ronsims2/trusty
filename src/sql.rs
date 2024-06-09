@@ -51,6 +51,11 @@ pub(crate) struct SummaryStats {
     pub fresh_note_stats: NoteView
 }
 
+pub(crate) struct KeyValuePair {
+    pub key: String,
+    pub value: String
+}
+
 pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
     let formatted_title = make_text_single_line(title);
     let conn = get_crusty_db_conn();
@@ -401,7 +406,7 @@ fn get_key_val_select_sql(table: &str) -> String {
     format!("SELECT value from {} WHERE key = :key;", table)
 }
 
-pub(crate) fn get_value_from_attr_table(table: &str, key: &str) -> String {
+pub(crate) fn get_value_from_attr_table(table: &str, key: &str) -> KeyValuePair {
     let conn = get_crusty_db_conn();
     let sql = match table.to_lowercase().as_str() {
         "app" => {
@@ -418,7 +423,10 @@ pub(crate) fn get_value_from_attr_table(table: &str, key: &str) -> String {
 
     let mut stmt = conn.prepare(&sql).unwrap();
     let result = match stmt.query_row(named_params! {":key": key},|row| {
-        Ok(row.get(0)? as String)
+        Ok(KeyValuePair {
+            key: key.to_string(),
+            value: row.get(0)?
+        })
     }) {
         Ok(data) => {
             data
