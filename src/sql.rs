@@ -401,17 +401,34 @@ fn get_key_val_select_sql(table: &str) -> String {
     format!("SELECT value from {} WHERE key = :key;", table)
 }
 
-pub(crate) fn get_value_from_attr_table(table: &str, key: &str) {
+pub(crate) fn get_value_from_attr_table(table: &str, key: &str) -> String {
     let conn = get_crusty_db_conn();
     let sql = match table.to_lowercase().as_str() {
         "app" => {
+            get_key_val_select_sql(table)
+        },
+        "config" => {
             get_key_val_select_sql(table)
         }
         _ => {
             cr_println(format!("{}", "Could not get select val sql."));
             exit(Errors::KeyValSelectErr as i32)
         }
-    }
+    };
+
+    let mut stmt = conn.prepare(&sql).unwrap();
+    let result = match stmt.query_row(named_params! {":key": key},|row| {
+        Ok(row.get(0)? as String)
+    }) {
+        Ok(data) => {
+            data
+        },
+        Err(error) => {
+            cr_println(format!("{}", "Could not get select val sql."));
+            exit(Errors::KeyValSelectErr as i32)
+        }
+    };
+    result
 }
 
 pub(crate) fn add_key_value(table: &str, key: &str, value: &str) -> bool {

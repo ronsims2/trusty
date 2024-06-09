@@ -1,6 +1,6 @@
 use unicode_segmentation::UnicodeSegmentation;
 use regex::Regex;
-use crate::sql::{SimpleNoteView};
+use crate::sql::{get_value_from_attr_table, SimpleNoteView};
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 use crate::setup::get_crusty_db_conn;
 
@@ -55,5 +55,8 @@ pub(crate) fn encrypt_text(key: &str, text: &str) -> String {
 }
 
 pub(crate) fn check_password(password: &str) {
-    let conn = get_crusty_db_conn();
+    let saved_encrypted_password = get_value_from_attr_table("app", "password");
+    let encrypted_password = encrypt_text(password, password);
+
+    println!("saved: {} | attempted: {}", saved_encrypted_password, encrypted_password)
 }
