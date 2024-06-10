@@ -406,6 +406,10 @@ fn get_key_val_select_sql(table: &str) -> String {
     format!("SELECT value from {} WHERE key = :key;", table)
 }
 
+fn get_key_val_update_sql(table: &str) -> String {
+    format!("UPDATE {} SET value = :value WHERE ", table)
+}
+
 pub(crate) fn get_value_from_attr_table(table: &str, key: &str) -> KeyValuePair {
     let conn = get_crusty_db_conn();
     let sql = match table.to_lowercase().as_str() {
