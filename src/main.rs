@@ -4,6 +4,7 @@ mod sql;
 mod render;
 mod utils;
 mod errors;
+mod security;
 
 use std::env;
 use std::fmt::Arguments;
@@ -51,6 +52,8 @@ fn main() {
     let summary = args.summary;
     let protected = args.summary;
 
+    let is_protected = protected.unwrap_or(false);
+
     if summary.is_some() {
         let summary = get_summary();
         print_app_summary(summary);
@@ -67,8 +70,11 @@ fn main() {
 
     // if there is a title and note param insert a proper note
     if title.is_some() && note.is_some() {
-        // @todo encrypt message here
-        insert_note(title.unwrap(), note.unwrap(), false);
+        let mut title = title.unwrap();
+        if is_protected {
+            title = en
+        }
+        insert_note(, note.unwrap(), false);
         return
     }
 
