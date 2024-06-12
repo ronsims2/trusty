@@ -11,8 +11,9 @@ use rusqlite::{Connection, params, Params};
 use uuid::Uuid;
 use crate::errors::Errors;
 use crate::render::cr_println;
+use crate::security::prompt_password;
 use crate::sql::add_key_value;
-use crate::utils::{encrypt_text, validate_password};
+use crate::utils::{check_password, encrypt_text, validate_password};
 
 
 fn get_win_home_drive() -> String {
@@ -155,30 +156,22 @@ pub(crate) fn init_crusty_db() {
     }
 }
 
-pub(crate) fn set_password(update: bool, current_count: i32){
-    let mut count = current_count;
-    let password = rpassword::prompt_password("Create your password: ").unwrap();
-    let password2 = rpassword::prompt_password("Enter your password again: ").unwrap();
-
-    if (password.eq(&password2) && validate_password(&password)) {
-        let encrypted_password = encrypt_text(&password, &password);
-        if update {
-            // @todo Implement update
+pub(crate) fn set_password(update: bool, current_count: i32) {
+    let insert_password = |pw: &str| -> bool {
+        let encrypted_password = encrypt_text(pw, pw);
+        if add_key_value("app", "password", &encrypted_password) {
+            cr_println("Password set".to_string());
+            return true
         } else {
-            if add_key_value("app", "password", &encrypted_password) {
-                cr_println("Password set".to_string())
-            } else {
-                cr_println(format!("{}", "Could not set password."));
-                exit(Errors::SetPasswordErr as i32)
-            }
+            cr_println(format!("{}", "Could not set password."));
+            exit(Errors::SetPasswordErr as i32)
         }
+    };
+
+    if prompt_password(insert_password, false) {
         return
-    }
-    count += 1;
-    println!("Count: {}", count);
-    if count == 3 {
-        cr_println(format!("{}", "To many attempts to create a password."));
+    } else {
+        cr_println(format!("{}", "Invalid password."));
         exit(Errors::CreatePasswordErr as i32)
     }
-    set_password(update, count)
 }

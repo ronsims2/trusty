@@ -1,5 +1,6 @@
 use crate::utils::{check_password, validate_password};
 
+// compare_password will check against the db
 pub(crate) fn prompt_password<F>(fun: F, compare_password: bool) -> bool where F: Fn(&str) -> bool {
     let mut attempts = 0;
     while attempts < 2  {

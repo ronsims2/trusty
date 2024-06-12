@@ -14,7 +14,7 @@ use crate::cli::{Cli, edit_note, edit_title, insert_note_from_std_in, open_note,
 use crate::render::{print_app_summary, print_dump, print_note_summary, print_simple_note};
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db, set_password};
 use crate::sql::{delete_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, insert_note, list_note_titles};
-use crate::utils::{check_password, slice_text};
+use crate::utils::{check_password, encrypt_text, slice_text};
 
 fn main() {
     // check for a crusty home directory, if it doesn't exist show setup prompt
@@ -70,12 +70,13 @@ fn main() {
 
     // if there is a title and note param insert a proper note
     if title.is_some() && note.is_some() {
-        let mut title = title.unwrap();
-        if is_protected {
-            title = en
-        }
-        insert_note(, note.unwrap(), false);
-        return
+        // @todo I need to get the password and then use it to encrypt the title and body
+        // let mut title = title.unwrap();
+        // if is_protected {
+        //     title = encrypt_text(title);
+        // }
+        // insert_note(title, note.unwrap(), false);
+        // return
     }
 
     if find.is_some() {
