@@ -27,22 +27,18 @@ pub(crate) fn make_text_single_line(text: &str) -> String {
 }
 
 pub(crate) fn validate_password(password: &str) -> bool {
-    println!("The password is: {}", password.to_string());
     // password may not be blank, may be alphanumeric and at least 4 characters
     if password.trim().is_empty() {
-        println!("The password is empty");
         return false
     }
 
     let re = Regex::new(r"^[A-Za-z0-9]+$").unwrap();
 
     if !re.is_match(password) {
-        println!("The password does not match the pattern");
         return false
     }
 
     if password.len() < 3 {
-        println!("The password is too short");
         return false
     }
 

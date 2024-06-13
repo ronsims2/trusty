@@ -7,6 +7,7 @@ use uuid::Uuid;
 use crate::cli::read_from_std_in;
 use crate::errors::Errors;
 use crate::render::{cr_println, print_note_summary};
+use crate::security::prompt_password;
 use crate::setup::get_crusty_db_conn;
 use crate::utils::{encrypt_text, make_text_single_line};
 
@@ -56,8 +57,17 @@ pub(crate) struct KeyValuePair {
     pub value: String
 }
 
-pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
-    let formatted_title = make_text_single_line(title);
+pub(crate) fn add_note(title: &str, note: &str, protected: bool) {
+    println!("Protected flag: {}", protected);
+    if protected {
+        insert_encrypted_note(title, note);
+    } else {
+        let formatted_title = make_text_single_line(title);
+        insert_note(&formatted_title, &note, false)
+    }
+}
+
+pub(crate)  fn insert_note(title: &str, note: &str, protected: bool) {
     let conn = get_crusty_db_conn();
     // create the new note id
     let content_id = Uuid::new_v4().to_string();
@@ -72,7 +82,7 @@ pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
     }).unwrap();
 
     conn.execute(&note_insert, named_params! {
-        ":title": formatted_title,
+        ":title": title,
         ":protected": protected,
         ":content_id": content_id,
     }).unwrap();
@@ -81,13 +91,17 @@ pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
     conn.execute(last_inserted_sql, ()).unwrap();
 }
 
-pub(crate) fn encrypt_note(title: &str, note: &str) {
-    let insert_encrypted_note = | password: &str| -> bool {
-        let encrypted_title = encrypt_text(password, title);
+pub(crate) fn insert_encrypted_note(title: &str, note: &str) {
+    let encrypted_and_insert_note = | password: &str| -> bool {
+        let formatted_title = make_text_single_line(title);
+        let encrypted_title = encrypt_text(password, &formatted_title);
         let encrypt_note = encrypt_text(password, note);
+        insert_note(&encrypted_title, &encrypt_note, true);
 
-
+        return true
     };
+
+    prompt_password(encrypted_and_insert_note, true);
 }
 
 pub(crate) fn list_note_titles() {

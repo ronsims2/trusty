@@ -3,7 +3,7 @@ use std::process::exit;
 use clap::Parser;
 use crate::errors::Errors;
 use crate::render::cr_println;
-use crate::sql::{get_last_touched_note, get_note_by_id, insert_note, set_note_trash, update_note_by_content_id, update_note_by_note_id, update_title_by_content_id};
+use crate::sql::{get_last_touched_note, get_note_by_id, add_note, set_note_trash, update_note_by_content_id, update_note_by_note_id, update_title_by_content_id};
 use crate::utils::{make_text_single_line, slice_text};
 
 
@@ -67,7 +67,7 @@ pub(crate) fn insert_note_from_std_in(title: &str, protected: bool) -> bool {
         }
         Some(piped_input) => {
             if !piped_input.trim().is_empty() {
-                insert_note(title, &piped_input, protected);
+                add_note(title, &piped_input, protected);
                 true
             } else {
                 cr_println(format!("{}", "Input was either empty or flag was not specified, please fix your command."));
@@ -103,7 +103,7 @@ pub(crate) fn open_note(id: usize) {
     } else {
         let draft = edit::edit("").unwrap();
         let title = slice_text(0, 64, &draft);
-        insert_note(&title, &draft, false);
+        add_note(&title, &draft, false);
     }
 }
 

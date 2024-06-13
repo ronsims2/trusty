@@ -13,7 +13,7 @@ use clap::Parser;
 use crate::cli::{Cli, edit_note, edit_title, insert_note_from_std_in, open_note, read_from_std_in, restore_note, trash_note};
 use crate::render::{print_app_summary, print_dump, print_note_summary, print_simple_note};
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db, set_password};
-use crate::sql::{delete_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, insert_note, list_note_titles};
+use crate::sql::{delete_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, add_note, list_note_titles};
 use crate::utils::{check_password, encrypt_text, slice_text};
 
 fn main() {
@@ -50,7 +50,7 @@ fn main() {
     let all = args.all;
     let dump = args.dump;
     let summary = args.summary;
-    let protected = args.summary;
+    let protected = args.protect;
 
     let should_encrypt_note = protected.unwrap_or(false);
 
@@ -70,7 +70,7 @@ fn main() {
 
     // if there is a title and note param insert a proper note
     if title.is_some() && note.is_some() {
-        insert_note(title.unwrap(), note.unwrap(), should_encrypt_note);
+        add_note(title.unwrap(), note.unwrap(), should_encrypt_note);
         return
     }
 
@@ -91,7 +91,7 @@ fn main() {
         // @todo encrypt message here
         let note = quick_note.unwrap();
         let title = slice_text(0, 64, note);
-        insert_note(title.as_str(), note, should_encrypt_note);
+        add_note(title.as_str(), note, should_encrypt_note);
         return
     }
 
