@@ -52,7 +52,7 @@ fn main() {
     let summary = args.summary;
     let protected = args.summary;
 
-    let is_protected = protected.unwrap_or(false);
+    let should_encrypt_note = protected.unwrap_or(false);
 
     if summary.is_some() {
         let summary = get_summary();
@@ -62,7 +62,7 @@ fn main() {
 
     if input.is_some() {
         let title_val = title.unwrap_or("Untitled");
-        let result = insert_note_from_std_in(title_val);
+        let result = insert_note_from_std_in(title_val, should_encrypt_note);
         if result {
             return
         }
@@ -70,13 +70,8 @@ fn main() {
 
     // if there is a title and note param insert a proper note
     if title.is_some() && note.is_some() {
-        // @todo I need to get the password and then use it to encrypt the title and body
-        // let mut title = title.unwrap();
-        // if is_protected {
-        //     title = encrypt_text(title);
-        // }
-        // insert_note(title, note.unwrap(), false);
-        // return
+        insert_note(title.unwrap(), note.unwrap(), should_encrypt_note);
+        return
     }
 
     if find.is_some() {
@@ -96,12 +91,11 @@ fn main() {
         // @todo encrypt message here
         let note = quick_note.unwrap();
         let title = slice_text(0, 64, note);
-        insert_note(title.as_str(), note, false);
+        insert_note(title.as_str(), note, should_encrypt_note);
         return
     }
 
     if edit.is_some() {
-        // @todo encrypt message here
         if all.is_some() {
             edit_title(None);
         }
@@ -110,7 +104,6 @@ fn main() {
     }
 
     if open.is_some() {
-        // @todo encrypt message here
         let note_id = open.unwrap();
         if all.is_some() {
             edit_title(Some(note_id));
@@ -121,7 +114,6 @@ fn main() {
     }
 
     if delete.is_some() {
-        // @todo encrypt message here
         let note_id = delete.unwrap();
         delete_note(note_id, false);
         list_note_titles();
@@ -129,7 +121,6 @@ fn main() {
     }
 
     if force_delete.is_some() {
-        // @todo encrypt message here
         let note_id = force_delete.unwrap();
         delete_note(note_id, true);
         list_note_titles();
@@ -143,7 +134,6 @@ fn main() {
     }
 
     if trash.is_some() {
-        // @todo encrypt message here
         let note_id = trash.unwrap();
         trash_note(note_id);
         list_note_titles();
@@ -158,7 +148,6 @@ fn main() {
     }
 
     if dump.is_some() {
-        // @todo encrypt message here
         let notes = dump_notes();
         print_dump(notes);
         return

@@ -8,7 +8,7 @@ use crate::cli::read_from_std_in;
 use crate::errors::Errors;
 use crate::render::{cr_println, print_note_summary};
 use crate::setup::get_crusty_db_conn;
-use crate::utils::make_text_single_line;
+use crate::utils::{encrypt_text, make_text_single_line};
 
 #[derive(Debug)]
 pub(crate) struct NoteSummary {
@@ -59,7 +59,6 @@ pub(crate) struct KeyValuePair {
 pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
     let formatted_title = make_text_single_line(title);
     let conn = get_crusty_db_conn();
-    let protected_val = if protected {1} else {0};
     // create the new note id
     let content_id = Uuid::new_v4().to_string();
     let note_insert = "INSERT INTO notes (title, protected, created, updated, content_id) \
@@ -80,6 +79,15 @@ pub(crate) fn insert_note(title: &str, note: &str, protected: bool) {
 
     let last_inserted_sql = "UPDATE app SET value = (SELECT last_insert_rowid()) WHERE key = 'last_touched';";
     conn.execute(last_inserted_sql, ()).unwrap();
+}
+
+pub(crate) fn encrypt_note(title: &str, note: &str) {
+    let insert_encrypted_note = | password: &str| -> bool {
+        let encrypted_title = encrypt_text(password, title);
+        let encrypt_note = encrypt_text(password, note);
+
+
+    };
 }
 
 pub(crate) fn list_note_titles() {

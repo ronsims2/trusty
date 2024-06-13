@@ -60,14 +60,14 @@ pub(crate) fn read_from_std_in() -> Option<String> {
     }
 }
 
-pub(crate) fn insert_note_from_std_in(title: &str) -> bool {
+pub(crate) fn insert_note_from_std_in(title: &str, protected: bool) -> bool {
     let result = match read_from_std_in() {
         None => {
             false
         }
         Some(piped_input) => {
             if !piped_input.trim().is_empty() {
-                insert_note(title, &piped_input, false);
+                insert_note(title, &piped_input, protected);
                 true
             } else {
                 cr_println(format!("{}", "Input was either empty or flag was not specified, please fix your command."));
