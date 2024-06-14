@@ -25,34 +25,3 @@ pub(crate) fn make_text_single_line(text: &str) -> String {
 
     new_text.collect::<String>().trim().to_string()
 }
-
-pub(crate) fn validate_password(password: &str) -> bool {
-    // password may not be blank, may be alphanumeric and at least 4 characters
-    if password.trim().is_empty() {
-        return false
-    }
-
-    let re = Regex::new(r"^[A-Za-z0-9]+$").unwrap();
-
-    if !re.is_match(password) {
-        return false
-    }
-
-    if password.len() < 3 {
-        return false
-    }
-
-    true
-}
-
-pub(crate) fn encrypt_text(key: &str, text: &str) -> String {
-    let mc = new_magic_crypt!(key, 256);
-    mc.encrypt_str_to_base64(text)
-}
-
-pub(crate) fn check_password(password: &str) -> bool {
-    let saved_encrypted_password = get_value_from_attr_table("app", "password");
-    let encrypted_password = encrypt_text(password, password);
-
-    encrypted_password.eq(&saved_encrypted_password.value)
-}

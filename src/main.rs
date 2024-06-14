@@ -14,7 +14,8 @@ use crate::cli::{Cli, edit_note, edit_title, insert_note_from_std_in, open_note,
 use crate::render::{print_app_summary, print_dump, print_note_summary, print_simple_note};
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db, set_password};
 use crate::sql::{delete_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, add_note, list_note_titles};
-use crate::utils::{check_password, encrypt_text, slice_text};
+use crate::utils::{slice_text};
+use crate::security::{check_password, encrypt_text};
 
 fn main() {
     // check for a crusty home directory, if it doesn't exist show setup prompt

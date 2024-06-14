@@ -13,7 +13,7 @@ use crate::errors::Errors;
 use crate::render::cr_println;
 use crate::security::prompt_password;
 use crate::sql::add_key_value;
-use crate::utils::{check_password, encrypt_text, validate_password};
+use crate::security::{check_password, encrypt_text, validate_password};
 
 
 fn get_win_home_drive() -> String {

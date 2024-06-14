@@ -7,9 +7,9 @@ use uuid::Uuid;
 use crate::cli::read_from_std_in;
 use crate::errors::Errors;
 use crate::render::{cr_println, print_note_summary};
-use crate::security::prompt_password;
+use crate::security::{decrypt_note, prompt_password, encrypt_text};
 use crate::setup::get_crusty_db_conn;
-use crate::utils::{encrypt_text, make_text_single_line};
+use crate::utils::{make_text_single_line};
 
 #[derive(Debug)]
 pub(crate) struct NoteSummary {
@@ -123,15 +123,29 @@ pub(crate) fn list_note_titles() {
 }
 
 pub(crate) fn get_note_by_id(id: usize) -> SimpleNoteView {
-    let sql = "SELECT notes.title, content.body, notes.content_id FROM notes JOIN content on notes.content_id = content.content_id WHERE notes.note_id = :note_id;";
+    let sql = "SELECT notes.title, content.body, notes.protected, notes.content_id FROM notes JOIN content on notes.content_id = content.content_id WHERE notes.note_id = :note_id;";
     let conn = get_crusty_db_conn();
     let mut stmt = conn.prepare(sql).unwrap();
     let result = match stmt.query_row(named_params! {":note_id": id as u32}, |row| {
-        Ok(SimpleNoteView {
-            title: row.get(0)?,
-            body: row.get(1)?,
-            content_id: row.get(2)?
-        })
+        let is_protected = row.get(2).unwrap();
+
+        let title: String = row.get(0).unwrap();
+        let note: String = row.get(1).unwrap();
+        let unencrypted_note = decrypt_note(&title, &note);
+
+        return if is_protected {
+            Ok(SimpleNoteView {
+                title: unencrypted_note.title,
+                body: unencrypted_note.body,
+                content_id: row.get(3)?
+            })
+        } else {
+            Ok(SimpleNoteView {
+                title,
+                body: note,
+                content_id: row.get(3)?
+            })
+        }
     }) {
         Ok(res) => {
             update_last_touched(id.to_string().as_str());
