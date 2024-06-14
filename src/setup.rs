@@ -169,7 +169,7 @@ pub(crate) fn set_password(update: bool, current_count: i32) {
     };
 
 
-    cr_println("Set up a password so that you can encrypt things 🤐".to_string())
+    cr_println("Set up a password so that you can encrypt things 🤐".to_string());
     if prompt_for_password(insert_password, false, true) {
         return
     } else {
