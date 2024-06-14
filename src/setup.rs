@@ -11,7 +11,7 @@ use rusqlite::{Connection, params, Params};
 use uuid::Uuid;
 use crate::errors::Errors;
 use crate::render::cr_println;
-use crate::security::prompt_password;
+use crate::security::prompt_for_password;
 use crate::sql::add_key_value;
 use crate::security::{check_password, encrypt_text, validate_password};
 
@@ -168,7 +168,7 @@ pub(crate) fn set_password(update: bool, current_count: i32) {
         }
     };
 
-    if prompt_password(insert_password, false) {
+    if prompt_for_password(insert_password, false, true) {
         return
     } else {
         cr_println(format!("{}", "Invalid password."));
