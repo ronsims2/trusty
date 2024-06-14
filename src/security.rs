@@ -4,11 +4,11 @@ use crate::render::cr_println;
 use crate::sql::{get_value_from_attr_table, SimpleNoteView};
 
 // compare_password will check against the db
-pub(crate) fn prompt_for_password<F>(fun: F, compare_password_to_db: bool, check_passwords_match: bool) -> bool where F: FnOnce(&str) -> bool {
+pub(crate) fn prompt_for_password<F>(fun: F, compare_password_to_db: bool, confirm_password: bool) -> bool where F: FnOnce(&str) -> bool {
     let mut attempts = 0;
     while attempts < 2  {
         let password = rpassword::prompt_password("Enter password: ").unwrap();
-        let password2 = if check_passwords_match {
+        let password2 = if confirm_password {
             rpassword::prompt_password("Enter your password again: ").unwrap()
         } else {
             password.clone()
