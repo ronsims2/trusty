@@ -22,6 +22,7 @@ pub(crate) struct SimpleNoteView {
     pub(crate) title: String,
     pub(crate) body: String,
     pub(crate) content_id: String,
+    pub(crate) protected: bool
 }
 
 pub(crate) struct NoteView {
@@ -137,13 +138,15 @@ pub(crate) fn get_note_by_id(id: usize) -> SimpleNoteView {
             Ok(SimpleNoteView {
                 title: unencrypted_note.title,
                 body: unencrypted_note.body,
-                content_id: row.get(3)?
+                content_id: row.get(3)?,
+                protected: true
             })
         } else {
             Ok(SimpleNoteView {
                 title,
                 body: note,
-                content_id: row.get(3)?
+                content_id: row.get(3)?,
+                protected: false
             })
         }
     }) {
@@ -214,6 +217,7 @@ pub(crate) fn get_last_touched_note() -> SimpleNoteView {
     let conn = get_crusty_db_conn();
     let mut stmt = conn.prepare(sql).unwrap();
     let result = match stmt.query_row([], |row| {
+        // @todo PROTECTED: modify this to prompt if last touched is protected
         Ok(SimpleNoteView {
             content_id: row.get(0)?,
             title: row.get(1)?,

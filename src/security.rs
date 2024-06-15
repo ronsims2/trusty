@@ -42,6 +42,7 @@ pub(crate) fn decrypt_note(title: &str, note: &str) ->SimpleNoteView {
         title: unencrypted_title,
         body: unencrypted_note,
         content_id: "0".to_string(),
+        protected: true
     }
 }
 

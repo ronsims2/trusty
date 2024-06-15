@@ -94,16 +94,17 @@ pub(crate) fn edit_title(note_id: Option<usize>) {
     update_title_by_content_id(&note.content_id, &edited);
 }
 
-pub(crate) fn open_note(id: usize) {
+pub(crate) fn open_note(id: usize, protected: boolean) {
     if id > 0 {
         let note = get_note_by_id(id);
         let body = note.body.as_str();
         let edited = edit::edit(body).unwrap();
+        // @todo add code to re-encrypt note
         update_note_by_note_id(id, &edited);
     } else {
         let draft = edit::edit("").unwrap();
         let title = slice_text(0, 64, &draft);
-        add_note(&title, &draft, false);
+        add_note(&title, &draft, protected);
     }
 }
 

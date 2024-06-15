@@ -109,7 +109,7 @@ fn main() {
         if all.is_some() {
             edit_title(Some(note_id));
         }
-        open_note(note_id);
+        open_note(note_id, should_encrypt_note);
 
         return;
     }
