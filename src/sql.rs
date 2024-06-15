@@ -9,7 +9,7 @@ use crate::errors::Errors;
 use crate::render::{cr_println, print_note_summary};
 use crate::security::{decrypt_note, prompt_for_password, encrypt_text};
 use crate::setup::get_crusty_db_conn;
-use crate::utils::{make_text_single_line};
+use crate::utils::{make_text_single_line, slice_text};
 
 #[derive(Debug)]
 pub(crate) struct NoteSummary {
@@ -76,6 +76,8 @@ pub(crate)  fn insert_note(title: &str, note: &str, protected: bool) {
     VALUES (:title, :protected, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, :content_id);";
     let content_insert = "INSERT INTO content (content_id, body) VALUES (:content_id, :body);";
 
+    let truncated_title = slice_text(0, 128, title);
+
     // The integrity of these 2 inserts needs to be guaranteed.
     conn.execute(&content_insert, named_params! {
         ":content_id": content_id,
@@ -83,7 +85,7 @@ pub(crate)  fn insert_note(title: &str, note: &str, protected: bool) {
     }).unwrap();
 
     conn.execute(&note_insert, named_params! {
-        ":title": title,
+        ":title": truncated_title,
         ":protected": protected,
         ":content_id": content_id,
     }).unwrap();
@@ -132,9 +134,10 @@ pub(crate) fn get_note_by_id(id: usize) -> SimpleNoteView {
 
         let title: String = row.get(0).unwrap();
         let note: String = row.get(1).unwrap();
-        let unencrypted_note = decrypt_note(&title, &note);
 
         return if is_protected {
+            let unencrypted_note = decrypt_note(&title, &note);
+
             Ok(SimpleNoteView {
                 title: unencrypted_note.title,
                 body: unencrypted_note.body,
@@ -212,17 +215,33 @@ pub(crate) fn update_last_touched(note_id:&str){
 }
 
 pub(crate) fn get_last_touched_note() -> SimpleNoteView {
-    let sql = "SELECT notes.content_id, notes.title, content.body FROM notes JOIN content on notes.content_id = content.content_id \
+    let sql = "SELECT notes.content_id, notes.title, notes.protected, content.body FROM notes JOIN content on notes.content_id = content.content_id \
     WHERE notes.note_id = CAST((SELECT value FROM app WHERE key = 'last_touched') AS INTEGER); ";
     let conn = get_crusty_db_conn();
     let mut stmt = conn.prepare(sql).unwrap();
     let result = match stmt.query_row([], |row| {
-        // @todo PROTECTED: modify this to prompt if last touched is protected
-        Ok(SimpleNoteView {
-            content_id: row.get(0)?,
-            title: row.get(1)?,
-            body: row.get(2)?,
-        })
+        let is_protected: bool = row.get(2).unwrap();
+        let title: String = row.get(0).unwrap();
+        let note: String = row.get(1).unwrap();
+        let content_id = row.get(0).unwrap();
+
+        if is_protected {
+            let unencrypted_note = decrypt_note(&title, &note);
+
+            Ok(SimpleNoteView {
+                content_id,
+                title: unencrypted_note.title,
+                body: unencrypted_note.body,
+                protected: is_protected
+            })
+        } else {
+            Ok(SimpleNoteView {
+                content_id,
+                title: row.get(1)?,
+                body: row.get(3)?,
+                protected: is_protected
+            })
+        }
     }) {
         Ok(res) => {
             res
@@ -266,10 +285,11 @@ pub(crate) fn update_note_by_note_id(id: usize, text: &str) {
 pub(crate) fn update_title_by_content_id(id: &str, text: &str) {
     // @todo modify to handle encryption
     let title = make_text_single_line(&text);
+    let truncated_title = slice_text(0, 128, &title);
     let conn = get_crusty_db_conn();
     let sql = "UPDATE notes SET title = :title, updated = CURRENT_TIMESTAMP WHERE content_id = :content_id;";
     let stmt = conn.prepare(sql);
-    stmt.unwrap().execute(named_params! {":content_id": id, ":title": &title}).unwrap();
+    stmt.unwrap().execute(named_params! {":content_id": id, ":title": &truncated_title}).unwrap();
 }
 
 pub(crate) fn delete_note(id: usize, force: bool) {

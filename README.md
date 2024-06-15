@@ -124,3 +124,7 @@ Hard delete all notes in the trash.
 Untrash a note by ID.
 
 `crusty --restore 2`
+
+### Release Notes
+
+Version 0.11.0 updated the size of the title column to accommodate encrypted messages.

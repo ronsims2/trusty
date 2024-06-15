@@ -94,7 +94,7 @@ pub(crate) fn edit_title(note_id: Option<usize>) {
     update_title_by_content_id(&note.content_id, &edited);
 }
 
-pub(crate) fn open_note(id: usize, protected: boolean) {
+pub(crate) fn open_note(id: usize, protected: bool) {
     if id > 0 {
         let note = get_note_by_id(id);
         let body = note.body.as_str();

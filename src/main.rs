@@ -15,7 +15,7 @@ use crate::render::{print_app_summary, print_dump, print_note_summary, print_sim
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db, set_password};
 use crate::sql::{delete_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, add_note, list_note_titles};
 use crate::utils::{slice_text};
-use crate::security::{check_password, encrypt_text};
+use crate::security::{check_password, decrypt_note, encrypt_text};
 
 fn main() {
     // check for a crusty home directory, if it doesn't exist show setup prompt
@@ -78,12 +78,6 @@ fn main() {
 
     if find.is_some() {
         let note = get_note_by_id(find.unwrap());
-        print_simple_note(note);
-        return
-    }
-
-    if find_from.is_some() {
-        let note = get_note_from_menu_line();
         print_simple_note(note);
         return
     }
