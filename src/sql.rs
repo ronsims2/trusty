@@ -264,6 +264,7 @@ pub(crate) fn update_note_by_note_id(id: usize, text: &str) {
 }
 
 pub(crate) fn update_title_by_content_id(id: &str, text: &str) {
+    // @todo modify to handle encryption
     let title = make_text_single_line(&text);
     let conn = get_crusty_db_conn();
     let sql = "UPDATE notes SET title = :title, updated = CURRENT_TIMESTAMP WHERE content_id = :content_id;";

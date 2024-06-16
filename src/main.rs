@@ -70,6 +70,7 @@ fn main() {
     }
 
     // if there is a title and note param insert a proper note
+    // @todo this could replace the quick note command if we unwrap+or for the title
     if title.is_some() && note.is_some() {
         add_note(title.unwrap(), note.unwrap(), should_encrypt_note);
         return
@@ -89,9 +90,8 @@ fn main() {
 
     // add an untitled quick note, this needs to stay near the bottom
     if quick_note.is_some() && title.is_none() && note.is_none() {
-        // @todo encrypt message here
         let note = quick_note.unwrap();
-        let title = slice_text(0, 64, note);
+        let title = slice_text(0, 128, note);
         add_note(title.as_str(), note, should_encrypt_note);
         return
     }
