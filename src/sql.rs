@@ -275,6 +275,7 @@ pub(crate) fn update_note_by_content_id(id: &str, text: &str) {
 }
 
 pub(crate) fn update_note_by_note_id(id: usize, text: &str) {
+    // @todo this needs to support encryption
     let conn = get_crusty_db_conn();
     let sql = "UPDATE content SET body = :body WHERE content_id = (SELECT content_id FROM notes WHERE note_id = :note_id);";
     let stmt = conn.prepare(sql);

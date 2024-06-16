@@ -27,7 +27,7 @@ pub(crate) fn prompt_for_password<F>(fun: F, compare_password_to_db: bool, confi
     false
 }
 
-pub(crate) fn decrypt_note(title: &str, note: &str) ->SimpleNoteView {
+pub(crate) fn decrypt_note(title: &str, note: &str) -> SimpleNoteView {
     let mut unencrypted_title = "".to_string();
     let mut unencrypted_note = "".to_string();
     let handle_decrypt = | password: &str| -> bool {
@@ -41,6 +41,25 @@ pub(crate) fn decrypt_note(title: &str, note: &str) ->SimpleNoteView {
     return SimpleNoteView {
         title: unencrypted_title,
         body: unencrypted_note,
+        content_id: "0".to_string(),
+        protected: true
+    }
+}
+
+pub(crate) fn encrypt_note(title: &str, note: &str) -> SimpleNoteView {
+    let mut encrypted_title = "".to_string();
+    let mut encrypted_body = "".to_string();
+    let handle_encrypt = |password: &str| -> bool {
+        encrypted_title = encrypt_text(password, title);
+        encrypted_body = encrypt_text(password, note);
+        return true;
+    };
+
+    prompt_for_password(handle_encrypt, true, false);
+
+    return SimpleNoteView {
+        title: encrypted_title,
+        body: encrypted_body,
         content_id: "0".to_string(),
         protected: true
     }

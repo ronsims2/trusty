@@ -3,6 +3,7 @@ use std::process::exit;
 use clap::Parser;
 use crate::errors::Errors;
 use crate::render::cr_println;
+use crate::security::{decrypt_note, encrypt_note};
 use crate::sql::{get_last_touched_note, get_note_by_id, add_note, set_note_trash, update_note_by_content_id, update_note_by_note_id, update_title_by_content_id};
 use crate::utils::{make_text_single_line, slice_text};
 
@@ -89,9 +90,23 @@ pub(crate) fn edit_note() {
 pub(crate) fn edit_title(note_id: Option<usize>) {
     let id = note_id.unwrap_or(0);
     let note = if id > 0  {get_note_by_id(id)} else {get_last_touched_note()};
-    let title = note.title.as_str();
-    let edited = edit::edit(title).unwrap();
-    update_title_by_content_id(&note.content_id, &edited);
+    let title = match note.protected {
+        true => {
+            let decrypted_note = decrypt_note(&note.title, &note.body);
+            decrypted_note.title.to_string()
+        }
+        false => {note.title.to_string()}
+    };
+
+    let edited_title = match note.protected {
+        true => {
+            let encrypted_note = encrypt_note(&title, "");
+            encrypted_note.title
+        }
+        false => {edit::edit(title).unwrap()}
+    };
+
+    update_title_by_content_id(&note.content_id, &edited_title);
 }
 
 pub(crate) fn open_note(id: usize, protected: bool) {
