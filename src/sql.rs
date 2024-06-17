@@ -59,7 +59,6 @@ pub(crate) struct KeyValuePair {
 }
 
 pub(crate) fn add_note(title: &str, note: &str, protected: bool) {
-    println!("Protected flag: {}", protected);
     if protected {
         insert_encrypted_note(title, note);
     } else {

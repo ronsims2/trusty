@@ -4,7 +4,7 @@ use crate::render::cr_println;
 use crate::sql::{get_value_from_attr_table, SimpleNoteView};
 
 // compare_password will check against the db
-pub(crate) fn prompt_for_password<F>(fun: F, compare_password_to_db: bool, confirm_password: bool) -> bool where F: FnOnce(&str) -> bool {
+pub(crate) fn prompt_for_password<F>(mut fun: F, compare_password_to_db: bool, confirm_password: bool) -> bool where F: FnMut(&str) -> bool {
     let mut attempts = 0;
     while attempts < 2  {
         let password = rpassword::prompt_password("Enter password: ").unwrap();
@@ -15,25 +15,36 @@ pub(crate) fn prompt_for_password<F>(fun: F, compare_password_to_db: bool, confi
         };
 
         if password.eq(&password2) && validate_password(&password) {
-            return if compare_password_to_db && check_password(&password) {
-                fun(&password)
+            if compare_password_to_db  {
+                if check_password(&password) {
+                    if fun(&password) {
+                        return true
+                    }
+                }
             } else {
-                fun(&password)
+                if fun(&password) {
+                    return true
+                }
             }
         }
+
         cr_println("Password incorrect, try again.".to_string());
         attempts += 1;
     }
+
+    cr_println("Password incorrect.".to_string());
     false
 }
 
 pub(crate) fn decrypt_note(title: &str, note: &str) -> SimpleNoteView {
     let mut unencrypted_title = "".to_string();
     let mut unencrypted_note = "".to_string();
+
     let handle_decrypt = | password: &str| -> bool {
         unencrypted_title = decrypt_text(password, title);
         unencrypted_note = decrypt_text(password, note);
-        return true;
+
+        return true
     };
 
     prompt_for_password(handle_decrypt, true, false);
@@ -49,10 +60,12 @@ pub(crate) fn decrypt_note(title: &str, note: &str) -> SimpleNoteView {
 pub(crate) fn encrypt_note(title: &str, note: &str) -> SimpleNoteView {
     let mut encrypted_title = "".to_string();
     let mut encrypted_body = "".to_string();
+
     let handle_encrypt = |password: &str| -> bool {
         encrypted_title = encrypt_text(password, title);
         encrypted_body = encrypt_text(password, note);
-        return true;
+
+        return true
     };
 
     prompt_for_password(handle_encrypt, true, false);
@@ -97,6 +110,5 @@ pub(crate) fn decrypt_text(key: &str, text: &str) -> String {
 pub(crate) fn check_password(password: &str) -> bool {
     let saved_encrypted_password = get_value_from_attr_table("app", "password");
     let encrypted_password = encrypt_text(password, password);
-
     encrypted_password.eq(&saved_encrypted_password.value)
 }
