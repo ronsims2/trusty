@@ -3,7 +3,11 @@ use regex::Regex;
 use crate::render::cr_println;
 use crate::sql::{get_value_from_attr_table, SimpleNoteView};
 
-// compare_password will check against the db
+/**
+* @compare_password - will compare what the user typed against the password saved in the database
+* @confirm_password - will ask for the password 2x to make sure you typed the same one
+* @fun - is passed the password and should NEVER be used outside the closure!!!!
+*/
 pub(crate) fn prompt_for_password<F>(mut fun: F, compare_password_to_db: bool, confirm_password: bool) -> bool where F: FnMut(&str) -> bool {
     let mut attempts = 0;
     while attempts < 2  {
