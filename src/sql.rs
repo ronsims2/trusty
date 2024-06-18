@@ -516,11 +516,39 @@ pub(crate) fn add_key_value(table: &str, key: &str, value: &str) -> bool {
             get_key_val_insert_sql(table)
         }
         _ => {
-            cr_println(format!("{}", "Could not create key val sql."));
+            cr_println(format!("{}", "Could not create key val."));
             exit(Errors::KeyValInsertErr as i32)
         }
     };
 
+    let stmt = conn.prepare(&sql);
+    let code = stmt.unwrap().execute(named_params! {
+        ":key": key,
+        ":value" : value}).unwrap_or(0);
+
+    code > 0
+}
+
+// @todo refactor to reuse/simplify key_val CRUD func logic
+pub(crate) fn update_key_value(table: &str, key: &str, value: &str) -> bool {
+    let conn = get_crusty_db_conn();
+
+    let sql = match table.to_lowercase().as_str() {
+        // these match tables created during setup
+        // @todo these matches are probably over kill since this is trusted code being concatenated
+        "app" => {
+            get_key_val_update_sql(table)
+        },
+        "config" => {
+            get_key_val_update_sql(table)
+        }
+        _ => {
+            cr_println(format!("{}", "Could not update key val."));
+            exit(Errors::KeyValUpdateErr as i32)
+        }
+    };
+
+    // @todo this could be refactor into its own function
     let stmt = conn.prepare(&sql);
     let code = stmt.unwrap().execute(named_params! {
         ":key": key,

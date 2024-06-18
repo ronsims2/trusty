@@ -1,6 +1,7 @@
 use magic_crypt::{MagicCryptTrait, new_magic_crypt};
 use regex::Regex;
 use crate::render::cr_println;
+use crate::setup::set_password;
 use crate::sql::{get_value_from_attr_table, SimpleNoteView};
 
 /**
@@ -115,4 +116,12 @@ pub(crate) fn check_password(password: &str) -> bool {
     let saved_encrypted_password = get_value_from_attr_table("app", "password");
     let encrypted_password = encrypt_text(password, password);
     encrypted_password.eq(&saved_encrypted_password.value)
+}
+
+pub(crate) fn recovery_reset_password(recovery_code: &str) {
+    let saved_code = get_value_from_attr_table("app", "recovery_code");
+
+    if saved_code.value.eq(recovery_code) {
+        set_password(true)
+    }
 }

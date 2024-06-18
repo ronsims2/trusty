@@ -12,7 +12,7 @@ use uuid::Uuid;
 use crate::errors::Errors;
 use crate::render::cr_println;
 use crate::security::prompt_for_password;
-use crate::sql::add_key_value;
+use crate::sql::{add_key_value, update_key_value};
 use crate::security::{check_password, encrypt_text, validate_password};
 
 
@@ -156,24 +156,59 @@ pub(crate) fn init_crusty_db() {
     }
 }
 
-pub(crate) fn set_password(update: bool, current_count: i32) {
-    let insert_password = |pw: &str| -> bool {
-        let encrypted_password = encrypt_text(pw, pw);
-        if add_key_value("app", "password", &encrypted_password) {
-            cr_println("Password set".to_string());
-            return true
+pub(crate) fn set_password(update: bool) {
+    // @todo refactor to make DRY
+    if update {
+        cr_println("Change your password".to_string());
+        let update_password = |pw: &str| -> bool {
+            let encrypted_password = encrypt_text(pw, pw);
+            let recovery_code = Uuid::new_v4().to_string();
+            let encrypted_recovery_code = encrypt_text(&recovery_code, &recovery_code);
+
+            if update_key_value("app", "password", &encrypted_password) &&
+                update_key_value("app", "recovery_code", &encrypted_recovery_code) {
+                cr_println("Password set".to_string());
+                cr_println(format!("🛟 Recovery code generated: {}", recovery_code));
+                cr_println("Save your recovery code and use it to change your password if you forget it...again.".to_string());
+
+                return true
+            } else {
+                cr_println(format!("{}", "Could not set password."));
+                exit(Errors::SetPasswordErr as i32)
+            }
+        };
+
+        if prompt_for_password(update_password, false, true) {
+            return
         } else {
-            cr_println(format!("{}", "Could not set password."));
-            exit(Errors::SetPasswordErr as i32)
+            cr_println(format!("{}", "Invalid password."));
+            exit(Errors::CreatePasswordErr as i32)
         }
-    };
-
-
-    cr_println("Set up a password so that you can encrypt things 🤐".to_string());
-    if prompt_for_password(insert_password, false, true) {
-        return
     } else {
-        cr_println(format!("{}", "Invalid password."));
-        exit(Errors::CreatePasswordErr as i32)
+        let insert_password = |pw: &str| -> bool {
+            let encrypted_password = encrypt_text(pw, pw);
+            let recovery_code = Uuid::new_v4().to_string();
+            let encrypted_recovery_code = encrypt_text(&recovery_code, &recovery_code);
+
+            if add_key_value("app", "password", &encrypted_password) &&
+                add_key_value("app", "recovery_code", &encrypted_recovery_code) {
+                cr_println("Password set".to_string());
+                cr_println(format!("🛟 Recovery code generated: {}", recovery_code));
+                cr_println("Save your recovery code and use it to change your password if you forget it.".to_string());
+
+                return true
+            } else {
+                cr_println(format!("{}", "Could not set password."));
+                exit(Errors::SetPasswordErr as i32)
+            }
+        };
+
+        cr_println("Set up a password so that you can encrypt things 🤐".to_string());
+        if prompt_for_password(insert_password, false, true) {
+            return
+        } else {
+            cr_println(format!("{}", "Invalid password."));
+            exit(Errors::CreatePasswordErr as i32)
+        }
     }
 }
