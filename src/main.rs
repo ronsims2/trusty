@@ -15,7 +15,7 @@ use crate::render::{print_app_summary, print_dump, print_note_summary, print_sim
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db, set_password};
 use crate::sql::{delete_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, add_note, list_note_titles};
 use crate::utils::{slice_text};
-use crate::security::{check_password, decrypt_note, encrypt_text};
+use crate::security::{check_password, decrypt_note, encrypt_text, recovery_reset_password};
 
 fn main() {
     // check for a crusty home directory, if it doesn't exist show setup prompt
@@ -52,8 +52,17 @@ fn main() {
     let dump = args.dump;
     let summary = args.summary;
     let protected = args.protect;
+    let recover = args.recover;
 
     let should_encrypt_note = protected.unwrap_or(false);
+
+    // reset password flow
+    if recover.is_some() {
+        let recovery_code = recover.unwrap();
+        recovery_reset_password(&recovery_code);
+
+        return
+    }
 
     if summary.is_some() {
         let summary = get_summary();

@@ -468,7 +468,7 @@ fn get_key_val_select_sql(table: &str) -> String {
 }
 
 fn get_key_val_update_sql(table: &str) -> String {
-    format!("UPDATE {} SET value = :value WHERE ", table)
+    format!("UPDATE {} SET value = :value WHERE key = :key;", table)
 }
 
 pub(crate) fn get_value_from_attr_table(table: &str, key: &str) -> KeyValuePair {
@@ -547,6 +547,8 @@ pub(crate) fn update_key_value(table: &str, key: &str, value: &str) -> bool {
             exit(Errors::KeyValUpdateErr as i32)
         }
     };
+
+    println!("SQL: {}", sql);
 
     // @todo this could be refactor into its own function
     let stmt = conn.prepare(&sql);

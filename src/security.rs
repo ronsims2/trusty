@@ -120,8 +120,10 @@ pub(crate) fn check_password(password: &str) -> bool {
 
 pub(crate) fn recovery_reset_password(recovery_code: &str) {
     let saved_code = get_value_from_attr_table("app", "recovery_code");
-
-    if saved_code.value.eq(recovery_code) {
-        set_password(true)
+    let encrypted_code = encrypt_text(recovery_code, recovery_code);
+    if saved_code.value.eq(&encrypted_code) {
+         set_password(true)
+    } else {
+        cr_println("Invalid recovery key provided.".to_string());
     }
 }
