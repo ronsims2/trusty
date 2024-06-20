@@ -50,7 +50,9 @@ pub(crate) struct Cli {
     #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Specify this flag to protect a note.")]
     pub protect: Option<bool>,
     #[arg(long, help = "Use this flag to reset your password with a recovery code.")]
-    pub recover: Option<String>
+    pub recover: Option<String>,
+    #[arg(short, long, help = "Decrypt a note and save it as plain text.")]
+    pub unprotect: Option<usize>
 }
 
 pub(crate) fn read_from_std_in() -> Option<String> {

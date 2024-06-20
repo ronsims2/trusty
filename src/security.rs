@@ -1,8 +1,9 @@
+use std::process::exit;
 use magic_crypt::{MagicCryptTrait, new_magic_crypt};
 use regex::Regex;
 use crate::render::cr_println;
 use crate::setup::set_password;
-use crate::sql::{get_value_from_attr_table, SimpleNoteView};
+use crate::sql::{get_note_by_id, get_value_from_attr_table, SimpleNoteView, update_note_by_note_id, update_title_by_content_id};
 
 /**
 * @compare_password - will compare what the user typed against the password saved in the database
@@ -125,5 +126,19 @@ pub(crate) fn recovery_reset_password(recovery_code: &str) {
          set_password(true)
     } else {
         cr_println("Invalid recovery key provided.".to_string());
+    }
+}
+
+
+pub(crate) fn unprotect_note(note_id: usize) {
+    let note = get_note_by_id(note_id);
+
+    if note.protected {
+        let decrypted_note = decrypt_note(&note.title, &note.body);
+        update_title_by_content_id(&decrypted_note.content_id, &decrypted_note.title);
+        update_note_by_note_id(note_id, &decrypted_note.body);
+    } else {
+        cr_println(format!("Note: {} is note encrypted.", note_id));
+        exit(0);
     }
 }

@@ -559,3 +559,7 @@ pub(crate) fn update_key_value(table: &str, key: &str, value: &str) -> bool {
 
     code > 0
 }
+
+pub(crate) fn update_protected_flag(is_protected: bool) {
+    "UPDATE"
+}
