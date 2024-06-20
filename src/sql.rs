@@ -107,14 +107,15 @@ pub(crate) fn insert_encrypted_note(title: &str, note: &str) {
 }
 
 pub(crate) fn list_note_titles() {
-    // @todo encrypt message here, add param to conditionally do
-    let sql = "SELECT note_id, title, updated FROM notes WHERE protected = FALSE AND TRASHED IS FALSE ORDER BY updated;";
+    let sql = "SELECT note_id, title, updated, protected FROM notes WHERE TRASHED IS FALSE ORDER BY updated;";
     let conn = get_crusty_db_conn();
     let mut stmt = conn.prepare(sql).unwrap();
     let results = stmt.query_map([], |row| {
+        let is_protected: bool = row.get(3).unwrap();
+        let title: String = if is_protected { "ENCRYPTED".to_string() } else {row.get(1).unwrap_or("NULL".to_string())};
         Ok(NoteSummary {
             id: row.get(0)?,
-            title: row.get(1)?,
+            title,
             updated: row.get(2)?,
         })
     }).unwrap();
