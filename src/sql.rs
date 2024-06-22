@@ -560,6 +560,14 @@ pub(crate) fn update_key_value(table: &str, key: &str, value: &str) -> bool {
     code > 0
 }
 
-pub(crate) fn update_protected_flag(is_protected: bool) {
-    "UPDATE"
+pub(crate) fn update_protected_flag(note_id: usize, protected: bool) -> bool {
+    let conn = get_crusty_db_conn();
+   let sql = "UPDATE notes set protected = :protected WHERE note_id = :note_id;";
+
+    let code = conn.execute(&sql, named_params! {
+        ":note_id": note_id,
+        ":protected": protected
+    }).unwrap_or(0);
+
+    code > 0
 }
