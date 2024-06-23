@@ -6,7 +6,7 @@ use rusqlite::{Connection, MappedRows, named_params, Row};
 use uuid::Uuid;
 use crate::cli::read_from_std_in;
 use crate::errors::Errors;
-use crate::render::{cr_println, print_note_summary};
+use crate::render::{cr_println, print_note_summary, print_simple_note};
 use crate::security::{decrypt_note, prompt_for_password, encrypt_text};
 use crate::setup::get_crusty_db_conn;
 use crate::utils::{make_text_single_line, slice_text};
@@ -63,7 +63,8 @@ pub(crate) fn add_note(title: &str, note: &str, protected: bool) {
         insert_encrypted_note(title, note);
     } else {
         let formatted_title = make_text_single_line(title);
-        insert_note(&formatted_title, &note, false)
+        let truncated_title = slice_text(0, 128, &formatted_title);
+        insert_note(&truncated_title, &note, false)
     }
 }
 
@@ -75,8 +76,6 @@ pub(crate)  fn insert_note(title: &str, note: &str, protected: bool) {
     VALUES (:title, :protected, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, :content_id);";
     let content_insert = "INSERT INTO content (content_id, body) VALUES (:content_id, :body);";
 
-    let truncated_title = slice_text(0, 128, title);
-
     // The integrity of these 2 inserts needs to be guaranteed.
     conn.execute(&content_insert, named_params! {
         ":content_id": content_id,
@@ -84,7 +83,7 @@ pub(crate)  fn insert_note(title: &str, note: &str, protected: bool) {
     }).unwrap();
 
     conn.execute(&note_insert, named_params! {
-        ":title": truncated_title,
+        ":title": title,
         ":protected": protected,
         ":content_id": content_id,
     }).unwrap();
