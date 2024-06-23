@@ -134,12 +134,11 @@ pub(crate) fn unprotect_note(note_id: usize) {
     let note = get_note_by_id(note_id);
 
     if note.protected {
-        let decrypted_note = decrypt_note(&note.title, &note.body);
-        update_title_by_content_id(&decrypted_note.content_id, &decrypted_note.title);
-        update_note_by_note_id(note_id, &decrypted_note.body);
+        update_title_by_content_id(&note.content_id, &note.title);
+        update_note_by_note_id(note_id, &note.body);
         update_protected_flag(note_id, false);
     } else {
-        cr_println(format!("Note: {} is note encrypted.", note_id));
+        cr_println(format!("Note: {} is not encrypted.", note_id));
         exit(0);
     }
 }
