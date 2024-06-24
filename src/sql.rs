@@ -220,17 +220,17 @@ pub(crate) fn get_last_touched_note() -> SimpleNoteView {
     let mut stmt = conn.prepare(sql).unwrap();
     let result = match stmt.query_row([], |row| {
         let is_protected: bool = row.get(2).unwrap();
-        let title: String = row.get(0).unwrap();
-        let note: String = row.get(1).unwrap();
+        let title: String = row.get(1).unwrap();
+        let body: String = row.get(3).unwrap();
         let content_id = row.get(0).unwrap();
 
         if is_protected {
-            let unencrypted_note = decrypt_note(&title, &note);
+            let decrypted_note = decrypt_note(&title, &body);
 
             Ok(SimpleNoteView {
                 content_id,
-                title: unencrypted_note.title,
-                body: unencrypted_note.body,
+                title: decrypted_note.title,
+                body: decrypted_note.body,
                 protected: is_protected
             })
         } else {
@@ -274,7 +274,6 @@ pub(crate) fn update_note_by_content_id(id: &str, text: &str) {
 }
 
 pub(crate) fn update_note_by_note_id(id: usize, text: &str) {
-    // @todo this needs to support encryption
     let conn = get_crusty_db_conn();
     let sql = "UPDATE content SET body = :body WHERE content_id = (SELECT content_id FROM notes WHERE note_id = :note_id);";
     let stmt = conn.prepare(sql);
@@ -283,13 +282,11 @@ pub(crate) fn update_note_by_note_id(id: usize, text: &str) {
 }
 
 pub(crate) fn update_title_by_content_id(id: &str, text: &str) {
-    // @todo modify to handle encryption
     let title = make_text_single_line(&text);
-    let truncated_title = slice_text(0, 128, &title);
     let conn = get_crusty_db_conn();
     let sql = "UPDATE notes SET title = :title, updated = CURRENT_TIMESTAMP WHERE content_id = :content_id;";
     let stmt = conn.prepare(sql);
-    stmt.unwrap().execute(named_params! {":content_id": id, ":title": &truncated_title}).unwrap();
+    stmt.unwrap().execute(named_params! {":content_id": id, ":title": &title}).unwrap();
 }
 
 pub(crate) fn delete_note(id: usize, force: bool) {

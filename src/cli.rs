@@ -88,7 +88,15 @@ pub(crate) fn edit_note() {
     let note = get_last_touched_note();
     let body = note.body.as_str();
     let edited = edit::edit(body).unwrap();
-    update_note_by_content_id(&note.content_id, &edited);
+
+    let new_body = match note.protected {
+        true => {
+            let encrypted_note = encrypt_note("", &edited);
+            encrypted_note.body
+        }
+        false => {edited}
+    };
+    update_note_by_content_id(&note.content_id, &new_body);
 }
 
 pub(crate) fn edit_title(note_id: Option<usize>) {
@@ -116,11 +124,10 @@ pub(crate) fn open_note(id: usize, protected: bool) {
         let note = get_note_by_id(id);
         let body = note.body.as_str();
         let edited = edit::edit(body).unwrap();
-        // @todo add code to re-encrypt note
         update_note_by_note_id(id, &edited);
     } else {
         let draft = edit::edit("").unwrap();
-        let title = slice_text(0, 64, &draft);
+        let title = slice_text(0, 128, &draft);
         add_note(&title, &draft, protected);
     }
 }
