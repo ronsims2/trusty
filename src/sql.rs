@@ -299,7 +299,7 @@ pub(crate) fn delete_note(id: usize, force: bool) {
             "DELETE FROM notes WHERE note_id = :note_id;"
         }
         false => {
-            "DELETE FROM notes WHERE note_id = :note_id AND protect is FALSE;"
+            "DELETE FROM notes WHERE note_id = :note_id AND protected is FALSE;"
         }
     };
     let stmt = conn.prepare(sql);

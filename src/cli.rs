@@ -94,23 +94,21 @@ pub(crate) fn edit_note() {
 pub(crate) fn edit_title(note_id: Option<usize>) {
     let id = note_id.unwrap_or(0);
     let note = if id > 0  {get_note_by_id(id)} else {get_last_touched_note()};
-    let title = match note.protected {
-        true => {
-            let decrypted_note = decrypt_note(&note.title, &note.body);
-            decrypted_note.title.to_string()
-        }
-        false => {note.title.to_string()}
-    };
+    let title = note.title.to_string();
 
-    let edited_title = match note.protected {
+    let edited_title = edit::edit(title).unwrap();
+
+
+
+    let new_title = match note.protected {
         true => {
-            let encrypted_note = encrypt_note(&title, "");
+            let encrypted_note = encrypt_note(&edited_title, "");
             encrypted_note.title
         }
-        false => {edit::edit(title).unwrap()}
+        false => {edited_title}
     };
 
-    update_title_by_content_id(&note.content_id, &edited_title);
+    update_title_by_content_id(&note.content_id, &new_title);
 }
 
 pub(crate) fn open_note(id: usize, protected: bool) {
