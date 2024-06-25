@@ -2,14 +2,15 @@ use std::fmt::format;
 use std::io;
 use std::io::Write;
 use crate::sql::{NoteSummary, NoteView, SimpleNoteView, SummaryStats};
-use crate::utils::slice_text;
+use crate::utils::{slice_text, truncate_rich_text};
 
 pub(crate) fn print_note_summary(note: NoteSummary) {
     // @todo refactor to use cr_print
     let stdout = io::stdout();
     let mut handle = stdout.lock();
-    let title = slice_text(0,45, &note.title);
-    let text = format!("{:width$} | {:title_width$} | {}", note.id, title, note.updated, width = 9, title_width = 45);
+    // let title = slice_text(0,45, &note.title);
+    let title = truncate_rich_text(&note.title, 45);
+    let text = format!("{:width$} | {} | {}", note.id, note.updated, title, width = 9);
     writeln!(&mut handle, "{}", text).unwrap();
     writeln!(&mut handle, "{}+{}+{}", "-".repeat(10), "-".repeat(47), "-".repeat(21)).unwrap();
 }
