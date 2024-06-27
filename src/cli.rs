@@ -139,3 +139,11 @@ pub(crate) fn trash_note(id: usize) {
 pub(crate) fn restore_note(id: usize) {
     set_note_trash(id, false);
 }
+
+pub(crate) fn delete_note(note_id: usize, force: bool) {
+    if crate::sql::delete_note(note_id, force) {
+        cr_println(format!("Note: {} deleted.", note_id))
+    } else {
+        cr_println(format!("Could not delete noted: {}, it may be protected or already removed.", note_id));
+    }
+}

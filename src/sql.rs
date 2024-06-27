@@ -289,7 +289,7 @@ pub(crate) fn update_title_by_content_id(id: &str, text: &str) {
     stmt.unwrap().execute(named_params! {":content_id": id, ":title": &title}).unwrap();
 }
 
-pub(crate) fn delete_note(id: usize, force: bool) {
+pub(crate) fn delete_note(id: usize, force: bool) -> bool {
     let conn = get_crusty_db_conn();
     let sql = match force {
         true => {
@@ -300,7 +300,9 @@ pub(crate) fn delete_note(id: usize, force: bool) {
         }
     };
     let stmt = conn.prepare(sql);
-    stmt.unwrap().execute(named_params! {":note_id": id}).unwrap();
+    let result = stmt.unwrap().execute(named_params! {":note_id": id}).unwrap();
+
+    result > 0
 }
 
 pub(crate) fn empty_trash() {

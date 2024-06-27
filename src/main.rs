@@ -10,10 +10,10 @@ use std::env;
 use std::fmt::Arguments;
 use std::path::Path;
 use clap::Parser;
-use crate::cli::{Cli, edit_note, edit_title, insert_note_from_std_in, open_note, read_from_std_in, restore_note, trash_note};
+use crate::cli::{Cli, delete_note, edit_note, edit_title, insert_note_from_std_in, open_note, read_from_std_in, restore_note, trash_note};
 use crate::render::{cr_println, print_app_summary, print_dump, print_note_summary, print_simple_note};
 use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db, set_password};
-use crate::sql::{delete_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, add_note, list_note_titles};
+use crate::sql::{dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, add_note, list_note_titles};
 use crate::utils::{slice_text};
 use crate::security::{check_password, decrypt_note, encrypt_text, recovery_reset_password, unprotect_note};
 
@@ -134,14 +134,13 @@ fn main() {
     if delete.is_some() {
         let note_id = delete.unwrap();
         delete_note(note_id, false);
-        list_note_titles();
+
         return
     }
 
     if force_delete.is_some() {
         let note_id = force_delete.unwrap();
         delete_note(note_id, true);
-        list_note_titles();
         return
     }
 
