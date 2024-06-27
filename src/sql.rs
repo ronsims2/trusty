@@ -313,7 +313,7 @@ pub(crate) fn set_note_trash(id: usize, trash_state: bool) {
     let conn = get_crusty_db_conn();
     let sql = "UPDATE notes SET trashed = :trashed WHERE note_id = :note_id;";
     let stmt = conn.prepare(sql);
-    stmt.unwrap().execute(named_params! {":note_id": id}).unwrap();
+    stmt.unwrap().execute(named_params! {":note_id": id, ":trashed": trash_state}).unwrap();
 }
 
 pub(crate) fn dump_notes() -> Vec<NoteView> {
