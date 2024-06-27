@@ -57,6 +57,12 @@ fn main() {
 
     let should_encrypt_note = protected.unwrap_or(false);
 
+    if find_from.is_some() {
+        let note = get_note_from_menu_line();
+        print_simple_note(note);
+        return
+    }
+
     // reset password flow
     if recover.is_some() {
         let recovery_code = recover.unwrap();
