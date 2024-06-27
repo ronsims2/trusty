@@ -12,7 +12,7 @@ pub(crate) fn print_note_summary(note: NoteSummary) {
     let title = truncate_rich_text(&note.title, 45);
     let text = format!("{:width$} | {} | {}", note.id, note.updated, title, width = 9);
     writeln!(&mut handle, "{}", text).unwrap();
-    writeln!(&mut handle, "{}+{}+{}", "-".repeat(10), "-".repeat(47), "-".repeat(21)).unwrap();
+    writeln!(&mut handle, "{}+{}+{}", "-".repeat(10), "-".repeat(21), "-".repeat(47)).unwrap();
 }
 
 pub(crate) fn cr_println(text: String) {
