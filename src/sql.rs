@@ -112,7 +112,7 @@ pub(crate) fn list_note_titles() {
     let mut stmt = conn.prepare(sql).unwrap();
     let results = stmt.query_map([], |row| {
         let is_protected: bool = row.get(3).unwrap();
-        let title: String = if is_protected { "ENCRYPTED".to_string() } else {row.get(1).unwrap_or("NULL".to_string())};
+        let title: String = if is_protected { "🔒 ENCRYPTED".to_string() } else {row.get(1).unwrap_or("NULL".to_string())};
         Ok(NoteSummary {
             id: row.get(0)?,
             title,
@@ -547,8 +547,6 @@ pub(crate) fn update_key_value(table: &str, key: &str, value: &str) -> bool {
             exit(Errors::KeyValUpdateErr as i32)
         }
     };
-
-    println!("SQL: {}", sql);
 
     // @todo this could be refactor into its own function
     let stmt = conn.prepare(&sql);

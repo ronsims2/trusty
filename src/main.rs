@@ -24,7 +24,7 @@ fn main() {
         None => {
             create_crusty_dir();
             init_crusty_db();
-            set_password(false);
+            set_password(false, None);
             get_crusty_db_path()
         }
         Some(conf_path) => {

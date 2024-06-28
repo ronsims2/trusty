@@ -159,12 +159,13 @@ pub(crate) fn init_crusty_db() {
 pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
     if update {
         cr_println("Change your password".to_string());
+        let rrc = &raw_recovery_code.unwrap().to_string();
         let update_password = |pw: &str| -> bool {
             let encrypted_password = encrypt_text(pw, pw);
             let recovery_code = Uuid::new_v4().to_string();
             let encrypted_recovery_code = encrypt_text(&recovery_code, &recovery_code);
             let old_encrypted_boss_key = get_value_from_attr_table("app", "recovery_boss_key");
-            let old_recovery_key = raw_recovery_code.unwrap();
+            let old_recovery_key = rrc;
             let old_decrypted_boss_key = decrypt_text(&old_recovery_key, &old_encrypted_boss_key.value);
             let new_boss_key = encrypt_text(pw, &old_decrypted_boss_key);
             let new_recovery_boss_key = encrypt_text(&recovery_code, &old_decrypted_boss_key);
