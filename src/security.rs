@@ -47,8 +47,9 @@ pub(crate) fn decrypt_note(title: &str, note: &str) -> SimpleNoteView {
     let mut unencrypted_note = "".to_string();
 
     let handle_decrypt = | password: &str| -> bool {
-        unencrypted_title = decrypt_text(password, title);
-        unencrypted_note = decrypt_text(password, note);
+        let decrypted_boss_key = get_boss_key(password);
+        unencrypted_title = decrypt_text(&decrypted_boss_key, title);
+        unencrypted_note = decrypt_text(&decrypted_boss_key, note);
 
         return true
     };
@@ -68,8 +69,9 @@ pub(crate) fn encrypt_note(title: &str, note: &str) -> SimpleNoteView {
     let mut encrypted_body = "".to_string();
 
     let handle_encrypt = |password: &str| -> bool {
-        encrypted_title = encrypt_text(password, title);
-        encrypted_body = encrypt_text(password, note);
+        let decrypted_boss_key = get_boss_key(password);
+        encrypted_title = encrypt_text(&decrypted_boss_key, title);
+        encrypted_body = encrypt_text(&decrypted_boss_key, note);
 
         return true
     };
@@ -142,4 +144,11 @@ pub(crate) fn unprotect_note(note_id: usize) {
         cr_println(format!("Note: {} is not encrypted.", note_id));
         exit(0);
     }
+}
+
+pub(crate) fn get_boss_key(password: &str) -> String {
+    let boss_key = get_value_from_attr_table("app", "boss_key");
+    let decrypted_boss_key = decrypt_text(password, &boss_key.value);
+
+    decrypted_boss_key.to_string()
 }

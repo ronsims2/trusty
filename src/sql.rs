@@ -7,7 +7,7 @@ use uuid::Uuid;
 use crate::cli::read_from_std_in;
 use crate::errors::Errors;
 use crate::render::{cr_println, print_note_summary, print_simple_note};
-use crate::security::{decrypt_note, prompt_for_password, encrypt_text};
+use crate::security::{decrypt_note, prompt_for_password, encrypt_text, get_boss_key};
 use crate::setup::get_crusty_db_conn;
 use crate::utils::{make_text_single_line, slice_text};
 
@@ -95,8 +95,9 @@ pub(crate)  fn insert_note(title: &str, note: &str, protected: bool) {
 pub(crate) fn insert_encrypted_note(title: &str, note: &str) {
     let encrypted_and_insert_note = | password: &str| -> bool {
         let formatted_title = make_text_single_line(title);
-        let encrypted_title = encrypt_text(password, &formatted_title);
-        let encrypt_note = encrypt_text(password, note);
+        let decrypted_boss_key = get_boss_key(password);
+        let encrypted_title = encrypt_text(&decrypted_boss_key, &formatted_title);
+        let encrypt_note = encrypt_text(&decrypted_boss_key, note);
         insert_note(&encrypted_title, &encrypt_note, true);
 
         return true

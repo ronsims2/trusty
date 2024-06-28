@@ -28,6 +28,16 @@ Its pretty good for:
 * Cataloging small base64 data (files/images)
 * Drafting haikus
 
+## getting Started
+
+When you first set up cRusty, it will create a `.crusty` directory in your home folder.
+This is where configurations and your data are stored.
+
+The CLI will also ask you to set a password.  This is used to encrypt notes.
+This process will generate recovery code 🛟 that you can use set a new password if you forget yours.
+
+⚠️ Save this recovery code in a safe place or else you protected notes will be lost forever!
+
 ## Usage
 
 ### Add a Note
@@ -102,6 +112,22 @@ Similarly, open an editor to change the title and body of a note.
 Open a new blank note in an editor.
 
 `crusty -o`
+
+### Encrypt Notes
+
+You can create an encrypted note by adding the protected flag to any note creation command.
+
+`crusty -o -p`
+
+`crusty -t 'A new note' -n 'Some text for a note here.' -p`
+
+### Decrypt Notes
+
+When you try to open an encrypted note it will prompt for your password.
+
+Decrypted and save a plain text note.
+
+`cn --unprotect 4`
 
 ### Remove Notes
 
