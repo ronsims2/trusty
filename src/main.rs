@@ -54,7 +54,7 @@ fn main() {
     let encrypted = args.encrypt;
     let recover = args.recover;
     let unprotect = args.unprotect;
-    let protect = args.protect
+    let protect = args.protect;
 
     let should_encrypt_note = encrypted.unwrap_or(false);
 

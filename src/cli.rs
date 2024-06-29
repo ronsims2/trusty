@@ -1,4 +1,5 @@
 use std::io;
+use std::io::{BufRead, Read};
 use std::process::exit;
 use clap::Parser;
 use crate::errors::Errors;
@@ -59,12 +60,18 @@ pub(crate) struct Cli {
 
 pub(crate) fn read_from_std_in() -> Option<String> {
     let mut buffer = String::new();
-    io::stdin().read_line(&mut buffer).ok()?;
-    if !buffer.trim().is_empty() {
-        Some(buffer.to_string())
-    } else {
-        None
-    }
+    // io::stdin().read_line(&mut buffer).ok()?;
+    // if !buffer.trim().is_empty() {
+    //     Some(buffer.to_string())
+    // } else {
+    //     None
+    // }
+
+    let stdin = io::stdin();
+    let mut handle = stdin.lock();
+    handle.read_to_string(&mut buffer).unwrap();
+
+    Some(buffer.to_string())
 }
 
 pub(crate) fn insert_note_from_std_in(title: &str, protected: bool) -> bool {
