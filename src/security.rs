@@ -157,8 +157,13 @@ pub(crate) fn protect_note(note_id: usize) {
     let note = get_note_by_id(note_id);
 
     if note.protected {
-
+        cr_println(format!("Note: {} is already encrypted", note_id))
     } else {
+        let encrypted_note = encrypt_note(&note.title, &note.body);
+        update_title_by_content_id(&note.content_id, &encrypted_note.title);
+        update_note_by_note_id(note_id, &encrypted_note.body);
+        update_protected_flag(note_id, true);
 
+        cr_println(format!("Note: {} is now encrypted.", note_id));
     }
 }
