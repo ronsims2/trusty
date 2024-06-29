@@ -152,3 +152,13 @@ pub(crate) fn get_boss_key(password: &str) -> String {
 
     decrypted_boss_key.to_string()
 }
+
+pub(crate) fn protect_note(note_id: usize) {
+    let note = get_note_by_id(note_id);
+
+    if note.protected {
+
+    } else {
+
+    }
+}

@@ -47,12 +47,14 @@ pub(crate) struct Cli {
     pub dump: Option<bool>,
     #[arg(long, default_missing_value = "true", num_args = 0, help = "Print a summary of statistics about your notes.")]
     pub summary: Option<bool>,
-    #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Specify this flag to protect a note.")]
-    pub protect: Option<bool>,
+    #[arg(short = 'E', long, default_missing_value = "true", num_args = 0, help = "Specify this flag to encrypt a note.")]
+    pub encrypt: Option<bool>,
     #[arg(long, help = "Use this flag to reset your password with a recovery code.")]
     pub recover: Option<String>,
     #[arg(short, long, help = "Decrypt a note and save it as plain text.")]
-    pub unprotect: Option<usize>
+    pub unprotect: Option<usize>,
+    #[arg(short, long, help = "Encrypt and save an existing note.")]
+    pub protect: Option<usize>
 }
 
 pub(crate) fn read_from_std_in() -> Option<String> {

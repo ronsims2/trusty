@@ -51,11 +51,12 @@ fn main() {
     let all = args.all;
     let dump = args.dump;
     let summary = args.summary;
-    let protected = args.protect;
+    let encrypted = args.encrypt;
     let recover = args.recover;
     let unprotect = args.unprotect;
+    let protect = args.protect
 
-    let should_encrypt_note = protected.unwrap_or(false);
+    let should_encrypt_note = encrypted.unwrap_or(false);
 
     if find_from.is_some() {
         let note = get_note_from_menu_line();
@@ -69,6 +70,10 @@ fn main() {
         recovery_reset_password(&recovery_code);
 
         return
+    }
+
+    if protect.is_none() {
+        let note_id = unprotect.unwrap_or(0);
     }
 
     if unprotect.is_some() {
