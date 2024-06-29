@@ -1,9 +1,10 @@
 use std::process::exit;
 use magic_crypt::{MagicCryptTrait, new_magic_crypt};
 use regex::Regex;
-use crate::render::cr_println;
-use crate::setup::set_password;
-use crate::sql::{get_note_by_id, get_value_from_attr_table, NoteView, SimpleNoteView, update_note_by_note_id, update_protected_flag, update_title_by_content_id};
+use uuid::Uuid;
+use crate::errors::Errors;
+use crate::render::{cr_print_error, cr_println};
+use crate::sql::{add_key_value, get_note_by_id, get_value_from_attr_table, NoteView, SimpleNoteView, update_key_value, update_note_by_note_id, update_protected_flag, update_title_by_content_id};
 
 /**
 * @compare_password - will compare what the user typed against the password saved in the database
@@ -191,4 +192,73 @@ pub(crate) fn decrypt_dump(notes: &Vec<NoteView>) -> Vec<NoteView> {
     prompt_for_password(handle_decrypt, true, false);
 
     return decrypted_notes
+}
+
+pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
+    if update {
+        cr_println("Change your password".to_string());
+        let rrc = &raw_recovery_code.unwrap().to_string();
+        let update_password = |pw: &str| -> bool {
+            let encrypted_password = encrypt_text(pw, pw);
+            let recovery_code = Uuid::new_v4().to_string();
+            let encrypted_recovery_code = encrypt_text(&recovery_code, &recovery_code);
+            let old_encrypted_boss_key = get_value_from_attr_table("app", "recovery_boss_key");
+            let old_recovery_key = rrc;
+            let old_decrypted_boss_key = decrypt_text(&old_recovery_key, &old_encrypted_boss_key.value);
+            let new_boss_key = encrypt_text(pw, &old_decrypted_boss_key);
+            let new_recovery_boss_key = encrypt_text(&recovery_code, &old_decrypted_boss_key);
+
+            if update_key_value("app", "password", &encrypted_password) &&
+                update_key_value("app", "recovery_code", &encrypted_recovery_code) &&
+                update_key_value("app", "boss_key", &new_boss_key) &&
+                update_key_value("app", "recovery_boss_key", &new_recovery_boss_key) {
+                cr_println("Password set".to_string());
+                cr_println(format!("🛟 Recovery code generated: {}", recovery_code));
+                cr_println("Save your recovery code and use it to change your password if you forget it...again.".to_string());
+
+                return true
+            } else {
+                cr_print_error(format!("{}", "Could not set password."));
+                exit(Errors::SetPasswordErr as i32)
+            }
+        };
+
+        if prompt_for_password(update_password, false, true) {
+            return
+        } else {
+            cr_print_error(format!("{}", "Invalid password."));
+            exit(Errors::CreatePasswordErr as i32)
+        }
+    } else {
+        let insert_password = |pw: &str| -> bool {
+            let encrypted_password = encrypt_text(pw, pw);
+            let recovery_code = Uuid::new_v4().to_string();
+            let encrypted_recovery_code = encrypt_text(&recovery_code, &recovery_code);
+            let raw_boss_key = Uuid::new_v4().to_string();
+            let boss_key = encrypt_text(pw, &raw_boss_key);
+            let recovery_boss_key = encrypt_text(&recovery_code, &raw_boss_key);
+
+            if add_key_value("app", "password", &encrypted_password) &&
+                add_key_value("app", "recovery_code", &encrypted_recovery_code) &&
+                add_key_value("app", "boss_key", &boss_key) &&
+                add_key_value("app", "recovery_boss_key", &recovery_boss_key) {
+                cr_println("Password set".to_string());
+                cr_println(format!("🛟 Recovery code generated: {}", recovery_code));
+                cr_println("Save your recovery code and use it to change your password if you forget it.".to_string());
+
+                return true
+            } else {
+                cr_print_error(format!("{}", "Could not set password."));
+                exit(Errors::SetPasswordErr as i32)
+            }
+        };
+
+        cr_println("Set up an alpha-numeric password so that you can encrypt things 🤐".to_string());
+        if prompt_for_password(insert_password, false, true) {
+            return
+        } else {
+            cr_print_error(format!("{}", "Invalid password."));
+            exit(Errors::CreatePasswordErr as i32)
+        }
+    }
 }
