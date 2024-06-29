@@ -21,6 +21,12 @@ pub(crate) fn cr_println(text: String) {
     writeln!(&mut handle, "{}", text).unwrap();
 }
 
+pub(crate) fn cr_print_error(text: String) {
+    let stderr = io::stderr();
+    let mut handle = stderr.lock();
+    writeln!(&mut handle, "{}", text).unwrap();
+}
+
 pub(crate) fn print_simple_note(note: SimpleNoteView) {
     // @todo Right now it is better to not render the title so that using things liked saved data are easier
     // cr_println(note.title);

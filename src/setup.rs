@@ -10,7 +10,7 @@ use clap::Parser;
 use rusqlite::{Connection, params, Params};
 use uuid::Uuid;
 use crate::errors::Errors;
-use crate::render::cr_println;
+use crate::render::{cr_print_error, cr_println};
 use crate::security::{decrypt_note, decrypt_text, prompt_for_password};
 use crate::sql::{add_key_value, get_value_from_attr_table, update_key_value};
 use crate::security::{check_password, encrypt_text, validate_password};
@@ -22,7 +22,7 @@ fn get_win_home_drive() -> String {
             val.to_string()
         }
         Err(_) => {
-            cr_println(format!("{}", "Could not determine Windows user drive."));
+            cr_print_error(format!("{}", "Could not determine Windows user drive."));
             exit(Errors::WinUserErr as i32)
         }
     };
@@ -45,7 +45,7 @@ pub(crate) fn get_home_dir() -> String {
             }
         }
         Err(_) => {
-            cr_println(format!("{}", "Could not determine home path during config."));
+            cr_print_error(format!("{}", "Could not determine home path during config."));
             exit(Errors::HomePathErr as i32)
         }
     };
@@ -75,7 +75,7 @@ pub(crate) fn create_crusty_dir() {
             cr_println(format!("Created cRusty config at: {:?}", config_path));
         }
         Err(_) => {
-            cr_println(format!("{}", "Could not create cRusty config directory."));
+            cr_print_error(format!("{}", "Could not create cRusty config directory."));
             exit(Errors::ConfigDirErr as i32)
         }
     }
@@ -180,7 +180,7 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
 
                 return true
             } else {
-                cr_println(format!("{}", "Could not set password."));
+                cr_print_error(format!("{}", "Could not set password."));
                 exit(Errors::SetPasswordErr as i32)
             }
         };
@@ -188,7 +188,7 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
         if prompt_for_password(update_password, false, true) {
             return
         } else {
-            cr_println(format!("{}", "Invalid password."));
+            cr_print_error(format!("{}", "Invalid password."));
             exit(Errors::CreatePasswordErr as i32)
         }
     } else {
@@ -210,7 +210,7 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
 
                 return true
             } else {
-                cr_println(format!("{}", "Could not set password."));
+                cr_print_error(format!("{}", "Could not set password."));
                 exit(Errors::SetPasswordErr as i32)
             }
         };
@@ -219,7 +219,7 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
         if prompt_for_password(insert_password, false, true) {
             return
         } else {
-            cr_println(format!("{}", "Invalid password."));
+            cr_print_error(format!("{}", "Invalid password."));
             exit(Errors::CreatePasswordErr as i32)
         }
     }

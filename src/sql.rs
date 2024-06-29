@@ -6,7 +6,7 @@ use rusqlite::{Connection, MappedRows, named_params, Row};
 use uuid::Uuid;
 use crate::cli::read_from_std_in;
 use crate::errors::Errors;
-use crate::render::{cr_println, print_note_summary, print_simple_note};
+use crate::render::{cr_print_error, cr_println, print_note_summary, print_simple_note};
 use crate::security::{decrypt_note, prompt_for_password, encrypt_text, get_boss_key, decrypt_dump};
 use crate::setup::get_crusty_db_conn;
 use crate::utils::{make_text_single_line, slice_text};
@@ -158,7 +158,7 @@ pub(crate) fn get_note_by_id(id: usize) -> SimpleNoteView {
             res
         },
         Err(err) => {
-            cr_println(format!("Could not find note for id: {}", id));
+            cr_print_error(format!("Could not find note for id: {}", id));
             exit(Errors::NoteIdErr as i32);
         }
     };
@@ -169,13 +169,13 @@ pub(crate) fn get_note_by_id(id: usize) -> SimpleNoteView {
 pub(crate) fn get_note_from_menu_line() -> SimpleNoteView {
     let result = match read_from_std_in() {
         None => {
-            cr_println(format!("{}", "No menu line specified, could not lookup record."));
+            cr_print_error(format!("{}", "No menu line specified, could not lookup record."));
             exit(Errors::MenuLineErr as i32);
         }
         Some(ln) => {
             let trimmed_ln = ln.trim();
             if trimmed_ln.is_empty() {
-                cr_println(format!("{}", "Menu line input is empty, could not lookup record."));
+                cr_print_error(format!("{}", "Menu line input is empty, could not lookup record."));
                 exit(Errors::MenuLineEmptyErr as i32);
             } else {
                 get_note_from_menu_line_by_id(ln.as_str())
@@ -193,7 +193,7 @@ fn get_note_from_menu_line_by_id(line: &str) -> SimpleNoteView {
             get_note_by_id(id as usize)
         }
         Err(_) => {
-            cr_println(format!("{}", "Menu line input is malformed, please check your input."));
+            cr_print_error(format!("{}", "Menu line input is malformed, please check your input."));
             exit(Errors::MenuLineMalformedErr as i32);
         }
     };
@@ -208,7 +208,7 @@ pub(crate) fn update_last_touched(note_id:&str){
             conn.execute(&sql, named_params! {":last_touched": id as usize}).unwrap();
         }
         Err(_) => {
-            cr_println(format!("{}", "note ID is malformed, please check your input."));
+            cr_print_error(format!("{}", "note ID is malformed, please check your input."));
             exit(Errors::NoteIdMalformedErr as i32)
         }
     }
@@ -247,7 +247,7 @@ pub(crate) fn get_last_touched_note() -> SimpleNoteView {
             res
         }
         Err(_) => {
-            cr_println(format!("{}", "Could not fetch the last touched note."));
+            cr_print_error(format!("{}", "Could not fetch the last touched note."));
             exit(Errors::LastTouchFetchErr as i32)
         }
     };
@@ -448,9 +448,7 @@ pub(crate) fn get_summary() -> SummaryStats {
     };
 
     if errors.len() > 0 {
-        for err in errors {
-            cr_println(format!("{}", err));
-        }
+        cr_print_error("Error creating summary.".to_string());
         exit(Errors::SummaryErr as i32);
     }
 
@@ -485,7 +483,7 @@ pub(crate) fn get_value_from_attr_table(table: &str, key: &str) -> KeyValuePair 
             get_key_val_select_sql(table)
         }
         _ => {
-            cr_println(format!("{}", "Could not get select val sql."));
+            cr_print_error(format!("{}", "Could not get select val sql."));
             exit(Errors::KeyValSelectErr as i32)
         }
     };
@@ -501,7 +499,7 @@ pub(crate) fn get_value_from_attr_table(table: &str, key: &str) -> KeyValuePair 
             data
         },
         Err(error) => {
-            cr_println(format!("{}", "Could not get select val sql."));
+            cr_print_error(format!("{}", "Could not get select val sql."));
             exit(Errors::KeyValSelectErr as i32)
         }
     };
@@ -520,7 +518,7 @@ pub(crate) fn add_key_value(table: &str, key: &str, value: &str) -> bool {
             get_key_val_insert_sql(table)
         }
         _ => {
-            cr_println(format!("{}", "Could not create key val."));
+            cr_print_error(format!("{}", "Could not create key val."));
             exit(Errors::KeyValInsertErr as i32)
         }
     };
@@ -547,7 +545,7 @@ pub(crate) fn update_key_value(table: &str, key: &str, value: &str) -> bool {
             get_key_val_update_sql(table)
         }
         _ => {
-            cr_println(format!("{}", "Could not update key val."));
+            cr_print_error(format!("{}", "Could not update key val."));
             exit(Errors::KeyValUpdateErr as i32)
         }
     };
