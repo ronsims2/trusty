@@ -55,6 +55,7 @@ fn main() {
     let recover = args.recover;
     let unprotect = args.unprotect;
     let protect = args.protect;
+    let dump_protected = args.dump_protected;
 
     let should_encrypt_note = encrypted.unwrap_or(false);
 
@@ -166,7 +167,13 @@ fn main() {
     }
 
     if dump.is_some() {
-        let notes = dump_notes();
+        let notes = dump_notes(false);
+        print_dump(notes);
+        return
+    }
+
+    if dump_protected.is_some() {
+        let notes = dump_notes(true);
         print_dump(notes);
         return
     }

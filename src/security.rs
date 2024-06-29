@@ -3,12 +3,12 @@ use magic_crypt::{MagicCryptTrait, new_magic_crypt};
 use regex::Regex;
 use crate::render::cr_println;
 use crate::setup::set_password;
-use crate::sql::{get_note_by_id, get_value_from_attr_table, SimpleNoteView, update_note_by_note_id, update_protected_flag, update_title_by_content_id};
+use crate::sql::{get_note_by_id, get_value_from_attr_table, NoteView, SimpleNoteView, update_note_by_note_id, update_protected_flag, update_title_by_content_id};
 
 /**
 * @compare_password - will compare what the user typed against the password saved in the database
 * @confirm_password - will ask for the password 2x to make sure you typed the same one
-* @fun - is passed the password and should NEVER be used outside the closure!!!!
+* @fun - is passed the plain-text password as a parameter and the password should NEVER be used/seen outside the closure!!!!
 */
 pub(crate) fn prompt_for_password<F>(mut fun: F, compare_password_to_db: bool, confirm_password: bool) -> bool where F: FnMut(&str) -> bool {
     let mut attempts = 0;
@@ -166,4 +166,29 @@ pub(crate) fn protect_note(note_id: usize) {
 
         cr_println(format!("Note: {} is now encrypted.", note_id));
     }
+}
+
+pub(crate) fn decrypt_dump(notes: &Vec<NoteView>) -> Vec<NoteView> {
+    let mut decrypted_notes: Vec<NoteView> = vec![];
+    let handle_decrypt = |password: &str| -> bool {
+        let boss_key = get_boss_key(password);
+        for note in notes {
+            let decrypted_note = NoteView{
+                title: decrypt_text(&boss_key, &note.title),
+                body: decrypt_text(&boss_key, &note.body),
+                note_id: note.note_id,
+                content_id: note.content_id.to_string(),
+                updated: note.updated.to_string(),
+                created: note.created.to_string(),
+            };
+
+            decrypted_notes.push(decrypted_note)
+        }
+
+        return true
+    };
+
+    prompt_for_password(handle_decrypt, true, false);
+
+    return decrypted_notes
 }

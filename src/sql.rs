@@ -7,7 +7,7 @@ use uuid::Uuid;
 use crate::cli::read_from_std_in;
 use crate::errors::Errors;
 use crate::render::{cr_println, print_note_summary, print_simple_note};
-use crate::security::{decrypt_note, prompt_for_password, encrypt_text, get_boss_key};
+use crate::security::{decrypt_note, prompt_for_password, encrypt_text, get_boss_key, decrypt_dump};
 use crate::setup::get_crusty_db_conn;
 use crate::utils::{make_text_single_line, slice_text};
 
@@ -319,13 +319,13 @@ pub(crate) fn set_note_trash(id: usize, trash_state: bool) {
     stmt.unwrap().execute(named_params! {":note_id": id, ":trashed": trash_state}).unwrap();
 }
 
-pub(crate) fn dump_notes() -> Vec<NoteView> {
+pub(crate) fn dump_notes(protected: bool) -> Vec<NoteView> {
     let conn = get_crusty_db_conn();
     let sql = "SELECT note_id, title, created, updated, notes.content_id, content.body from \
-    notes JOIN content on notes.content_id = content.content_id WHERE protected is FALSE AND trashed IS FALSE;";
+    notes JOIN content on notes.content_id = content.content_id WHERE protected is :protected;";
     let mut stmt = conn.prepare(sql).unwrap();
 
-    let result_set = stmt.query_map([],|row| {
+    let result_set = stmt.query_map(named_params! {":protected": protected},|row| {
         Ok(NoteView{
             note_id: row.get(0)?,
             title: row.get(1)?,
@@ -353,6 +353,10 @@ pub(crate) fn dump_notes() -> Vec<NoteView> {
                 })
             }
         }
+    }
+
+    if protected {
+        return decrypt_dump(&results)
     }
 
     results

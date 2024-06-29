@@ -44,8 +44,10 @@ pub(crate) struct Cli {
     pub restore: Option<usize>,
     #[arg(short = 'A', long, default_missing_value = "true", num_args = 0, help = "When editing, this modifier will allow you to edit a title.")]
     pub all: Option<bool>,
-    #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Print all notes, very good for using grep to search or less to review.")]
+    #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Print all unprotected notes, very good for using grep to search or less to review.")]
     pub dump: Option<bool>,
+    #[arg(long, default_missing_value = "true", num_args = 0, help = "Print all protected notes, very good for using grep to search or less to review.")]
+    pub dump_protected: Option<bool>,
     #[arg(long, default_missing_value = "true", num_args = 0, help = "Print a summary of statistics about your notes.")]
     pub summary: Option<bool>,
     #[arg(short = 'E', long, default_missing_value = "true", num_args = 0, help = "Specify this flag to encrypt a note.")]
