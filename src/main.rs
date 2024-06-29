@@ -68,21 +68,18 @@ fn main() {
     if recover.is_some() {
         let recovery_code = recover.unwrap();
         recovery_reset_password(&recovery_code);
-
         return
     }
 
     if protect.is_some() {
         let note_id = protect.unwrap_or(0);
         protect_note(note_id);
-
         return
     }
 
     if unprotect.is_some() {
         let note_id = unprotect.unwrap_or(0);
         unprotect_note(note_id);
-
         return
     }
 
@@ -94,10 +91,8 @@ fn main() {
 
     if input.is_some() {
         let title_val = title.unwrap_or("Untitled");
-        let result = insert_note_from_std_in(title_val, should_encrypt_note);
-        if result {
-            return
-        }
+        insert_note_from_std_in(title_val, should_encrypt_note);
+        return
     }
 
     // if there is a title and note param insert a proper note
@@ -135,14 +130,12 @@ fn main() {
             edit_title(Some(note_id));
         }
         open_note(note_id, should_encrypt_note);
-
-        return;
+        return
     }
 
     if delete.is_some() {
         let note_id = delete.unwrap();
         delete_note(note_id, false);
-
         return
     }
 

@@ -117,9 +117,13 @@ Open a new blank note in an editor.
 
 You can create an encrypted note by adding the protected flag to any note creation command.
 
-`crusty -o -p`
+`crusty -o -E`
 
-`crusty -t 'A new note' -n 'Some text for a note here.' -p`
+`crusty -t 'A new note' -n 'Some text for a note here.' -E`
+
+Encrypt an existing note.
+
+`crusty -p 2`
 
 ### Decrypt Notes
 
