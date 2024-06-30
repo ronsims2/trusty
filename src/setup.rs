@@ -8,6 +8,11 @@ use uuid::Uuid;
 use crate::errors::Errors;
 use crate::render::{cr_print_error, cr_println};
 
+#[cfg(test)]
+use mockall::*;
+#[cfg(test)]
+use mockall::predicate::*;
+
 fn get_win_home_drive() -> String {
     let win_home_drive = match env::var("HOMEDRIVE") {
         Ok(val) => {
@@ -45,14 +50,17 @@ pub(crate) fn get_home_dir() -> String {
     user_home
 }
 
-pub(crate) fn get_crusty_dir() -> PathBuf {
+fn get_crusty_directory(dir_name: String) -> PathBuf {
     let user_home = get_home_dir();
-    let config_loc = format!("{}/.crusty", &user_home);
+    let config_loc = format!("{}/{}", &user_home, dir_name);
     Path::new(&config_loc).to_path_buf()
 }
 
+
+
+
 pub(crate) fn check_for_config(home_dir: &String) -> Option<PathBuf> {
-    let config_path = get_crusty_dir();
+    let config_path = CrustyFileOperations::get_crusty_dir();
 
     if config_path.exists() {
         return Some(config_path)
@@ -60,21 +68,36 @@ pub(crate) fn check_for_config(home_dir: &String) -> Option<PathBuf> {
     None
 }
 
-pub(crate) fn create_crusty_dir() {
-    let config_path = get_crusty_dir();
-    match fs::create_dir(&config_path) {
-        Ok(_) => {
-            cr_println(format!("Created cRusty config at: {:?}", config_path));
+
+
+#[cfg_attr(test, automock)]
+pub trait FileOperations {
+    fn  create_crusty_dir() -> ();
+    fn get_crusty_dir() -> PathBuf;
+}
+
+pub(crate) struct CrustyFileOperations {
+}
+impl FileOperations for CrustyFileOperations {
+    fn create_crusty_dir() {
+        let config_path = CrustyFileOperations::get_crusty_dir();
+        match fs::create_dir(&config_path) {
+            Ok(_) => {
+                cr_println(format!("Created cRusty config at: {:?}", config_path));
+            }
+            Err(_) => {
+                cr_print_error(format!("{}", "Could not create cRusty config directory."));
+                exit(Errors::ConfigDirErr as i32)
+            }
         }
-        Err(_) => {
-            cr_print_error(format!("{}", "Could not create cRusty config directory."));
-            exit(Errors::ConfigDirErr as i32)
-        }
+    }
+    fn get_crusty_dir() -> PathBuf {
+        get_crusty_directory(".crusty".to_string())
     }
 }
 
 pub(crate) fn get_crusty_db_path() -> PathBuf {
-    let config_path = get_crusty_dir();
+    let config_path = CrustyFileOperations::get_crusty_dir();
     config_path.join("crusty.db")
 }
 
@@ -161,6 +184,23 @@ mod tests {
 
     #[test]
     fn test_get_home_dir() {
+        let windows_os = "windows";
+        let os_fam = env::consts::FAMILY;
+        let home_dir = get_home_dir();
+        if os_fam.eq(windows_os) {
+            assert!(home_dir.contains(':'));
+        } else {
+            assert!(home_dir.len() > 0)
+        }
+    }
+
+    #[test]
+    fn test_get_crusty_dir() {
+        let crusty_dir = CrustyFileOperations::get_crusty_dir();
+        assert!(crusty_dir.to_str().unwrap().contains(".crusty"))
+    }
+
+    fn test_create_crusty_dir() {
 
     }
 }
