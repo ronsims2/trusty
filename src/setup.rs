@@ -147,3 +147,20 @@ pub(crate) fn init_crusty_db() {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_get_win_home_drive() {
+        let home_drive_value = "FOOBAR";
+        env::set_var("HOMEDRIVE", home_drive_value);
+        let home_drive = get_win_home_drive();
+        assert_eq!(home_drive, home_drive_value)
+    }
+
+    #[test]
+    fn test_get_home_dir() {
+
+    }
+}
