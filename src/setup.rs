@@ -12,6 +12,8 @@ use crate::render::{cr_print_error, cr_println};
 use mockall::*;
 #[cfg(test)]
 use mockall::predicate::*;
+#[cfg(test)]
+use tempfile::tempdir;
 
 fn get_win_home_drive() -> String {
     let win_home_drive = match env::var("HOMEDRIVE") {
@@ -60,7 +62,7 @@ fn get_crusty_directory(dir_name: String) -> PathBuf {
 
 
 pub(crate) fn check_for_config(home_dir: &String) -> Option<PathBuf> {
-    let config_path = CrustyFileOperations::get_crusty_dir();
+    let config_path = CrustyFileOperations::get_crusty_dir(&CrustyFileOperations {});
 
     if config_path.exists() {
         return Some(config_path)
@@ -72,32 +74,33 @@ pub(crate) fn check_for_config(home_dir: &String) -> Option<PathBuf> {
 
 #[cfg_attr(test, automock)]
 pub trait FileOperations {
-    fn  create_crusty_dir() -> ();
-    fn get_crusty_dir() -> PathBuf;
+    fn get_crusty_dir(&self) -> PathBuf;
 }
 
 pub(crate) struct CrustyFileOperations {
 }
 impl FileOperations for CrustyFileOperations {
-    fn create_crusty_dir() {
-        let config_path = CrustyFileOperations::get_crusty_dir();
-        match fs::create_dir(&config_path) {
-            Ok(_) => {
-                cr_println(format!("Created cRusty config at: {:?}", config_path));
-            }
-            Err(_) => {
-                cr_print_error(format!("{}", "Could not create cRusty config directory."));
-                exit(Errors::ConfigDirErr as i32)
-            }
-        }
-    }
-    fn get_crusty_dir() -> PathBuf {
+    fn get_crusty_dir(&self) -> PathBuf {
         get_crusty_directory(".crusty".to_string())
     }
 }
 
+pub(crate) fn create_crusty_dir(cfo: &dyn FileOperations) -> bool {
+    let config_path = cfo.get_crusty_dir();
+    match fs::create_dir(&config_path) {
+        Ok(_) => {
+            cr_println(format!("Created cRusty config at: {:?}", config_path));
+        }
+        Err(_) => {
+            cr_print_error(format!("{}", "Could not create cRusty config directory."));
+            exit(Errors::ConfigDirErr as i32)
+        }
+    }
+    return true
+}
+
 pub(crate) fn get_crusty_db_path() -> PathBuf {
-    let config_path = CrustyFileOperations::get_crusty_dir();
+    let config_path = CrustyFileOperations::get_crusty_dir(&CrustyFileOperations {});
     config_path.join("crusty.db")
 }
 
@@ -173,6 +176,7 @@ pub(crate) fn init_crusty_db() {
 
 #[cfg(test)]
 mod tests {
+    use std::env::temp_dir;
     use super::*;
     #[test]
     fn test_get_win_home_drive() {
@@ -196,11 +200,24 @@ mod tests {
 
     #[test]
     fn test_get_crusty_dir() {
-        let crusty_dir = CrustyFileOperations::get_crusty_dir();
+        let crusty_dir = CrustyFileOperations::get_crusty_dir(&CrustyFileOperations {});
         assert!(crusty_dir.to_str().unwrap().contains(".crusty"))
     }
 
+    #[test]
     fn test_create_crusty_dir() {
+        let mut mock = MockFileOperations::new();
+        let mock_dir = tempdir().unwrap();
+        let mock_file_name = "crusty.mock.db".to_string();
+        let mock_file = mock_dir.path().join(mock_file_name);
 
+        println!("Mock file: {:?}", mock_file.as_path().to_str().unwrap());
+
+        mock
+            .expect_get_crusty_dir()
+            .return_const(mock_file.as_path().to_path_buf());
+
+        let result = create_crusty_dir(&mock);
+        assert!(result);
     }
 }
