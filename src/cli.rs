@@ -5,6 +5,7 @@ use clap::Parser;
 use crate::errors::Errors;
 use crate::render::{cr_print_error, cr_println};
 use crate::security::{decrypt_note, encrypt_note};
+use crate::setup::CrustyPathOperations;
 use crate::sql::{get_last_touched_note, get_note_by_id, add_note, set_note_trash, update_note_by_content_id, update_note_by_note_id, update_title_by_content_id};
 use crate::utils::{make_text_single_line, slice_text};
 
@@ -96,7 +97,7 @@ pub(crate) fn insert_note_from_std_in(title: &str, protected: bool) -> bool {
 }
 
 pub(crate) fn edit_note() {
-    let note = get_last_touched_note();
+    let note = get_last_touched_note(&CrustyPathOperations{}, );
     let body = note.body.as_str();
     let edited = edit::edit(body).unwrap();
 
@@ -107,12 +108,12 @@ pub(crate) fn edit_note() {
         }
         false => {edited}
     };
-    update_note_by_content_id(&note.content_id, &new_body);
+    update_note_by_content_id(&CrustyPathOperations{}, &note.content_id, &new_body);
 }
 
 pub(crate) fn edit_title(note_id: Option<usize>) {
     let id = note_id.unwrap_or(0);
-    let note = if id > 0  {get_note_by_id(id)} else {get_last_touched_note()};
+    let note = if id > 0  {get_note_by_id(&CrustyPathOperations{}, id)} else {get_last_touched_note(&CrustyPathOperations{})};
     let title = note.title.to_string();
 
     let edited_title = edit::edit(title).unwrap();
@@ -127,15 +128,15 @@ pub(crate) fn edit_title(note_id: Option<usize>) {
         false => {edited_title}
     };
 
-    update_title_by_content_id(&note.content_id, &new_title);
+    update_title_by_content_id(&CrustyPathOperations{}, &note.content_id, &new_title);
 }
 
 pub(crate) fn open_note(id: usize, protected: bool) {
     if id > 0 {
-        let note = get_note_by_id(id);
+        let note = get_note_by_id(&CrustyPathOperations{}, id);
         let body = note.body.as_str();
         let edited = edit::edit(body).unwrap();
-        update_note_by_note_id(id, &edited);
+        update_note_by_note_id(&CrustyPathOperations{}, id, &edited);
     } else {
         let draft = edit::edit("").unwrap();
         let title = slice_text(0, 128, &draft);
@@ -144,15 +145,15 @@ pub(crate) fn open_note(id: usize, protected: bool) {
 }
 
 pub(crate) fn trash_note(id: usize) {
-    set_note_trash(id, true);
+    set_note_trash(&CrustyPathOperations{}, id, true);
 }
 
 pub(crate) fn restore_note(id: usize) {
-    set_note_trash(id, false);
+    set_note_trash(&CrustyPathOperations{}, id, false);
 }
 
 pub(crate) fn delete_note(note_id: usize, force: bool) {
-    if crate::sql::delete_note(note_id, force) {
+    if crate::sql::delete_note(&CrustyPathOperations{}, note_id, force) {
         cr_println(format!("Note: {} deleted.", note_id))
     } else {
         cr_println(format!("Could not delete noted: {}, it may be protected or already removed.", note_id));

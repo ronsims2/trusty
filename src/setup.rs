@@ -62,7 +62,7 @@ fn get_crusty_directory(dir_name: String) -> PathBuf {
 
 
 pub(crate) fn check_for_config(home_dir: &String) -> Option<PathBuf> {
-    let config_path = CrustyFileOperations::get_crusty_dir(&CrustyFileOperations {});
+    let config_path = CrustyPathOperations::get_crusty_dir(&CrustyPathOperations {});
 
     if config_path.exists() {
         return Some(config_path)
@@ -73,20 +73,25 @@ pub(crate) fn check_for_config(home_dir: &String) -> Option<PathBuf> {
 
 
 #[cfg_attr(test, automock)]
-pub trait FileOperations {
+pub trait PathOperations {
     fn get_crusty_dir(&self) -> PathBuf;
+    fn get_crusty_db_path(&self) -> PathBuf;
 }
 
-pub(crate) struct CrustyFileOperations {
+pub(crate) struct CrustyPathOperations {
 }
-impl FileOperations for CrustyFileOperations {
+impl PathOperations for CrustyPathOperations {
     fn get_crusty_dir(&self) -> PathBuf {
         get_crusty_directory(".crusty".to_string())
     }
+    fn get_crusty_db_path(&self) -> PathBuf {
+        let config_path = self.get_crusty_dir();
+        config_path.join("crusty.db")
+    }
 }
 
-pub(crate) fn create_crusty_dir(cfo: &dyn FileOperations) -> bool {
-    let config_path = cfo.get_crusty_dir();
+pub(crate) fn create_crusty_dir(cpo: &dyn PathOperations) -> bool {
+    let config_path = cpo.get_crusty_dir();
     match fs::create_dir(&config_path) {
         Ok(_) => {
             cr_println(format!("Created cRusty config at: {:?}", config_path));
@@ -99,18 +104,12 @@ pub(crate) fn create_crusty_dir(cfo: &dyn FileOperations) -> bool {
     return true
 }
 
-pub(crate) fn get_crusty_db_path() -> PathBuf {
-    let config_path = CrustyFileOperations::get_crusty_dir(&CrustyFileOperations {});
-    config_path.join("crusty.db")
-}
-
-pub(crate) fn get_crusty_db_conn() -> Connection {
-    let db_path = get_crusty_db_path();
+pub(crate) fn get_db_conn(db_path: &PathBuf) -> Connection {
     Connection::open(db_path.as_path()).unwrap()
 }
 
-pub(crate) fn create_crusty_sys_tables() {
-    let conn = get_crusty_db_conn();
+pub(crate) fn create_crusty_sys_tables(db_path: &PathBuf) {
+    let conn = get_db_conn(db_path);
     let create_content_sql = "CREATE TABLE IF NOT EXISTS \
     content (content_id NCHAR(36) PRIMARY KEY, body TEXT);";
     let create_notes_sql = "CREATE TABLE IF NOT EXISTS notes (note_id INTEGER PRIMARY KEY AUTOINCREMENT, \
@@ -141,7 +140,7 @@ pub(crate) fn get_unix_epoch_ts() -> u64 {
     ts
 }
 
-pub(crate) fn populate_crusty_sys_tables() {
+pub(crate) fn populate_crusty_sys_tables(cpo: &dyn PathOperations) {
     let content_id = Uuid::new_v4();
     let crusty_app_id = Uuid::new_v4();
     let note_insert_sql = format!("INSERT INTO notes (title, protected, created, updated, content_id) VALUES \
@@ -150,7 +149,8 @@ pub(crate) fn populate_crusty_sys_tables() {
     let config_insert_app_id_sql = format!("INSERT INTO config (key, value) VALUES ('crusty_app_id', '{}');", crusty_app_id);
     let config_insert_version_sql = format!("INSERT INTO config (key, value) VALUES ('crusty_version', '{}');", env!("CARGO_PKG_VERSION"));
 
-    let conn = get_crusty_db_conn();
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
     conn.execute(&content_insert_sql, ()).unwrap();
     conn.execute(&note_insert_sql, ()).unwrap();
     conn.execute(&config_insert_app_id_sql, ()).unwrap();
@@ -160,18 +160,20 @@ pub(crate) fn populate_crusty_sys_tables() {
 
 }
 
-pub(crate) fn init_crusty_db() {
-    let db_path = get_crusty_db_path();
+pub(crate) fn init_crusty_db(cpo: &dyn PathOperations) -> bool {
+    let db_path = cpo.get_crusty_db_path();
     let db_created = fs::File::create(db_path.as_path());
     match db_created {
         Ok(_) => {
-            create_crusty_sys_tables();
-            populate_crusty_sys_tables();
+            create_crusty_sys_tables(&db_path);
+            populate_crusty_sys_tables(cpo);
         }
         Err(_) => {
             cr_println(format!("{}", "Could not create cRusty DB."));
         }
     }
+
+    return true
 }
 
 #[cfg(test)]
@@ -200,24 +202,42 @@ mod tests {
 
     #[test]
     fn test_get_crusty_dir() {
-        let crusty_dir = CrustyFileOperations::get_crusty_dir(&CrustyFileOperations {});
+        let crusty_dir = CrustyPathOperations::get_crusty_dir(&CrustyPathOperations {});
         assert!(crusty_dir.to_str().unwrap().contains(".crusty"))
     }
 
     #[test]
     fn test_create_crusty_dir() {
-        let mut mock = MockFileOperations::new();
+        let mut mock = MockPathOperations::new();
         let mock_dir = tempdir().unwrap();
-        let mock_file_name = "crusty.mock.db".to_string();
-        let mock_file = mock_dir.path().join(mock_file_name);
-
-        println!("Mock file: {:?}", mock_file.as_path().to_str().unwrap());
+        // tempdir will create a folder, you need to append a directory to this path
+        // to pass to create function
+        let mock_crusty_dir = mock_dir.path().join(".crusty").to_path_buf();
 
         mock
             .expect_get_crusty_dir()
-            .return_const(mock_file.as_path().to_path_buf());
+            .return_const(mock_crusty_dir);
 
         let result = create_crusty_dir(&mock);
+        assert!(result);
+    }
+
+    #[test]
+    fn test_init_crusty_db() {
+        let mock_dir = tempdir().unwrap();
+        let mock_crusty_dir = mock_dir.path().join(".crusty").to_path_buf();
+        let mock_crusty_db_path = mock_crusty_dir.join("crusty.db").to_path_buf();
+        let mut mock = MockPathOperations::new();
+        mock
+            .expect_get_crusty_dir()
+            .return_const(mock_crusty_dir);
+
+        mock
+            .expect_get_crusty_db_path()
+            .return_const(mock_crusty_db_path);
+
+        create_crusty_dir(&mock);
+        let result = init_crusty_db(&mock);
         assert!(result);
     }
 }

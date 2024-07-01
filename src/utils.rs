@@ -2,7 +2,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use regex::Regex;
 use crate::sql::{get_value_from_attr_table, SimpleNoteView};
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
-use crate::setup::get_crusty_db_conn;
+use crate::setup::get_db_conn;
 
 pub struct CharCount {
     ascii: usize,

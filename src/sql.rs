@@ -8,7 +8,7 @@ use crate::cli::read_from_std_in;
 use crate::errors::Errors;
 use crate::render::{cr_print_error, cr_println, print_note_summary, print_simple_note};
 use crate::security::{decrypt_note, prompt_for_password, encrypt_text, get_boss_key, decrypt_dump};
-use crate::setup::get_crusty_db_conn;
+use crate::setup::{CrustyPathOperations, get_db_conn, PathOperations};
 use crate::utils::{make_text_single_line, slice_text};
 
 #[derive(Debug)]
@@ -64,12 +64,13 @@ pub(crate) fn add_note(title: &str, note: &str, protected: bool) {
     } else {
         let formatted_title = make_text_single_line(title);
         let truncated_title = slice_text(0, 128, &formatted_title);
-        insert_note(&truncated_title, &note, false)
+        insert_note(&CrustyPathOperations{}, &truncated_title, &note, false)
     }
 }
 
-pub(crate)  fn insert_note(title: &str, note: &str, protected: bool) {
-    let conn = get_crusty_db_conn();
+pub(crate)  fn insert_note(cpo: &dyn PathOperations, title: &str, note: &str, protected: bool) {
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
     // create the new note id
     let content_id = Uuid::new_v4().to_string();
     let note_insert = "INSERT INTO notes (title, protected, created, updated, content_id) \
@@ -98,7 +99,7 @@ pub(crate) fn insert_encrypted_note(title: &str, note: &str) {
         let decrypted_boss_key = get_boss_key(password);
         let encrypted_title = encrypt_text(&decrypted_boss_key, &formatted_title);
         let encrypt_note = encrypt_text(&decrypted_boss_key, note);
-        insert_note(&encrypted_title, &encrypt_note, true);
+        insert_note(&CrustyPathOperations{}, &encrypted_title, &encrypt_note, true);
 
         return true
     };
@@ -106,9 +107,10 @@ pub(crate) fn insert_encrypted_note(title: &str, note: &str) {
     prompt_for_password(encrypted_and_insert_note, true, false);
 }
 
-pub(crate) fn list_note_titles() {
+pub(crate) fn list_note_titles(cpo: &dyn PathOperations) {
     let sql = "SELECT note_id, title, updated, protected FROM notes WHERE TRASHED IS FALSE ORDER BY updated;";
-    let conn = get_crusty_db_conn();
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
     let mut stmt = conn.prepare(sql).unwrap();
     let results = stmt.query_map([], |row| {
         let is_protected: bool = row.get(3).unwrap();
@@ -125,9 +127,10 @@ pub(crate) fn list_note_titles() {
     }
 }
 
-pub(crate) fn get_note_by_id(id: usize) -> SimpleNoteView {
+pub(crate) fn get_note_by_id(cpo: &dyn PathOperations, id: usize) -> SimpleNoteView {
     let sql = "SELECT notes.title, content.body, notes.protected, notes.content_id FROM notes JOIN content on notes.content_id = content.content_id WHERE notes.note_id = :note_id;";
-    let conn = get_crusty_db_conn();
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
     let mut stmt = conn.prepare(sql).unwrap();
     let result = match stmt.query_row(named_params! {":note_id": id as u32}, |row| {
         let is_protected = row.get(2).unwrap();
@@ -154,7 +157,7 @@ pub(crate) fn get_note_by_id(id: usize) -> SimpleNoteView {
         }
     }) {
         Ok(res) => {
-            update_last_touched(id.to_string().as_str());
+            update_last_touched(&CrustyPathOperations{}, id.to_string().as_str());
             res
         },
         Err(err) => {
@@ -190,7 +193,7 @@ fn get_note_from_menu_line_by_id(line: &str) -> SimpleNoteView {
     id_segment = id_segment.trim();
     let result = match id_segment.parse::<i32>(){
         Ok(id) => {
-            get_note_by_id(id as usize)
+            get_note_by_id(&CrustyPathOperations{}, id as usize)
         }
         Err(_) => {
             cr_print_error(format!("{}", "Menu line input is malformed, please check your input."));
@@ -200,11 +203,12 @@ fn get_note_from_menu_line_by_id(line: &str) -> SimpleNoteView {
     result
 }
 
-pub(crate) fn update_last_touched(note_id:&str){
+pub(crate) fn update_last_touched(cpo: &dyn PathOperations, note_id:&str){
     let sql = "UPDATE app SET value = :last_touched WHERE key = 'last_touched';";
     match note_id.parse::<i32>() {
         Ok(id) => {
-            let conn = get_crusty_db_conn();
+            let db_path = cpo.get_crusty_db_path();
+            let conn = get_db_conn(&db_path);
             conn.execute(&sql, named_params! {":last_touched": id as usize}).unwrap();
         }
         Err(_) => {
@@ -214,10 +218,11 @@ pub(crate) fn update_last_touched(note_id:&str){
     }
 }
 
-pub(crate) fn get_last_touched_note() -> SimpleNoteView {
+pub(crate) fn get_last_touched_note(cpo: &dyn PathOperations) -> SimpleNoteView {
     let sql = "SELECT notes.content_id, notes.title, notes.protected, content.body FROM notes JOIN content on notes.content_id = content.content_id \
     WHERE notes.note_id = CAST((SELECT value FROM app WHERE key = 'last_touched') AS INTEGER); ";
-    let conn = get_crusty_db_conn();
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
     let mut stmt = conn.prepare(sql).unwrap();
     let result = match stmt.query_row([], |row| {
         let is_protected: bool = row.get(2).unwrap();
@@ -266,32 +271,36 @@ pub(crate) fn update_note_ts_by_note_id(id: usize, conn: &Connection) {
     stmt.unwrap().execute(named_params! {":note_id": id}).unwrap();
 }
 
-pub(crate) fn update_note_by_content_id(id: &str, text: &str) {
-    let conn = get_crusty_db_conn();
+pub(crate) fn update_note_by_content_id(cpo: &dyn PathOperations, id: &str, text: &str) {
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
     let sql = "UPDATE content SET body = :body WHERE content_id = :content_id;";
     let stmt = conn.prepare(sql);
     stmt.unwrap().execute(named_params! {":content_id": id, ":body": &text}).unwrap();
     update_note_ts_by_content_id(id, &conn)
 }
 
-pub(crate) fn update_note_by_note_id(id: usize, text: &str) {
-    let conn = get_crusty_db_conn();
+pub(crate) fn update_note_by_note_id(cpo: &dyn PathOperations, id: usize, text: &str) {
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
     let sql = "UPDATE content SET body = :body WHERE content_id = (SELECT content_id FROM notes WHERE note_id = :note_id);";
     let stmt = conn.prepare(sql);
     stmt.unwrap().execute(named_params! {":note_id": id, ":body": &text}).unwrap();
     update_note_ts_by_note_id(id, &conn)
 }
 
-pub(crate) fn update_title_by_content_id(id: &str, text: &str) {
+pub(crate) fn update_title_by_content_id(cpo: &dyn PathOperations, id: &str, text: &str) {
     let title = make_text_single_line(&text);
-    let conn = get_crusty_db_conn();
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
     let sql = "UPDATE notes SET title = :title, updated = CURRENT_TIMESTAMP WHERE content_id = :content_id;";
     let stmt = conn.prepare(sql);
     stmt.unwrap().execute(named_params! {":content_id": id, ":title": &title}).unwrap();
 }
 
-pub(crate) fn delete_note(id: usize, force: bool) -> bool {
-    let conn = get_crusty_db_conn();
+pub(crate) fn delete_note(cpo: &dyn PathOperations, id: usize, force: bool) -> bool {
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
     let sql = match force {
         true => {
             "DELETE FROM notes WHERE note_id = :note_id;"
@@ -306,21 +315,24 @@ pub(crate) fn delete_note(id: usize, force: bool) -> bool {
     result > 0
 }
 
-pub(crate) fn empty_trash() {
-    let conn = get_crusty_db_conn();
+pub(crate) fn empty_trash(cpo: &dyn PathOperations) {
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
     let sql = "DELETE FROM notes WHERE trashed is TRUE;";
     conn.execute(&sql, ()).unwrap();
 }
 
-pub(crate) fn set_note_trash(id: usize, trash_state: bool) {
-    let conn = get_crusty_db_conn();
+pub(crate) fn set_note_trash(cpo: &dyn PathOperations, id: usize, trash_state: bool) {
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
     let sql = "UPDATE notes SET trashed = :trashed WHERE note_id = :note_id;";
     let stmt = conn.prepare(sql);
     stmt.unwrap().execute(named_params! {":note_id": id, ":trashed": trash_state}).unwrap();
 }
 
-pub(crate) fn dump_notes(protected: bool) -> Vec<NoteView> {
-    let conn = get_crusty_db_conn();
+pub(crate) fn dump_notes(cpo: &dyn PathOperations, protected: bool) -> Vec<NoteView> {
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
     let sql = "SELECT note_id, title, created, updated, notes.content_id, content.body from \
     notes JOIN content on notes.content_id = content.content_id WHERE protected is :protected;";
     let mut stmt = conn.prepare(sql).unwrap();
@@ -362,7 +374,7 @@ pub(crate) fn dump_notes(protected: bool) -> Vec<NoteView> {
     results
 }
 
-pub(crate) fn get_summary() -> SummaryStats {
+pub(crate) fn get_summary(cpo: &dyn PathOperations) -> SummaryStats {
     let largest_note_sql = "SELECT note_id, title, content.content_id, \
     MAX(length(body)) from content JOIN notes on content.content_id = notes.content_id;";
     let stalest_note_sql = "SELECT note_id, title, content_id, MIN(updated) from notes;";
@@ -372,7 +384,8 @@ pub(crate) fn get_summary() -> SummaryStats {
 
     let mut errors = vec![];
 
-    let conn = get_crusty_db_conn();
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
     let mut largest_stmt = conn.prepare(largest_note_sql).unwrap();
     let largest_result = match largest_stmt.query_row([], |row| {
         Ok(LargeNoteSummary{
@@ -473,8 +486,9 @@ fn get_key_val_update_sql(table: &str) -> String {
     format!("UPDATE {} SET value = :value WHERE key = :key;", table)
 }
 
-pub(crate) fn get_value_from_attr_table(table: &str, key: &str) -> KeyValuePair {
-    let conn = get_crusty_db_conn();
+pub(crate) fn get_value_from_attr_table(cpo: &dyn PathOperations, table: &str, key: &str) -> KeyValuePair {
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
     let sql = match table.to_lowercase().as_str() {
         "app" => {
             get_key_val_select_sql(table)
@@ -506,8 +520,9 @@ pub(crate) fn get_value_from_attr_table(table: &str, key: &str) -> KeyValuePair 
     result
 }
 
-pub(crate) fn add_key_value(table: &str, key: &str, value: &str) -> bool {
-    let conn = get_crusty_db_conn();
+pub(crate) fn add_key_value(cpo: &dyn PathOperations, table: &str, key: &str, value: &str) -> bool {
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
 
     let sql = match table.to_lowercase().as_str() {
         // these match tables created during setup
@@ -532,8 +547,9 @@ pub(crate) fn add_key_value(table: &str, key: &str, value: &str) -> bool {
 }
 
 // @todo refactor to reuse/simplify key_val CRUD func logic
-pub(crate) fn update_key_value(table: &str, key: &str, value: &str) -> bool {
-    let conn = get_crusty_db_conn();
+pub(crate) fn update_key_value(cpo: &dyn PathOperations, table: &str, key: &str, value: &str) -> bool {
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
 
     let sql = match table.to_lowercase().as_str() {
         // these match tables created during setup
@@ -559,8 +575,9 @@ pub(crate) fn update_key_value(table: &str, key: &str, value: &str) -> bool {
     code > 0
 }
 
-pub(crate) fn update_protected_flag(note_id: usize, protected: bool) -> bool {
-    let conn = get_crusty_db_conn();
+pub(crate) fn update_protected_flag(cpo: &dyn PathOperations, note_id: usize, protected: bool) -> bool {
+    let db_path = cpo.get_crusty_db_path();
+    let conn = get_db_conn(&db_path);
    let sql = "UPDATE notes set protected = :protected WHERE note_id = :note_id;";
 
     let code = conn.execute(&sql, named_params! {

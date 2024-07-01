@@ -4,6 +4,7 @@ use regex::Regex;
 use uuid::Uuid;
 use crate::errors::Errors;
 use crate::render::{cr_print_error, cr_println};
+use crate::setup::CrustyPathOperations;
 use crate::sql::{add_key_value, get_note_by_id, get_value_from_attr_table, NoteView, SimpleNoteView, update_key_value, update_note_by_note_id, update_protected_flag, update_title_by_content_id};
 
 /**
@@ -117,13 +118,13 @@ pub(crate) fn decrypt_text(key: &str, text: &str) -> String {
 }
 
 pub(crate) fn check_password(password: &str) -> bool {
-    let saved_encrypted_password = get_value_from_attr_table("app", "password");
+    let saved_encrypted_password = get_value_from_attr_table(&CrustyPathOperations{}, "app", "password");
     let encrypted_password = encrypt_text(password, password);
     encrypted_password.eq(&saved_encrypted_password.value)
 }
 
 pub(crate) fn recovery_reset_password(recovery_code: &str) {
-    let saved_code = get_value_from_attr_table("app", "recovery_code");
+    let saved_code = get_value_from_attr_table(&CrustyPathOperations{}, "app", "recovery_code");
     let encrypted_code = encrypt_text(recovery_code, recovery_code);
     let rec_code = Some(recovery_code.to_string());
     if saved_code.value.eq(&encrypted_code) {
@@ -135,12 +136,12 @@ pub(crate) fn recovery_reset_password(recovery_code: &str) {
 
 
 pub(crate) fn unprotect_note(note_id: usize) {
-    let note = get_note_by_id(note_id);
+    let note = get_note_by_id(&CrustyPathOperations{}, note_id);
 
     if note.protected {
-        update_title_by_content_id(&note.content_id, &note.title);
-        update_note_by_note_id(note_id, &note.body);
-        update_protected_flag(note_id, false);
+        update_title_by_content_id(&CrustyPathOperations{}, &note.content_id, &note.title);
+        update_note_by_note_id(&CrustyPathOperations{}, note_id, &note.body);
+        update_protected_flag(&CrustyPathOperations{}, note_id, false);
     } else {
         cr_println(format!("Note: {} is not encrypted.", note_id));
         exit(0);
@@ -148,22 +149,22 @@ pub(crate) fn unprotect_note(note_id: usize) {
 }
 
 pub(crate) fn get_boss_key(password: &str) -> String {
-    let boss_key = get_value_from_attr_table("app", "boss_key");
+    let boss_key = get_value_from_attr_table(&CrustyPathOperations{}, "app", "boss_key");
     let decrypted_boss_key = decrypt_text(password, &boss_key.value);
 
     decrypted_boss_key.to_string()
 }
 
 pub(crate) fn protect_note(note_id: usize) {
-    let note = get_note_by_id(note_id);
+    let note = get_note_by_id(&CrustyPathOperations{}, note_id);
 
     if note.protected {
         cr_println(format!("Note: {} is already encrypted", note_id))
     } else {
         let encrypted_note = encrypt_note(&note.title, &note.body);
-        update_title_by_content_id(&note.content_id, &encrypted_note.title);
-        update_note_by_note_id(note_id, &encrypted_note.body);
-        update_protected_flag(note_id, true);
+        update_title_by_content_id(&CrustyPathOperations{}, &note.content_id, &encrypted_note.title);
+        update_note_by_note_id(&CrustyPathOperations{}, note_id, &encrypted_note.body);
+        update_protected_flag(&CrustyPathOperations{}, note_id, true);
 
         cr_println(format!("Note: {} is now encrypted.", note_id));
     }
@@ -202,16 +203,16 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
             let encrypted_password = encrypt_text(pw, pw);
             let recovery_code = Uuid::new_v4().to_string();
             let encrypted_recovery_code = encrypt_text(&recovery_code, &recovery_code);
-            let old_encrypted_boss_key = get_value_from_attr_table("app", "recovery_boss_key");
+            let old_encrypted_boss_key = get_value_from_attr_table(&CrustyPathOperations{}, "app", "recovery_boss_key");
             let old_recovery_key = rrc;
             let old_decrypted_boss_key = decrypt_text(&old_recovery_key, &old_encrypted_boss_key.value);
             let new_boss_key = encrypt_text(pw, &old_decrypted_boss_key);
             let new_recovery_boss_key = encrypt_text(&recovery_code, &old_decrypted_boss_key);
 
-            if update_key_value("app", "password", &encrypted_password) &&
-                update_key_value("app", "recovery_code", &encrypted_recovery_code) &&
-                update_key_value("app", "boss_key", &new_boss_key) &&
-                update_key_value("app", "recovery_boss_key", &new_recovery_boss_key) {
+            if update_key_value(&CrustyPathOperations{}, "app", "password", &encrypted_password) &&
+                update_key_value(&CrustyPathOperations{}, "app", "recovery_code", &encrypted_recovery_code) &&
+                update_key_value(&CrustyPathOperations{}, "app", "boss_key", &new_boss_key) &&
+                update_key_value(&CrustyPathOperations{}, "app", "recovery_boss_key", &new_recovery_boss_key) {
                 cr_println("Password set".to_string());
                 cr_println(format!("🛟 Recovery code generated: {}", recovery_code));
                 cr_println("Save your recovery code and use it to change your password if you forget it...again.".to_string());
@@ -238,10 +239,10 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
             let boss_key = encrypt_text(pw, &raw_boss_key);
             let recovery_boss_key = encrypt_text(&recovery_code, &raw_boss_key);
 
-            if add_key_value("app", "password", &encrypted_password) &&
-                add_key_value("app", "recovery_code", &encrypted_recovery_code) &&
-                add_key_value("app", "boss_key", &boss_key) &&
-                add_key_value("app", "recovery_boss_key", &recovery_boss_key) {
+            if add_key_value(&CrustyPathOperations{}, "app", "password", &encrypted_password) &&
+                add_key_value(&CrustyPathOperations{}, "app", "recovery_code", &encrypted_recovery_code) &&
+                add_key_value(&CrustyPathOperations{}, "app", "boss_key", &boss_key) &&
+                add_key_value(&CrustyPathOperations{}, "app", "recovery_boss_key", &recovery_boss_key) {
                 cr_println("Password set".to_string());
                 cr_println(format!("🛟 Recovery code generated: {}", recovery_code));
                 cr_println("Save your recovery code and use it to change your password if you forget it.".to_string());

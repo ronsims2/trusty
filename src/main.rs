@@ -10,7 +10,7 @@ use clap::Parser;
 use security::set_password;
 use crate::cli::{Cli, delete_note, edit_note, edit_title, insert_note_from_std_in, open_note, restore_note, trash_note};
 use crate::render::{cr_println, print_app_summary, print_dump, print_simple_note};
-use crate::setup::{check_for_config, create_crusty_dir, CrustyFileOperations, FileOperations, get_crusty_db_path, get_home_dir, init_crusty_db};
+use crate::setup::{check_for_config, create_crusty_dir, CrustyPathOperations, PathOperations, get_home_dir, init_crusty_db};
 use crate::sql::{add_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, list_note_titles};
 use crate::utils::slice_text;
 use crate::security::{protect_note, recovery_reset_password, unprotect_note};
@@ -20,10 +20,10 @@ fn main() {
     let home_dir = get_home_dir();
     let conf_loc = match check_for_config(&home_dir) {
         None => {
-            create_crusty_dir(&CrustyFileOperations {});
-            init_crusty_db();
+            create_crusty_dir(&CrustyPathOperations {});
+            init_crusty_db(&CrustyPathOperations{});
             set_password(false, None);
-            get_crusty_db_path()
+            CrustyPathOperations::get_crusty_db_path(&CrustyPathOperations {})
         }
         Some(conf_path) => {
             conf_path
@@ -83,7 +83,7 @@ fn main() {
     }
 
     if summary.is_some() {
-        let summary = get_summary();
+        let summary = get_summary(&CrustyPathOperations{});
         print_app_summary(summary);
         return
     }
@@ -102,7 +102,7 @@ fn main() {
     }
 
     if find.is_some() {
-        let note = get_note_by_id(find.unwrap());
+        let note = get_note_by_id(&CrustyPathOperations{}, find.unwrap());
         print_simple_note(note);
         return
     }
@@ -145,15 +145,15 @@ fn main() {
     }
 
     if clean.is_some() {
-        empty_trash();
-        list_note_titles();
+        empty_trash(&CrustyPathOperations{});
+        list_note_titles(&CrustyPathOperations{});
         return
     }
 
     if trash.is_some() {
         let note_id = trash.unwrap();
         trash_note(note_id);
-        list_note_titles();
+        list_note_titles(&CrustyPathOperations{});
         return
     }
 
@@ -165,13 +165,13 @@ fn main() {
     }
 
     if dump.is_some() {
-        let notes = dump_notes(false);
+        let notes = dump_notes(&CrustyPathOperations{}, false);
         print_dump(notes);
         return
     }
 
     if dump_protected.is_some() {
-        let notes = dump_notes(true);
+        let notes = dump_notes(&CrustyPathOperations{}, true);
         print_dump(notes);
         return
     }
@@ -179,5 +179,5 @@ fn main() {
 
     // if there is no input at all show the menu
     // @todo pass flag encrypt message here
-    list_note_titles()
+    list_note_titles(&CrustyPathOperations{})
 }
