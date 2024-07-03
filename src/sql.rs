@@ -12,48 +12,48 @@ use crate::setup::{CrustyPathOperations, get_db_conn, PathOperations};
 use crate::utils::{make_text_single_line, slice_text};
 
 #[derive(Debug)]
-pub(crate) struct NoteSummary {
-    pub(crate) id: i32,
-    pub(crate) title: String,
-    pub(crate) updated: String,
+pub struct NoteSummary {
+    pub id: i32,
+    pub title: String,
+    pub updated: String,
 }
 
-pub(crate) struct SimpleNoteView {
-    pub(crate) title: String,
-    pub(crate) body: String,
-    pub(crate) content_id: String,
-    pub(crate) protected: bool
+pub struct SimpleNoteView {
+    pub title: String,
+    pub body: String,
+    pub content_id: String,
+    pub protected: bool
 }
 
-pub(crate) struct NoteView {
-    pub(crate) title: String,
-    pub(crate) body: String,
-    pub(crate) note_id: i32,
-    pub(crate) content_id: String,
-    pub(crate) updated: String,
-    pub(crate) created: String,
+pub struct NoteView {
+    pub title: String,
+    pub body: String,
+    pub note_id: i32,
+    pub content_id: String,
+    pub updated: String,
+    pub created: String,
 }
 
-pub(crate) struct LargeNoteSummary {
+pub struct LargeNoteSummary {
     pub note_id: i32,
     pub title: String,
     pub content_id: String,
     pub content_size: i32
 }
 
-pub(crate) struct DBStats {
+pub struct DBStats {
     pub total: i32,
     pub trashed: i32
 }
 
-pub(crate) struct SummaryStats {
+pub struct SummaryStats {
     pub db_stats: DBStats,
     pub large_note_stats: LargeNoteSummary,
     pub state_note_stats: NoteView,
     pub fresh_note_stats: NoteView
 }
 
-pub(crate) struct KeyValuePair {
+pub struct KeyValuePair {
     pub key: String,
     pub value: String
 }
@@ -127,7 +127,7 @@ pub(crate) fn list_note_titles(cpo: &dyn PathOperations) {
     }
 }
 
-pub(crate) fn get_note_by_id(cpo: &dyn PathOperations, id: usize) -> SimpleNoteView {
+pub fn get_note_by_id(cpo: &dyn PathOperations, id: usize) -> SimpleNoteView {
     let sql = "SELECT notes.title, content.body, notes.protected, notes.content_id FROM notes JOIN content on notes.content_id = content.content_id WHERE notes.note_id = :note_id;";
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);

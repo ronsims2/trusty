@@ -52,7 +52,7 @@ pub(crate) fn get_home_dir() -> String {
     user_home
 }
 
-fn get_crusty_directory(dir_name: String) -> PathBuf {
+pub fn get_crusty_directory(dir_name: String) -> PathBuf {
     let user_home = get_home_dir();
     let config_loc = format!("{}/{}", &user_home, dir_name);
     Path::new(&config_loc).to_path_buf()
@@ -78,7 +78,7 @@ pub trait PathOperations {
     fn get_crusty_db_path(&self) -> PathBuf;
 }
 
-pub(crate) struct CrustyPathOperations {
+pub struct CrustyPathOperations {
 }
 impl PathOperations for CrustyPathOperations {
     fn get_crusty_dir(&self) -> PathBuf {
@@ -90,7 +90,7 @@ impl PathOperations for CrustyPathOperations {
     }
 }
 
-pub(crate) fn create_crusty_dir(cpo: &dyn PathOperations) -> bool {
+pub fn create_crusty_dir(cpo: &dyn PathOperations) -> bool {
     let config_path = cpo.get_crusty_dir();
     match fs::create_dir(&config_path) {
         Ok(_) => {
@@ -108,7 +108,7 @@ pub(crate) fn get_db_conn(db_path: &PathBuf) -> Connection {
     Connection::open(db_path.as_path()).unwrap()
 }
 
-pub(crate) fn create_crusty_sys_tables(db_path: &PathBuf) {
+pub fn create_crusty_sys_tables(db_path: &PathBuf) {
     let conn = get_db_conn(db_path);
     let create_content_sql = "CREATE TABLE IF NOT EXISTS \
     content (content_id NCHAR(36) PRIMARY KEY, body TEXT);";
@@ -160,7 +160,7 @@ pub(crate) fn populate_crusty_sys_tables(cpo: &dyn PathOperations) {
 
 }
 
-pub(crate) fn init_crusty_db(cpo: &dyn PathOperations) -> bool {
+pub fn init_crusty_db(cpo: &dyn PathOperations) -> bool {
     let db_path = cpo.get_crusty_db_path();
     let db_created = fs::File::create(db_path.as_path());
     match db_created {
