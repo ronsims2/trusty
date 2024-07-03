@@ -53,3 +53,27 @@ pub(crate) fn truncate_rich_text(text: &str, size: usize) -> String {
 
     filtered_chars.join("").to_string()
 }
+
+#[cfg(test)]
+mod test {
+    use crate::utils::truncate_rich_text;
+
+    #[test]
+    fn test_truncate_rich_text() {
+        let result_1 = truncate_rich_text("🤷🏾🥷🏽🦀😀", 2);
+        assert_eq!(result_1, "🤷🏾");
+        let result_2 = truncate_rich_text("🤷🏾🥷🏽🦀😀", 4);
+        assert_eq!(result_2, "🤷🏾🥷🏽");
+        let result_3 = truncate_rich_text("A🥷🏽B😀", 4);
+        assert_eq!(result_3, "A🥷🏽B");
+        let result_4 = truncate_rich_text("A🥷🏽B😀", 3);
+        assert_eq!(result_4, "A🥷🏽");
+        let result_5 = truncate_rich_text("🤷🏾🥷🏽🦀😀", 5);
+        assert_eq!(result_5, "🤷🏾🥷🏽");
+        let result_6 = truncate_rich_text("A🤷🏾BCD🥷🏽🦀E😀FGHI JKLMN", 999);
+        assert_eq!(result_6, "A🤷🏾BCD🥷🏽🦀E😀FGHI JKLMN");
+        let result_7 = truncate_rich_text("A🤷🏾BCD🥷🏽🦀E😀FGHI JKLMN", 0);
+        assert_eq!(result_7, "");
+    }
+
+}

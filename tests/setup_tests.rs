@@ -35,7 +35,10 @@ fn test_populate_crusty_sys_tables() {
     let test = | mock: &dyn PathOperations | {
         let note = get_note_by_id(mock, 1);
         println!("NOTE: TITLE: {}", note.title);
+        // This tests the setup of the notes and content table from a users perspective
+        // this test both create_crusty_sys_tables and populate_crusty_sys_tables
         assert!(note.title.eq("Get Started with cRusty"));
+        assert!(note.body.eq("Welcome to cRusty the CLI notes app. -Ron"));
     };
 
     create_test_db(test);
