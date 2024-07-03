@@ -14,7 +14,7 @@ pub(crate) fn slice_text(start: usize, stop: usize, text: &str) -> String {
     let chars = text.graphemes(true).collect::<Vec<&str>>();
     let char_count = chars.iter().count();
 
-    return if stop - start < char_count {
+    return if start < stop && stop - start < char_count {
         let sample = &chars[start..stop];
         sample.join("").to_string()
     } else {
@@ -56,7 +56,20 @@ pub(crate) fn truncate_rich_text(text: &str, size: usize) -> String {
 
 #[cfg(test)]
 mod test {
-    use crate::utils::truncate_rich_text;
+    use crate::utils::{slice_text, truncate_rich_text};
+
+    #[test]
+    fn test_slice_text() {
+        let result = slice_text(0, 3, "foobar");
+        assert_eq!(result, "foo");
+        let result_2 = slice_text(2, 5, "foobar");
+        assert_eq!(result_2, "oba");
+        let result_3 = slice_text(0, 999, "foobar");
+        assert_eq!(result_3, "foobar");
+        let result_4 = slice_text(999, 0, "foobar");
+        assert_eq!(result_4, "foobar");
+
+    }
 
     #[test]
     fn test_truncate_rich_text() {
