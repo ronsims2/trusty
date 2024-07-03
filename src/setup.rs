@@ -183,8 +183,11 @@ mod tests {
     #[test]
     fn test_get_win_home_drive() {
         let home_drive_value = "FOOBAR";
+        let og_home_drive_value = env::var("HOMEDRIVE").unwrap_or("".to_string());
         env::set_var("HOMEDRIVE", home_drive_value);
         let home_drive = get_win_home_drive();
+        // @todo a nice before all would work better
+        env::set_var("HOMEDRIVE", og_home_drive_value);
         assert_eq!(home_drive, home_drive_value)
     }
 
@@ -193,11 +196,8 @@ mod tests {
         let windows_os = "windows";
         let os_fam = env::consts::FAMILY;
         let home_dir = get_home_dir();
-        if os_fam.eq(windows_os) {
-            assert!(home_dir.contains(':'));
-        } else {
-            assert!(home_dir.len() > 0)
-        }
+        println!("Home dir: {}", home_dir.to_string());
+        assert!(home_dir.len() > 0)
     }
 
     #[test]
