@@ -56,7 +56,7 @@ pub(crate) fn truncate_rich_text(text: &str, size: usize) -> String {
 
 #[cfg(test)]
 mod test {
-    use crate::utils::{slice_text, truncate_rich_text};
+    use crate::utils::{make_text_single_line, slice_text, truncate_rich_text};
 
     #[test]
     fn test_slice_text() {
@@ -69,6 +69,16 @@ mod test {
         let result_4 = slice_text(999, 0, "foobar");
         assert_eq!(result_4, "foobar");
 
+    }
+
+    #[test]
+    fn test_make_text_single_line() {
+        let result = make_text_single_line("Hello my name is: \r\n🤷🏾🥷 \r\nIDK ninja!");
+        assert_eq!(result, "Hello my name is: 🤷🏾🥷 IDK ninja!");
+        let result_2 = make_text_single_line("\r\n");
+        assert_eq!(result_2, "");
+        let result_3 = make_text_single_line("Hello my name is 🤷🏾🥷");
+        assert_eq!(result_3, "Hello my name is 🤷🏾🥷");
     }
 
     #[test]
