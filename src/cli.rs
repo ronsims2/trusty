@@ -3,11 +3,11 @@ use std::io::{BufRead, Read};
 use std::process::exit;
 use clap::Parser;
 use crate::errors::Errors;
-use crate::render::{cr_print_error, cr_println};
 use crate::security::{decrypt_note, encrypt_note};
 use crate::setup::CrustyPathOperations;
 use crate::sql::{get_last_touched_note, get_note_by_id, add_note, set_note_trash, update_note_by_content_id, update_note_by_note_id, update_title_by_content_id};
 use crate::utils::{make_text_single_line, slice_text};
+use crate::render::{CrustyPrinter, Printer};
 
 
 #[derive(Debug, Parser)]
@@ -87,7 +87,7 @@ pub(crate) fn insert_note_from_std_in(title: &str, protected: bool) -> bool {
                 add_note(title, &piped_input, protected);
                 true
             } else {
-                cr_print_error(format!("{}", "Input was either empty or flag was not specified, please fix your command."));
+                CrustyPrinter::cr_print_error(format!("{}", "Input was either empty or flag was not specified, please fix your command."));
                 exit(Errors::InputFlagErr as i32);
             }
         }
@@ -154,8 +154,8 @@ pub(crate) fn restore_note(id: usize) {
 
 pub(crate) fn delete_note(note_id: usize, force: bool) {
     if crate::sql::delete_note(&CrustyPathOperations{}, note_id, force) {
-        cr_println(format!("Note: {} deleted.", note_id))
+        CrustyPrinter::cr_println(format!("Note: {} deleted.", note_id))
     } else {
-        cr_println(format!("Could not delete noted: {}, it may be protected or already removed.", note_id));
+        CrustyPrinter::cr_println(format!("Could not delete noted: {}, it may be protected or already removed.", note_id));
     }
 }

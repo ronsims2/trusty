@@ -7,9 +7,10 @@ mod errors;
 mod security;
 
 use clap::Parser;
+use crusty::render::{CrustyPrinter, Printer};
 use security::set_password;
 use crate::cli::{Cli, delete_note, edit_note, edit_title, insert_note_from_std_in, open_note, restore_note, trash_note};
-use crate::render::{cr_println, print_app_summary, print_dump, print_simple_note};
+use crate::render::{print_app_summary, print_dump, print_simple_note};
 use crate::setup::{check_for_config, create_crusty_dir, CrustyPathOperations, PathOperations, get_home_dir, init_crusty_db};
 use crate::sql::{add_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, list_note_titles};
 use crate::utils::slice_text;
@@ -160,7 +161,7 @@ fn main() {
     if restore.is_some() {
         let note_id = restore.unwrap();
         restore_note(note_id);
-        cr_println(format!("Note: {} restored", note_id));
+        CrustyPrinter::cr_println(format!("Note: {} restored", note_id));
         return
     }
 

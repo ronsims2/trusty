@@ -2,8 +2,8 @@ use std::process::exit;
 use magic_crypt::{MagicCryptTrait, new_magic_crypt};
 use regex::Regex;
 use uuid::Uuid;
+use crate::render::{CrustyPrinter, Printer};
 use crate::errors::Errors;
-use crate::render::{cr_print_error, cr_println};
 use crate::setup::CrustyPathOperations;
 use crate::sql::{add_key_value, get_note_by_id, get_value_from_attr_table, NoteView, SimpleNoteView, update_key_value, update_note_by_note_id, update_protected_flag, update_title_by_content_id};
 
@@ -36,11 +36,11 @@ pub(crate) fn prompt_for_password<F>(mut fun: F, compare_password_to_db: bool, c
             }
         }
 
-        cr_println("Password incorrect, try again.".to_string());
+        CrustyPrinter::cr_println("Password incorrect, try again.".to_string());
         attempts += 1;
     }
 
-    cr_println("Password incorrect.".to_string());
+    CrustyPrinter::cr_println("Password incorrect.".to_string());
     false
 }
 
@@ -130,7 +130,7 @@ pub(crate) fn recovery_reset_password(recovery_code: &str) {
     if saved_code.value.eq(&encrypted_code) {
          set_password(true, rec_code)
     } else {
-        cr_println("Invalid recovery key provided.".to_string());
+        CrustyPrinter::cr_println("Invalid recovery key provided.".to_string());
     }
 }
 
@@ -143,7 +143,7 @@ pub(crate) fn unprotect_note(note_id: usize) {
         update_note_by_note_id(&CrustyPathOperations{}, note_id, &note.body);
         update_protected_flag(&CrustyPathOperations{}, note_id, false);
     } else {
-        cr_println(format!("Note: {} is not encrypted.", note_id));
+        CrustyPrinter::cr_println(format!("Note: {} is not encrypted.", note_id));
         exit(0);
     }
 }
@@ -159,14 +159,14 @@ pub(crate) fn protect_note(note_id: usize) {
     let note = get_note_by_id(&CrustyPathOperations{}, note_id);
 
     if note.protected {
-        cr_println(format!("Note: {} is already encrypted", note_id))
+        CrustyPrinter::cr_println(format!("Note: {} is already encrypted", note_id))
     } else {
         let encrypted_note = encrypt_note(&note.title, &note.body);
         update_title_by_content_id(&CrustyPathOperations{}, &note.content_id, &encrypted_note.title);
         update_note_by_note_id(&CrustyPathOperations{}, note_id, &encrypted_note.body);
         update_protected_flag(&CrustyPathOperations{}, note_id, true);
 
-        cr_println(format!("Note: {} is now encrypted.", note_id));
+        CrustyPrinter::cr_println(format!("Note: {} is now encrypted.", note_id));
     }
 }
 
@@ -197,7 +197,7 @@ pub(crate) fn decrypt_dump(notes: &Vec<NoteView>) -> Vec<NoteView> {
 
 pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
     if update {
-        cr_println("Change your password".to_string());
+        CrustyPrinter::cr_println("Change your password".to_string());
         let rrc = &raw_recovery_code.unwrap().to_string();
         let update_password = |pw: &str| -> bool {
             let encrypted_password = encrypt_text(pw, pw);
@@ -213,13 +213,13 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
                 update_key_value(&CrustyPathOperations{}, "app", "recovery_code", &encrypted_recovery_code) &&
                 update_key_value(&CrustyPathOperations{}, "app", "boss_key", &new_boss_key) &&
                 update_key_value(&CrustyPathOperations{}, "app", "recovery_boss_key", &new_recovery_boss_key) {
-                cr_println("Password set".to_string());
-                cr_println(format!("🛟 Recovery code generated: {}", recovery_code));
-                cr_println("Save your recovery code and use it to change your password if you forget it...again.".to_string());
+                CrustyPrinter::cr_println("Password set".to_string());
+                CrustyPrinter::cr_println(format!("🛟 Recovery code generated: {}", recovery_code));
+                CrustyPrinter::cr_println("Save your recovery code and use it to change your password if you forget it...again.".to_string());
 
                 return true
             } else {
-                cr_print_error(format!("{}", "Could not set password."));
+                CrustyPrinter::cr_print_error(format!("{}", "Could not set password."));
                 exit(Errors::SetPasswordErr as i32)
             }
         };
@@ -227,7 +227,7 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
         if prompt_for_password(update_password, false, true) {
             return
         } else {
-            cr_print_error(format!("{}", "Invalid password."));
+            CrustyPrinter::cr_print_error(format!("{}", "Invalid password."));
             exit(Errors::CreatePasswordErr as i32)
         }
     } else {
@@ -243,22 +243,22 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
                 add_key_value(&CrustyPathOperations{}, "app", "recovery_code", &encrypted_recovery_code) &&
                 add_key_value(&CrustyPathOperations{}, "app", "boss_key", &boss_key) &&
                 add_key_value(&CrustyPathOperations{}, "app", "recovery_boss_key", &recovery_boss_key) {
-                cr_println("Password set".to_string());
-                cr_println(format!("🛟 Recovery code generated: {}", recovery_code));
-                cr_println("Save your recovery code and use it to change your password if you forget it.".to_string());
+                CrustyPrinter::cr_println("Password set".to_string());
+                CrustyPrinter::cr_println(format!("🛟 Recovery code generated: {}", recovery_code));
+                CrustyPrinter::cr_println("Save your recovery code and use it to change your password if you forget it.".to_string());
 
                 return true
             } else {
-                cr_print_error(format!("{}", "Could not set password."));
+                CrustyPrinter::cr_print_error(format!("{}", "Could not set password."));
                 exit(Errors::SetPasswordErr as i32)
             }
         };
 
-        cr_println("Set up an alpha-numeric password so that you can encrypt things 🤐".to_string());
+        CrustyPrinter::cr_println("Set up an alpha-numeric password so that you can encrypt things 🤐".to_string());
         if prompt_for_password(insert_password, false, true) {
             return
         } else {
-            cr_print_error(format!("{}", "Invalid password."));
+            CrustyPrinter::cr_print_error(format!("{}", "Invalid password."));
             exit(Errors::CreatePasswordErr as i32)
         }
     }

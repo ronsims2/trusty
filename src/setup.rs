@@ -6,7 +6,7 @@ use std::time::SystemTime;
 use rusqlite::Connection;
 use uuid::Uuid;
 use crate::errors::Errors;
-use crate::render::{cr_print_error, cr_println};
+use crate::render::{Printer, CrustyPrinter};
 
 #[cfg(test)]
 use mockall::*;
@@ -21,7 +21,7 @@ fn get_win_home_drive() -> String {
             val.to_string()
         }
         Err(_) => {
-            cr_print_error(format!("{}", "Could not determine Windows user drive."));
+            CrustyPrinter::cr_print_error(format!("{}", "Could not determine Windows user drive."));
             exit(Errors::WinUserErr as i32)
         }
     };
@@ -44,7 +44,7 @@ pub(crate) fn get_home_dir() -> String {
             }
         }
         Err(_) => {
-            cr_print_error(format!("{}", "Could not determine home path during config."));
+            CrustyPrinter::cr_print_error(format!("{}", "Could not determine home path during config."));
             exit(Errors::HomePathErr as i32)
         }
     };
@@ -94,10 +94,10 @@ pub fn create_crusty_dir(cpo: &dyn PathOperations) -> bool {
     let config_path = cpo.get_crusty_dir();
     match fs::create_dir(&config_path) {
         Ok(_) => {
-            cr_println(format!("Created cRusty config at: {:?}", config_path));
+            CrustyPrinter::cr_println(format!("Created cRusty config at: {:?}", config_path));
         }
         Err(_) => {
-            cr_print_error(format!("{}", "Could not create cRusty config directory."));
+            CrustyPrinter::cr_print_error(format!("{}", "Could not create cRusty config directory."));
             exit(Errors::ConfigDirErr as i32)
         }
     }
@@ -128,7 +128,7 @@ pub fn create_crusty_sys_tables(db_path: &PathBuf) {
     // state inserts
     conn.execute(insert_last_touched_sql, ()).unwrap();
 
-    cr_println(format!("{}", "Initialized empty cRusty tables."));
+    CrustyPrinter::cr_println(format!("{}", "Initialized empty cRusty tables."));
 }
 
 pub(crate) fn get_unix_epoch_ts() -> u64 {
@@ -155,9 +155,8 @@ pub(crate) fn populate_crusty_sys_tables(cpo: &dyn PathOperations) {
     conn.execute(&note_insert_sql, ()).unwrap();
     conn.execute(&config_insert_app_id_sql, ()).unwrap();
     conn.execute(&config_insert_version_sql, ()).unwrap();
-    cr_println(format!("{}", "Configurations added."));
 
-
+    CrustyPrinter::cr_println(format!("{}", "Configurations added."));
 }
 
 pub fn init_crusty_db(cpo: &dyn PathOperations) -> bool {
@@ -169,7 +168,8 @@ pub fn init_crusty_db(cpo: &dyn PathOperations) -> bool {
             populate_crusty_sys_tables(cpo);
         }
         Err(_) => {
-            cr_println(format!("{}", "Could not create cRusty DB."));
+            CrustyPrinter::cr_println(format!("{}", "Could not create cRusty DB."));
+            exit(Errors::InitDBErr as i32)
         }
     }
 

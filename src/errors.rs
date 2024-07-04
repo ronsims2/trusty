@@ -14,5 +14,6 @@ pub enum Errors {
     CreatePasswordErr = 513,
     KeyValInsertErr = 514,
     KeyValSelectErr = 515,
-    KeyValUpdateErr = 516
+    KeyValUpdateErr = 516,
+    InitDBErr = 517
 }
