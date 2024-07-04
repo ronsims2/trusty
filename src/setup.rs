@@ -62,7 +62,7 @@ pub fn get_crusty_directory(dir_name: String) -> PathBuf {
 
 
 pub(crate) fn check_for_config(home_dir: &String) -> Option<PathBuf> {
-    let config_path = CrustyPathOperations::get_crusty_dir(&CrustyPathOperations {});
+    let config_path = CrustyPathOperations{}.get_crusty_dir();
 
     if config_path.exists() {
         return Some(config_path)
@@ -200,7 +200,7 @@ mod tests {
 
     #[test]
     fn test_get_crusty_dir() {
-        let crusty_dir = CrustyPathOperations::get_crusty_dir(&CrustyPathOperations {});
+        let crusty_dir = CrustyPathOperations{}.get_crusty_dir();
         assert!(crusty_dir.to_str().unwrap().contains(".crusty"))
     }
 

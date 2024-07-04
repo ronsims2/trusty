@@ -97,7 +97,7 @@ pub(crate) fn insert_note_from_std_in(title: &str, protected: bool) -> bool {
 }
 
 pub(crate) fn edit_note() {
-    let note = get_last_touched_note(&CrustyPathOperations{}, );
+    let note = get_last_touched_note(&CrustyPathOperations{});
     let body = note.body.as_str();
     let edited = edit::edit(body).unwrap();
 
@@ -108,12 +108,12 @@ pub(crate) fn edit_note() {
         }
         false => {edited}
     };
-    update_note_by_content_id(&CrustyPathOperations{}, &note.content_id, &new_body);
+    update_note_by_content_id(&CrustyPathOperations{},&note.content_id, &new_body);
 }
 
 pub(crate) fn edit_title(note_id: Option<usize>) {
     let id = note_id.unwrap_or(0);
-    let note = if id > 0  {get_note_by_id(&CrustyPathOperations{}, id)} else {get_last_touched_note(&CrustyPathOperations{})};
+    let note = if id > 0  {get_note_by_id(&CrustyPathOperations{},id)} else {get_last_touched_note(&CrustyPathOperations{})};
     let title = note.title.to_string();
 
     let edited_title = edit::edit(title).unwrap();
@@ -128,15 +128,15 @@ pub(crate) fn edit_title(note_id: Option<usize>) {
         false => {edited_title}
     };
 
-    update_title_by_content_id(&CrustyPathOperations{}, &note.content_id, &new_title);
+    update_title_by_content_id(&CrustyPathOperations{},&note.content_id, &new_title);
 }
 
 pub(crate) fn open_note(id: usize, protected: bool) {
     if id > 0 {
-        let note = get_note_by_id(&CrustyPathOperations{}, id);
+        let note = get_note_by_id(&CrustyPathOperations{},id);
         let body = note.body.as_str();
         let edited = edit::edit(body).unwrap();
-        update_note_by_note_id(&CrustyPathOperations{}, id, &edited);
+        update_note_by_note_id(&CrustyPathOperations{},id, &edited);
     } else {
         let draft = edit::edit("").unwrap();
         let title = slice_text(0, 128, &draft);
@@ -145,15 +145,15 @@ pub(crate) fn open_note(id: usize, protected: bool) {
 }
 
 pub(crate) fn trash_note(id: usize) {
-    set_note_trash(&CrustyPathOperations{}, id, true);
+    set_note_trash(&CrustyPathOperations{},id, true);
 }
 
 pub(crate) fn restore_note(id: usize) {
-    set_note_trash(&CrustyPathOperations{}, id, false);
+    set_note_trash(&CrustyPathOperations{},id, false);
 }
 
 pub(crate) fn delete_note(note_id: usize, force: bool) {
-    if crate::sql::delete_note(&CrustyPathOperations{}, note_id, force) {
+    if crate::sql::delete_note(&CrustyPathOperations{},note_id, force) {
         CrustyPrinter{}.println(format!("Note: {} deleted.", note_id))
     } else {
         CrustyPrinter{}.println(format!("Could not delete noted: {}, it may be protected or already removed.", note_id));

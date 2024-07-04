@@ -24,7 +24,7 @@ fn main() {
             create_crusty_dir(&CrustyPathOperations {});
             init_crusty_db(&CrustyPathOperations{});
             set_password(false, None);
-            CrustyPathOperations::get_crusty_db_path(&CrustyPathOperations {})
+            CrustyPathOperations{}.get_crusty_db_path()
         }
         Some(conf_path) => {
             conf_path
@@ -103,7 +103,7 @@ fn main() {
     }
 
     if find.is_some() {
-        let note = get_note_by_id(&CrustyPathOperations{}, find.unwrap());
+        let note = get_note_by_id(&CrustyPathOperations{},find.unwrap());
         print_simple_note(note);
         return
     }
@@ -166,13 +166,13 @@ fn main() {
     }
 
     if dump.is_some() {
-        let notes = dump_notes(&CrustyPathOperations{}, false);
+        let notes = dump_notes(&CrustyPathOperations{},false);
         print_dump(notes);
         return
     }
 
     if dump_protected.is_some() {
-        let notes = dump_notes(&CrustyPathOperations{}, true);
+        let notes = dump_notes(&CrustyPathOperations{},true);
         print_dump(notes);
         return
     }

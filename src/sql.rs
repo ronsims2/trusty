@@ -64,7 +64,7 @@ pub(crate) fn add_note(title: &str, note: &str, protected: bool) {
     } else {
         let formatted_title = make_text_single_line(title);
         let truncated_title = slice_text(0, 128, &formatted_title);
-        insert_note(&CrustyPathOperations{}, &truncated_title, &note, false)
+        insert_note(&CrustyPathOperations{},&truncated_title, &note, false)
     }
 }
 
@@ -99,7 +99,7 @@ pub(crate) fn insert_encrypted_note(title: &str, note: &str) {
         let decrypted_boss_key = get_boss_key(password);
         let encrypted_title = encrypt_text(&decrypted_boss_key, &formatted_title);
         let encrypt_note = encrypt_text(&decrypted_boss_key, note);
-        insert_note(&CrustyPathOperations{}, &encrypted_title, &encrypt_note, true);
+        insert_note(&CrustyPathOperations{},&encrypted_title, &encrypt_note, true);
 
         return true
     };
@@ -157,7 +157,7 @@ pub fn get_note_by_id(cpo: &dyn PathOperations, id: usize) -> SimpleNoteView {
         }
     }) {
         Ok(res) => {
-            update_last_touched(&CrustyPathOperations{}, id.to_string().as_str());
+            update_last_touched(&CrustyPathOperations{},id.to_string().as_str());
             res
         },
         Err(err) => {
@@ -193,7 +193,7 @@ fn get_note_from_menu_line_by_id(line: &str) -> SimpleNoteView {
     id_segment = id_segment.trim();
     let result = match id_segment.parse::<i32>(){
         Ok(id) => {
-            get_note_by_id(&CrustyPathOperations{}, id as usize)
+            get_note_by_id(&CrustyPathOperations{},id as usize)
         }
         Err(_) => {
             CrustyPrinter{}.print_error(format!("{}", "Menu line input is malformed, please check your input."));

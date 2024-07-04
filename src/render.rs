@@ -119,8 +119,6 @@ mod tests {
         mock.expect_println().return_const(());
         mock.expect_print_error().return_const(());
 
-
         print_note_summary(test_note_summary);
-
     }
 }
