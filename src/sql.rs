@@ -161,7 +161,7 @@ pub fn get_note_by_id(cpo: &dyn PathOperations, id: usize) -> SimpleNoteView {
             res
         },
         Err(err) => {
-            CrustyPrinter::cr_print_error(format!("Could not find note for id: {}", id));
+            CrustyPrinter{}.print_error(format!("Could not find note for id: {}", id));
             exit(Errors::NoteIdErr as i32);
         }
     };
@@ -172,13 +172,13 @@ pub fn get_note_by_id(cpo: &dyn PathOperations, id: usize) -> SimpleNoteView {
 pub(crate) fn get_note_from_menu_line() -> SimpleNoteView {
     let result = match read_from_std_in() {
         None => {
-            CrustyPrinter::cr_print_error(format!("{}", "No menu line specified, could not lookup record."));
+            CrustyPrinter{}.print_error(format!("{}", "No menu line specified, could not lookup record."));
             exit(Errors::MenuLineErr as i32);
         }
         Some(ln) => {
             let trimmed_ln = ln.trim();
             if trimmed_ln.is_empty() {
-                CrustyPrinter::cr_print_error(format!("{}", "Menu line input is empty, could not lookup record."));
+                CrustyPrinter{}.print_error(format!("{}", "Menu line input is empty, could not lookup record."));
                 exit(Errors::MenuLineEmptyErr as i32);
             } else {
                 get_note_from_menu_line_by_id(ln.as_str())
@@ -196,7 +196,7 @@ fn get_note_from_menu_line_by_id(line: &str) -> SimpleNoteView {
             get_note_by_id(&CrustyPathOperations{}, id as usize)
         }
         Err(_) => {
-            CrustyPrinter::cr_print_error(format!("{}", "Menu line input is malformed, please check your input."));
+            CrustyPrinter{}.print_error(format!("{}", "Menu line input is malformed, please check your input."));
             exit(Errors::MenuLineMalformedErr as i32);
         }
     };
@@ -212,7 +212,7 @@ pub(crate) fn update_last_touched(cpo: &dyn PathOperations, note_id:&str){
             conn.execute(&sql, named_params! {":last_touched": id as usize}).unwrap();
         }
         Err(_) => {
-            CrustyPrinter::cr_print_error(format!("{}", "note ID is malformed, please check your input."));
+            CrustyPrinter{}.print_error(format!("{}", "note ID is malformed, please check your input."));
             exit(Errors::NoteIdMalformedErr as i32)
         }
     }
@@ -252,7 +252,7 @@ pub(crate) fn get_last_touched_note(cpo: &dyn PathOperations) -> SimpleNoteView 
             res
         }
         Err(_) => {
-            CrustyPrinter::cr_print_error(format!("{}", "Could not fetch the last touched note."));
+            CrustyPrinter{}.print_error(format!("{}", "Could not fetch the last touched note."));
             exit(Errors::LastTouchFetchErr as i32)
         }
     };
@@ -461,7 +461,7 @@ pub(crate) fn get_summary(cpo: &dyn PathOperations) -> SummaryStats {
     };
 
     if errors.len() > 0 {
-        CrustyPrinter::cr_print_error("Error creating summary.".to_string());
+        CrustyPrinter{}.print_error("Error creating summary.".to_string());
         exit(Errors::SummaryErr as i32);
     }
 
@@ -497,7 +497,7 @@ pub(crate) fn get_value_from_attr_table(cpo: &dyn PathOperations, table: &str, k
             get_key_val_select_sql(table)
         }
         _ => {
-            CrustyPrinter::cr_print_error(format!("{}", "Could not get select val sql."));
+            CrustyPrinter{}.print_error(format!("{}", "Could not get select val sql."));
             exit(Errors::KeyValSelectErr as i32)
         }
     };
@@ -513,7 +513,7 @@ pub(crate) fn get_value_from_attr_table(cpo: &dyn PathOperations, table: &str, k
             data
         },
         Err(error) => {
-            CrustyPrinter::cr_print_error(format!("{}", "Could not get select val sql."));
+            CrustyPrinter{}.print_error(format!("{}", "Could not get select val sql."));
             exit(Errors::KeyValSelectErr as i32)
         }
     };
@@ -533,7 +533,7 @@ pub(crate) fn add_key_value(cpo: &dyn PathOperations, table: &str, key: &str, va
             get_key_val_insert_sql(table)
         }
         _ => {
-            CrustyPrinter::cr_print_error(format!("{}", "Could not create key val."));
+            CrustyPrinter{}.print_error(format!("{}", "Could not create key val."));
             exit(Errors::KeyValInsertErr as i32)
         }
     };
@@ -561,7 +561,7 @@ pub(crate) fn update_key_value(cpo: &dyn PathOperations, table: &str, key: &str,
             get_key_val_update_sql(table)
         }
         _ => {
-            CrustyPrinter::cr_print_error(format!("{}", "Could not update key val."));
+            CrustyPrinter{}.print_error(format!("{}", "Could not update key val."));
             exit(Errors::KeyValUpdateErr as i32)
         }
     };

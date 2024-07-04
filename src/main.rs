@@ -161,7 +161,7 @@ fn main() {
     if restore.is_some() {
         let note_id = restore.unwrap();
         restore_note(note_id);
-        CrustyPrinter::cr_println(format!("Note: {} restored", note_id));
+        CrustyPrinter{}.println(format!("Note: {} restored", note_id));
         return
     }
 

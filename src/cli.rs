@@ -87,7 +87,7 @@ pub(crate) fn insert_note_from_std_in(title: &str, protected: bool) -> bool {
                 add_note(title, &piped_input, protected);
                 true
             } else {
-                CrustyPrinter::cr_print_error(format!("{}", "Input was either empty or flag was not specified, please fix your command."));
+                CrustyPrinter{}.print_error(format!("{}", "Input was either empty or flag was not specified, please fix your command."));
                 exit(Errors::InputFlagErr as i32);
             }
         }
@@ -154,8 +154,8 @@ pub(crate) fn restore_note(id: usize) {
 
 pub(crate) fn delete_note(note_id: usize, force: bool) {
     if crate::sql::delete_note(&CrustyPathOperations{}, note_id, force) {
-        CrustyPrinter::cr_println(format!("Note: {} deleted.", note_id))
+        CrustyPrinter{}.println(format!("Note: {} deleted.", note_id))
     } else {
-        CrustyPrinter::cr_println(format!("Could not delete noted: {}, it may be protected or already removed.", note_id));
+        CrustyPrinter{}.println(format!("Could not delete noted: {}, it may be protected or already removed.", note_id));
     }
 }
