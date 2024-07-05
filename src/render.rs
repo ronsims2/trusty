@@ -106,11 +106,6 @@ mod tests {
             updated: "2024-07-01 22:56:27".to_string(),
         };
 
-        let sys_new_line = "";
-
-        let control_output = format!("        1 | 2024-07-01 22:56:27 | Get Started with cRusty{}
-        ----------+---------------------+-----------------------------------------------", sys_new_line);
-
         let mut mock = MockPrinter::new();
         mock.expect_println().times(2).return_const(());
         mock.expect_print_error().times(0).return_const(());
