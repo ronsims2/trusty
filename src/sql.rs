@@ -535,7 +535,7 @@ pub fn get_value_from_attr_table(cpo: &dyn PathOperations, table: &str, key: &st
     result
 }
 
-pub(crate) fn add_key_value(cpo: &dyn PathOperations, table: &str, key: &str, value: &str) -> bool {
+pub fn add_key_value(cpo: &dyn PathOperations, table: &str, key: &str, value: &str) -> bool {
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);
 
@@ -562,7 +562,7 @@ pub(crate) fn add_key_value(cpo: &dyn PathOperations, table: &str, key: &str, va
 }
 
 // @todo refactor to reuse/simplify key_val CRUD func logic
-pub(crate) fn update_key_value(cpo: &dyn PathOperations, table: &str, key: &str, value: &str) -> bool {
+pub fn update_key_value(cpo: &dyn PathOperations, table: &str, key: &str, value: &str) -> bool {
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);
 
@@ -590,7 +590,7 @@ pub(crate) fn update_key_value(cpo: &dyn PathOperations, table: &str, key: &str,
     code > 0
 }
 
-pub(crate) fn update_protected_flag(cpo: &dyn PathOperations, note_id: usize, protected: bool) -> bool {
+pub fn update_protected_flag(cpo: &dyn PathOperations, note_id: usize, protected: bool) -> bool {
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);
    let sql = "UPDATE notes set protected = :protected WHERE note_id = :note_id;";
