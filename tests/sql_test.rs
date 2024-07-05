@@ -4,8 +4,8 @@
 use std::path::PathBuf;
 use mockall::automock;
 use tempfile::tempdir;
-use crusty::setup::{create_crusty_dir, init_crusty_db, PathOperations};
-use crusty::sql::{get_note_by_id, add_note, list_note_titles, get_note_from_menu_line_by_id, NoteSummary, SimpleNoteView, update_last_touched, get_last_touched_note};
+use crusty::setup::{create_crusty_dir, get_db_conn, init_crusty_db, PathOperations};
+use crusty::sql::{get_note_by_id, add_note, list_note_titles, get_note_from_menu_line_by_id, NoteSummary, SimpleNoteView, update_last_touched, get_last_touched_note, update_note_ts_by_note_id, update_note_ts_by_content_id, update_note_by_note_id};
 use crusty::render::Printer;
 
 
@@ -115,6 +115,22 @@ fn test_update_last_touched() {
         update_last_touched(mock, "1");
         let note_2 = get_last_touched_note(mock);
         assert_ne!(note_2.title, title);
+    };
+
+    create_test_db(test);
+}
+
+#[test]
+fn test_update_note_functions() {
+    let test = | mock: &dyn PathOperations | {
+        let conn = get_db_conn(&mock.get_crusty_db_path());
+        let note = get_note_by_id(mock, 1);
+        assert!(update_note_ts_by_note_id(1, &conn));
+        assert!(update_note_ts_by_content_id(&note.content_id, &conn));
+        let text = "foobar";
+        assert!(update_note_by_note_id(mock, 1, text));
+        let note_2 = get_note_by_id(mock, 1);
+        assert_eq!(note_2.body, text);
     };
 
     create_test_db(test);

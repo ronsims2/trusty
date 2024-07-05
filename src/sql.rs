@@ -262,19 +262,23 @@ pub fn get_last_touched_note(cpo: &dyn PathOperations) -> SimpleNoteView {
     result
 }
 
-pub(crate) fn update_note_ts_by_content_id(id: &str, conn: &Connection) {
+pub fn update_note_ts_by_content_id(id: &str, conn: &Connection) -> bool {
     let sql = "UPDATE notes SET updated = CURRENT_TIMESTAMP WHERE content_id = :content_id;";
     let stmt = conn.prepare(sql);
-    stmt.unwrap().execute(named_params! {":content_id": id}).unwrap();
+    let result = stmt.unwrap().execute(named_params! {":content_id": id}).unwrap();
+
+    result > 0
 }
 
-pub(crate) fn update_note_ts_by_note_id(id: usize, conn: &Connection) {
+pub fn update_note_ts_by_note_id(id: usize, conn: &Connection) -> bool {
     let sql = "UPDATE notes SET updated = CURRENT_TIMESTAMP WHERE note_id = :note_id;";
     let stmt = conn.prepare(sql);
-    stmt.unwrap().execute(named_params! {":note_id": id}).unwrap();
+    let result = stmt.unwrap().execute(named_params! {":note_id": id}).unwrap();
+
+    result > 0
 }
 
-pub(crate) fn update_note_by_content_id(cpo: &dyn PathOperations, id: &str, text: &str) {
+pub(crate) fn update_note_by_content_id(cpo: &dyn PathOperations, id: &str, text: &str) -> bool {
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = "UPDATE content SET body = :body WHERE content_id = :content_id;";
@@ -283,13 +287,15 @@ pub(crate) fn update_note_by_content_id(cpo: &dyn PathOperations, id: &str, text
     update_note_ts_by_content_id(id, &conn)
 }
 
-pub(crate) fn update_note_by_note_id(cpo: &dyn PathOperations, id: usize, text: &str) {
+pub fn update_note_by_note_id(cpo: &dyn PathOperations, id: usize, text: &str) -> bool {
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = "UPDATE content SET body = :body WHERE content_id = (SELECT content_id FROM notes WHERE note_id = :note_id);";
     let stmt = conn.prepare(sql);
-    stmt.unwrap().execute(named_params! {":note_id": id, ":body": &text}).unwrap();
-    update_note_ts_by_note_id(id, &conn)
+    let result = stmt.unwrap().execute(named_params! {":note_id": id, ":body": &text}).unwrap();
+    update_note_ts_by_note_id(id, &conn);
+
+    result > 0
 }
 
 pub(crate) fn update_title_by_content_id(cpo: &dyn PathOperations, id: &str, text: &str) {

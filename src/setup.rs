@@ -103,7 +103,7 @@ pub fn create_crusty_dir(cpo: &dyn PathOperations) -> bool {
     return true
 }
 
-pub(crate) fn get_db_conn(db_path: &PathBuf) -> Connection {
+pub fn get_db_conn(db_path: &PathBuf) -> Connection {
     Connection::open(db_path.as_path()).unwrap()
 }
 
