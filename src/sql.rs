@@ -278,7 +278,7 @@ pub fn update_note_ts_by_note_id(id: usize, conn: &Connection) -> bool {
     result > 0
 }
 
-pub(crate) fn update_note_by_content_id(cpo: &dyn PathOperations, id: &str, text: &str) -> bool {
+pub fn update_note_by_content_id(cpo: &dyn PathOperations, id: &str, text: &str) -> bool {
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = "UPDATE content SET body = :body WHERE content_id = :content_id;";
@@ -298,16 +298,18 @@ pub fn update_note_by_note_id(cpo: &dyn PathOperations, id: usize, text: &str) -
     result > 0
 }
 
-pub(crate) fn update_title_by_content_id(cpo: &dyn PathOperations, id: &str, text: &str) {
+pub fn update_title_by_content_id(cpo: &dyn PathOperations, id: &str, text: &str) -> bool {
     let title = make_text_single_line(&text);
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = "UPDATE notes SET title = :title, updated = CURRENT_TIMESTAMP WHERE content_id = :content_id;";
     let stmt = conn.prepare(sql);
-    stmt.unwrap().execute(named_params! {":content_id": id, ":title": &title}).unwrap();
+    let result = stmt.unwrap().execute(named_params! {":content_id": id, ":title": &title}).unwrap();
+
+    result > 0
 }
 
-pub(crate) fn delete_note(cpo: &dyn PathOperations, id: usize, force: bool) -> bool {
+pub fn delete_note(cpo: &dyn PathOperations, id: usize, force: bool) -> bool {
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = match force {
@@ -383,7 +385,7 @@ pub(crate) fn dump_notes(cpo: &dyn PathOperations, protected: bool) -> Vec<NoteV
     results
 }
 
-pub(crate) fn get_summary(cpo: &dyn PathOperations) -> SummaryStats {
+pub fn get_summary(cpo: &dyn PathOperations) -> SummaryStats {
     let largest_note_sql = "SELECT note_id, title, content.content_id, \
     MAX(length(body)) from content JOIN notes on content.content_id = notes.content_id;";
     let stalest_note_sql = "SELECT note_id, title, content_id, MIN(updated) from notes;";
