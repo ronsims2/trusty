@@ -46,12 +46,12 @@ pub(crate) fn print_simple_note(printer: &dyn Printer, note: SimpleNoteView) {
     printer.println(note.body);
 }
 
-pub(crate) fn print_dump(notes: Vec<NoteView>) {
+pub(crate) fn print_dump(printer: &dyn Printer, notes: Vec<NoteView>) {
     for note in notes {
-        CrustyPrinter{}.println(format!("{:width$} | {} | {} | {}", note.note_id, note.content_id, note.created, note.updated, width = 9));
+        printer.println(format!("{:width$} | {} | {} | {}", note.note_id, note.content_id, note.created, note.updated, width = 9));
         let lines = note.body.lines();
         for line in lines {
-            CrustyPrinter{}.println(format!("{:width$} | {} | {}", note.note_id, note.content_id, line, width = 9));
+            printer.println(format!("{:width$} | {} | {}", note.note_id, note.content_id, line, width = 9));
         }
     }
 }
@@ -126,5 +126,30 @@ mod tests {
         mock.expect_println().times(1).return_const(());
         mock.expect_print_error().times(0).return_const(());
         print_simple_note(&mock, test_note);
+    }
+
+    #[test]
+    fn test_print_dump() {
+        let fake_data = vec![NoteView{
+            title: "foo".to_string(),
+            body: "foofoo".to_string(),
+            note_id: 0,
+            content_id: "".to_string(),
+            updated: "".to_string(),
+            created: "".to_string(),
+        }, NoteView{
+            title: "bar".to_string(),
+            body: "bar\r\nbar".to_string(),
+            note_id: 0,
+            content_id: "".to_string(),
+            updated: "".to_string(),
+            created: "".to_string(),
+        }];
+
+        let mut mock = MockPrinter::new();
+        mock.expect_println().times(5).return_const(());
+        mock.expect_print_error().times(0).return_const(());
+
+        print_dump(&mock, fake_data);
     }
 }

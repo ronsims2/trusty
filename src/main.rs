@@ -166,13 +166,13 @@ fn main() {
 
     if dump.is_some() {
         let notes = dump_notes(&CrustyPathOperations{},false);
-        print_dump(notes);
+        print_dump(&CrustyPrinter{}, notes);
         return
     }
 
     if dump_protected.is_some() {
         let notes = dump_notes(&CrustyPathOperations{},true);
-        print_dump(notes);
+        print_dump(&CrustyPrinter{}, notes);
         return
     }
 
