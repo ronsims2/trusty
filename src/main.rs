@@ -59,7 +59,7 @@ fn main() {
 
     if find_from.is_some() {
         let note = get_note_from_menu_line();
-        print_simple_note(note);
+        print_simple_note(&CrustyPrinter{}, note);
         return
     }
 
@@ -103,7 +103,7 @@ fn main() {
 
     if find.is_some() {
         let note = get_note_by_id(&CrustyPathOperations{},find.unwrap());
-        print_simple_note(note);
+        print_simple_note(&CrustyPrinter{}, note);
         return
     }
 

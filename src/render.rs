@@ -39,11 +39,11 @@ impl Printer for CrustyPrinter {
     }
 }
 
-pub(crate) fn print_simple_note(note: SimpleNoteView) {
+pub(crate) fn print_simple_note(printer: &dyn Printer, note: SimpleNoteView) {
     // @todo Right now it is better to not render the title so that using things liked saved data are easier
     // cr_println(note.title);
     // cr_println(format!("{}", "_".repeat(80)));
-    CrustyPrinter{}.println(note.body);
+    printer.println(note.body);
 }
 
 pub(crate) fn print_dump(notes: Vec<NoteView>) {
@@ -111,5 +111,20 @@ mod tests {
         mock.expect_print_error().times(0).return_const(());
 
         print_note_summary(&mock, test_note_summary);
+    }
+    
+    #[test]
+    fn test_print_simple_note() {
+        let test_note = SimpleNoteView{
+            title: "".to_string(),
+            body: "".to_string(),
+            content_id: "".to_string(),
+            protected: false,
+        };
+
+        let mut mock = MockPrinter::new();
+        mock.expect_println().times(1).return_const(());
+        mock.expect_print_error().times(0).return_const(());
+        print_simple_note(&mock, test_note);
     }
 }
