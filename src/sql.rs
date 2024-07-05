@@ -123,7 +123,7 @@ pub(crate) fn list_note_titles(cpo: &dyn PathOperations) {
     }).unwrap();
 
     for res in results {
-        print_note_summary(res.unwrap());
+        print_note_summary(&CrustyPrinter{}, res.unwrap());
     }
 }
 

@@ -9,15 +9,11 @@ use mockall::*;
 #[cfg(test)]
 use mockall::predicate::*;
 
-pub(crate) fn print_note_summary(note: NoteSummary) {
-    // @todo refactor to use cr_print
-    let stdout = io::stdout();
-    let mut handle = stdout.lock();
-    // let title = slice_text(0,45, &note.title);
+pub(crate) fn print_note_summary(printer: &dyn Printer, note: NoteSummary) {
     let title = truncate_rich_text(&note.title, 45);
     let text = format!("{:width$} | {} | {}", note.id, note.updated, title, width = 9);
-    writeln!(&mut handle, "{}", text).unwrap();
-    writeln!(&mut handle, "{}+{}+{}", "-".repeat(10), "-".repeat(21), "-".repeat(47)).unwrap();
+    printer.println(text);
+    printer.println(format!("{}+{}+{}", "-".repeat(10), "-".repeat(21), "-".repeat(47)));
 }
 
 //#[cfg_attr(test, automock)]
@@ -60,42 +56,42 @@ pub(crate) fn print_dump(notes: Vec<NoteView>) {
     }
 }
 
-pub(crate) fn print_app_summary(summary: SummaryStats) {
+pub(crate) fn print_app_summary(printer: &dyn Printer, summary: SummaryStats) {
     let total = summary.db_stats.total;
     let trashed = summary.db_stats.trashed;
     let stale = summary.state_note_stats;
     let fresh = summary.fresh_note_stats;
     let largest_note = summary.large_note_stats;
-    CrustyPrinter{}.println(format!("{}", "cRusty 🦀📝 Summary"));
-    CrustyPrinter{}.println(format!("{}", "=".repeat(80)));
+    printer.println(format!("{}", "cRusty 🦀📝 Summary"));
+    printer.println(format!("{}", "=".repeat(80)));
 
-    CrustyPrinter{}.println(format!("Total Notes: {} :: Trashed Notes: {}", total, trashed));
-    CrustyPrinter{}.println(format!("{}", "=".repeat(80)));
+    printer.println(format!("Total Notes: {} :: Trashed Notes: {}", total, trashed));
+    printer.println(format!("{}", "=".repeat(80)));
 
-    CrustyPrinter{}.println(format!("{}", "Largest Note:"));
-    CrustyPrinter{}.println(format!("Note ID: {:width$}", largest_note.note_id, width = 9));
-    CrustyPrinter{}.println(format!("Content ID: {}", largest_note.content_id));
-    CrustyPrinter{}.println(format!("Notes Size: {} (chars)", largest_note.content_size));
-    CrustyPrinter{}.println(format!("Title: {}", largest_note.title));
-    CrustyPrinter{}.println(format!("{}", "=".repeat(80)));
+    printer.println(format!("{}", "Largest Note:"));
+    printer.println(format!("Note ID: {:width$}", largest_note.note_id, width = 9));
+    printer.println(format!("Content ID: {}", largest_note.content_id));
+    printer.println(format!("Notes Size: {} (chars)", largest_note.content_size));
+    printer.println(format!("Title: {}", largest_note.title));
+    printer.println(format!("{}", "=".repeat(80)));
 
-    CrustyPrinter{}.println(format!("{}", "Freshest Note"));
-    CrustyPrinter{}.println(format!("Note ID   | Content ID                           | Updated           "));
-    CrustyPrinter{}.println(format!("{:width$} | {} | {}",
+    printer.println(format!("{}", "Freshest Note"));
+    printer.println(format!("Note ID   | Content ID                           | Updated           "));
+    printer.println(format!("{:width$} | {} | {}",
                                    fresh.note_id,
                                    fresh.content_id,
                                    fresh.updated,
                                    width = 9));
-    CrustyPrinter{}.println(format!("Title: {}", fresh.title));
-    CrustyPrinter{}.println(format!("{}", "=".repeat(80)));
-    CrustyPrinter{}.println(format!("Note ID   | Content ID                           | Updated           "));
-    CrustyPrinter{}.println(format!("{:width$} | {} | {}",
+    printer.println(format!("Title: {}", fresh.title));
+    printer.println(format!("{}", "=".repeat(80)));
+    printer.println(format!("Note ID   | Content ID                           | Updated           "));
+    printer.println(format!("{:width$} | {} | {}",
                                    stale.note_id,
                                    stale.content_id,
                                    stale.updated,
                                    width = 9));
-    CrustyPrinter{}.println(format!("Title: {}", stale.title));
-    CrustyPrinter{}.println(format!("{}", "=".repeat(80)));
+    printer.println(format!("Title: {}", stale.title));
+    printer.println(format!("{}", "=".repeat(80)));
 }
 
 #[cfg(test)]
@@ -116,9 +112,9 @@ mod tests {
         ----------+---------------------+-----------------------------------------------", sys_new_line);
 
         let mut mock = MockPrinter::new();
-        mock.expect_println().return_const(());
-        mock.expect_print_error().return_const(());
+        mock.expect_println().times(2).return_const(());
+        mock.expect_print_error().times(0).return_const(());
 
-        print_note_summary(test_note_summary);
+        print_note_summary(&mock, test_note_summary);
     }
 }
