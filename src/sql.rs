@@ -345,7 +345,7 @@ pub fn set_note_trash(cpo: &dyn PathOperations, id: usize, trash_state: bool) ->
     result > 0
 }
 
-pub(crate) fn dump_notes(cpo: &dyn PathOperations, protected: bool) -> Vec<NoteView> {
+pub fn dump_notes(cpo: &dyn PathOperations, protected: bool) -> Vec<NoteView> {
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = "SELECT note_id, title, created, updated, notes.content_id, content.body from \
