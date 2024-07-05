@@ -263,3 +263,31 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_validate_password() {
+        assert!(validate_password("Foobar"));
+        assert!(validate_password("Foob123"));
+        assert!(!validate_password("Fo"));
+        assert!(!validate_password("🛟🛟Foo"));
+    }
+
+
+    #[test]
+    fn test_encryption_functions() {
+        let val_1 = "bar";
+        let val_1_encrypted = "";
+        let key_1 = "foobar";
+
+        let encrypted_text = encrypt_text(key_1, val_1);
+
+        assert_ne!(val_1, encrypted_text);
+
+        let decrypted_text = decrypt_text(key_1, &encrypted_text);
+
+        assert_eq!(decrypted_text, val_1);
+    }
+}
