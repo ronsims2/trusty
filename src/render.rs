@@ -96,6 +96,7 @@ pub(crate) fn print_app_summary(printer: &dyn Printer, summary: SummaryStats) {
 
 #[cfg(test)]
 mod tests {
+    use crate::sql::{DBStats, LargeNoteSummary};
     use super::*;
 
     #[test]
@@ -130,7 +131,7 @@ mod tests {
 
     #[test]
     fn test_print_dump() {
-        let fake_data = vec![NoteView{
+        let mock_data = vec![NoteView{
             title: "foo".to_string(),
             body: "foofoo".to_string(),
             note_id: 0,
@@ -150,6 +151,41 @@ mod tests {
         mock.expect_println().times(5).return_const(());
         mock.expect_print_error().times(0).return_const(());
 
-        print_dump(&mock, fake_data);
+        print_dump(&mock, mock_data);
+    }
+
+    #[test]
+    fn test_print_app_summary() {
+        let mock_data = SummaryStats{
+            db_stats: DBStats { total: 0, trashed: 0 },
+            large_note_stats: LargeNoteSummary {
+                note_id: 0,
+                title: "".to_string(),
+                content_id: "".to_string(),
+                content_size: 0,
+            },
+            state_note_stats: NoteView {
+                title: "".to_string(),
+                body: "".to_string(),
+                note_id: 0,
+                content_id: "".to_string(),
+                updated: "".to_string(),
+                created: "".to_string(),
+            },
+            fresh_note_stats: NoteView {
+                title: "".to_string(),
+                body: "".to_string(),
+                note_id: 0,
+                content_id: "".to_string(),
+                updated: "".to_string(),
+                created: "".to_string(),
+            },
+        };
+
+        let mut mock = MockPrinter::new();
+        mock.expect_println().times(19).return_const(());
+        mock.expect_print_error().times(0).return_const(());
+
+        print_app_summary(&mock, mock_data);
     }
 }
