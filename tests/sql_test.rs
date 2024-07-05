@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use mockall::automock;
 use tempfile::tempdir;
 use crusty::setup::{create_crusty_dir, get_db_conn, init_crusty_db, PathOperations};
-use crusty::sql::{get_note_by_id, add_note, list_note_titles, get_note_from_menu_line_by_id, NoteSummary, SimpleNoteView, update_last_touched, get_last_touched_note, update_note_ts_by_note_id, update_note_ts_by_content_id, update_note_by_note_id, update_note_by_content_id, update_title_by_content_id, delete_note, get_summary, set_note_trash, empty_trash, dump_notes};
+use crusty::sql::{get_note_by_id, add_note, list_note_titles, get_note_from_menu_line_by_id, NoteSummary, SimpleNoteView, update_last_touched, get_last_touched_note, update_note_ts_by_note_id, update_note_ts_by_content_id, update_note_by_note_id, update_note_by_content_id, update_title_by_content_id, delete_note, get_summary, set_note_trash, empty_trash, dump_notes, get_value_from_attr_table};
 use crusty::render::Printer;
 
 
@@ -183,6 +183,16 @@ fn test_dump_notes() {
         add_note(mock, "foo", "bar", false);
         let notes = dump_notes(mock, false);
         assert_eq!(notes.len(), 4);
+    };
+
+    create_test_db(test);
+}
+
+#[test]
+fn test_get_value_from_attr_table() {
+    let test = | mock: &dyn PathOperations | {
+        let value = get_value_from_attr_table(mock, "app", "last_touched");
+        assert_eq!(value.value, "0");
     };
 
     create_test_db(test);

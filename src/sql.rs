@@ -501,7 +501,7 @@ fn get_key_val_update_sql(table: &str) -> String {
     format!("UPDATE {} SET value = :value WHERE key = :key;", table)
 }
 
-pub(crate) fn get_value_from_attr_table(cpo: &dyn PathOperations, table: &str, key: &str) -> KeyValuePair {
+pub fn get_value_from_attr_table(cpo: &dyn PathOperations, table: &str, key: &str) -> KeyValuePair {
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = match table.to_lowercase().as_str() {
@@ -605,5 +605,25 @@ pub(crate) fn update_protected_flag(cpo: &dyn PathOperations, note_id: usize, pr
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_key_val_insert_sql(){
+        let sql = get_key_val_insert_sql("app");
+        assert_eq!("INSERT INTO app (key, value) VALUES (:key, :value);", sql);
+    }
+
+    #[test]
+    fn test_get_key_val_select_sql() {
+        let sql = get_key_val_select_sql("app");
+        assert_eq!("SELECT value from app WHERE key = :key;", sql);
+    }
+
+    #[test]
+    fn test_get_key_val_update_sql() {
+        let sql = get_key_val_update_sql("app");
+        assert_eq!("UPDATE app SET value = :value WHERE key = :key;", sql)
+    }
+
 
 }
