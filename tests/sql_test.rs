@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use mockall::automock;
 use tempfile::tempdir;
 use crusty::setup::{create_crusty_dir, get_db_conn, init_crusty_db, PathOperations};
-use crusty::sql::{get_note_by_id, add_note, list_note_titles, get_note_from_menu_line_by_id, NoteSummary, SimpleNoteView, update_last_touched, get_last_touched_note, update_note_ts_by_note_id, update_note_ts_by_content_id, update_note_by_note_id, update_note_by_content_id, update_title_by_content_id, delete_note, get_summary};
+use crusty::sql::{get_note_by_id, add_note, list_note_titles, get_note_from_menu_line_by_id, NoteSummary, SimpleNoteView, update_last_touched, get_last_touched_note, update_note_ts_by_note_id, update_note_ts_by_content_id, update_note_by_note_id, update_note_by_content_id, update_title_by_content_id, delete_note, get_summary, set_note_trash, empty_trash};
 use crusty::render::Printer;
 
 
@@ -149,10 +149,28 @@ fn test_update_note_functions() {
 fn test_delete_note() {
     let test = | mock: &dyn PathOperations | {
         assert!(delete_note(mock, 1, true));
+        // db needs a note to get summary right now
         add_note(mock, "foo", "bar", false);
         let summary = get_summary(mock);
         assert_eq!(summary.db_stats.total, 1);
     };
 
     create_test_db(test);
+}
+
+#[test]
+fn test_trash_feature() {
+    let test = | mock: &dyn PathOperations | {
+        assert!(set_note_trash(mock, 1, true));
+        let summary = get_summary(mock);
+        assert_eq!(summary.db_stats.trashed, 1);
+        empty_trash(mock);
+        // db needs a note to get summary right now
+        add_note(mock, "foo", "bar", false);
+        let summary_2 = get_summary(mock);
+        assert_eq!(summary_2.db_stats.trashed, 0);
+    };
+
+    create_test_db(test);
+
 }

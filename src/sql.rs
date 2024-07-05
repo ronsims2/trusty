@@ -326,19 +326,23 @@ pub fn delete_note(cpo: &dyn PathOperations, id: usize, force: bool) -> bool {
     result > 0
 }
 
-pub(crate) fn empty_trash(cpo: &dyn PathOperations) {
+pub fn empty_trash(cpo: &dyn PathOperations) -> bool {
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = "DELETE FROM notes WHERE trashed is TRUE;";
-    conn.execute(&sql, ()).unwrap();
+    let result = conn.execute(&sql, ()).unwrap();
+
+    result > 0
 }
 
-pub(crate) fn set_note_trash(cpo: &dyn PathOperations, id: usize, trash_state: bool) {
+pub fn set_note_trash(cpo: &dyn PathOperations, id: usize, trash_state: bool) -> bool {
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = "UPDATE notes SET trashed = :trashed WHERE note_id = :note_id;";
     let stmt = conn.prepare(sql);
-    stmt.unwrap().execute(named_params! {":note_id": id, ":trashed": trash_state}).unwrap();
+    let result = stmt.unwrap().execute(named_params! {":note_id": id, ":trashed": trash_state}).unwrap();
+
+    result > 0
 }
 
 pub(crate) fn dump_notes(cpo: &dyn PathOperations, protected: bool) -> Vec<NoteView> {
