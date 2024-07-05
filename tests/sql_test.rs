@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use mockall::automock;
 use tempfile::tempdir;
 use crusty::setup::{create_crusty_dir, init_crusty_db, PathOperations};
-use crusty::sql::{get_note_by_id, add_note, list_note_titles};
+use crusty::sql::{get_note_by_id, add_note, list_note_titles, get_note_from_menu_line_by_id, NoteSummary, SimpleNoteView, update_last_touched, get_last_touched_note};
 use crusty::render::Printer;
 
 
@@ -46,6 +46,12 @@ pub fn create_test_db<F>(mut test_fun: F) where F: FnMut(&dyn PathOperations) {
 }
 
 
+fn test_default_note(note: SimpleNoteView) {
+    assert!(note.title.eq("Get Started with cRusty"));
+    assert!(note.body.eq("Welcome to cRusty the CLI notes app. -Ron"));
+}
+
+
 #[test]
 fn test_add_note() {
     let test = | mock: &dyn PathOperations | {
@@ -64,12 +70,12 @@ fn test_add_note() {
 // Test encrypted paths using python E2E tests
 #[test]
 fn test_populate_crusty_sys_tables() {
+    // this also test get_note_by_id
     let test = | mock: &dyn PathOperations | {
         let note = get_note_by_id(mock, 1);
         // This tests the setup of the notes and content table from a users perspective
         // this test both create_crusty_sys_tables and populate_crusty_sys_tables
-        assert!(note.title.eq("Get Started with cRusty"));
-        assert!(note.body.eq("Welcome to cRusty the CLI notes app. -Ron"));
+        test_default_note(note);
     };
 
     create_test_db(test);
@@ -83,6 +89,32 @@ fn test_list_note_titles() {
         mock_printer.expect_print_error().times(0).return_const(());
 
         list_note_titles(mock, &mock_printer);
+    };
+
+    create_test_db(test);
+}
+
+#[test]
+fn test_get_note_from_menu_line_by_id() {
+    let test = | mock: &dyn PathOperations | {
+        let test_line = "        1 | 2024-07-01 22:56:27 | Get Started with cRusty";
+        let note = get_note_from_menu_line_by_id(mock, test_line);
+        test_default_note(note);
+    };
+
+    create_test_db(test);
+}
+
+#[test]
+fn test_update_last_touched() {
+    let test = | mock: &dyn PathOperations | {
+        let title = "foo";
+        add_note(mock, title, "bar", false);
+        let note_1 = get_last_touched_note(mock);
+        assert_eq!(note_1.title, title);
+        update_last_touched(mock, "1");
+        let note_2 = get_last_touched_note(mock);
+        assert_ne!(note_2.title, title);
     };
 
     create_test_db(test);

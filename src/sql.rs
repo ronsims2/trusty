@@ -172,7 +172,7 @@ pub fn get_note_by_id(cpo: &dyn PathOperations, id: usize) -> SimpleNoteView {
     result
 }
 
-pub(crate) fn get_note_from_menu_line() -> SimpleNoteView {
+pub fn get_note_from_menu_line(cpo: &dyn PathOperations) -> SimpleNoteView {
     let result = match read_from_std_in() {
         None => {
             CrustyPrinter{}.print_error(format!("{}", "No menu line specified, could not lookup record."));
@@ -184,19 +184,19 @@ pub(crate) fn get_note_from_menu_line() -> SimpleNoteView {
                 CrustyPrinter{}.print_error(format!("{}", "Menu line input is empty, could not lookup record."));
                 exit(Errors::MenuLineEmptyErr as i32);
             } else {
-                get_note_from_menu_line_by_id(ln.as_str())
+                get_note_from_menu_line_by_id(cpo, ln.as_str())
             }
         }
     };
     result
 }
 
-fn get_note_from_menu_line_by_id(line: &str) -> SimpleNoteView {
+pub fn get_note_from_menu_line_by_id(cpo: &dyn PathOperations, line: &str) -> SimpleNoteView {
     let mut id_segment = &line[0..9];
     id_segment = id_segment.trim();
     let result = match id_segment.parse::<i32>(){
         Ok(id) => {
-            get_note_by_id(&CrustyPathOperations{},id as usize)
+            get_note_by_id(cpo, id as usize)
         }
         Err(_) => {
             CrustyPrinter{}.print_error(format!("{}", "Menu line input is malformed, please check your input."));
@@ -206,7 +206,7 @@ fn get_note_from_menu_line_by_id(line: &str) -> SimpleNoteView {
     result
 }
 
-pub(crate) fn update_last_touched(cpo: &dyn PathOperations, note_id:&str){
+pub fn update_last_touched(cpo: &dyn PathOperations, note_id:&str){
     let sql = "UPDATE app SET value = :last_touched WHERE key = 'last_touched';";
     match note_id.parse::<i32>() {
         Ok(id) => {
@@ -221,7 +221,7 @@ pub(crate) fn update_last_touched(cpo: &dyn PathOperations, note_id:&str){
     }
 }
 
-pub(crate) fn get_last_touched_note(cpo: &dyn PathOperations) -> SimpleNoteView {
+pub fn get_last_touched_note(cpo: &dyn PathOperations) -> SimpleNoteView {
     let sql = "SELECT notes.content_id, notes.title, notes.protected, content.body FROM notes JOIN content on notes.content_id = content.content_id \
     WHERE notes.note_id = CAST((SELECT value FROM app WHERE key = 'last_touched') AS INTEGER); ";
     let db_path = cpo.get_crusty_db_path();

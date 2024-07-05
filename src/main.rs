@@ -58,7 +58,7 @@ fn main() {
     let should_encrypt_note = encrypted.unwrap_or(false);
 
     if find_from.is_some() {
-        let note = get_note_from_menu_line();
+        let note = get_note_from_menu_line(&CrustyPathOperations{});
         print_simple_note(&CrustyPrinter{}, note);
         return
     }
