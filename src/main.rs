@@ -97,7 +97,7 @@ fn main() {
     // if there is a title and note param insert a proper note
     // @todo this could replace the quick note command if we unwrap+or for the title
     if title.is_some() && note.is_some() {
-        add_note(title.unwrap(), note.unwrap(), should_encrypt_note);
+        add_note(&CrustyPathOperations{}, title.unwrap(), note.unwrap(), should_encrypt_note);
         return
     }
 
@@ -111,7 +111,7 @@ fn main() {
     if quick_note.is_some() && title.is_none() && note.is_none() {
         let note = quick_note.unwrap();
         let title = slice_text(0, 128, note);
-        add_note(title.as_str(), note, should_encrypt_note);
+        add_note(&CrustyPathOperations{}, title.as_str(), note, should_encrypt_note);
         return
     }
 
@@ -146,14 +146,14 @@ fn main() {
 
     if clean.is_some() {
         empty_trash(&CrustyPathOperations{});
-        list_note_titles(&CrustyPathOperations{});
+        list_note_titles(&CrustyPathOperations{}, &CrustyPrinter{});
         return
     }
 
     if trash.is_some() {
         let note_id = trash.unwrap();
         trash_note(note_id);
-        list_note_titles(&CrustyPathOperations{});
+        list_note_titles(&CrustyPathOperations{}, &CrustyPrinter{});
         return
     }
 
@@ -179,5 +179,5 @@ fn main() {
 
     // if there is no input at all show the menu
     // @todo pass flag encrypt message here
-    list_note_titles(&CrustyPathOperations{})
+    list_note_titles(&CrustyPathOperations{}, &CrustyPrinter{})
 }

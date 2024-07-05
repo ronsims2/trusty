@@ -84,7 +84,7 @@ pub(crate) fn insert_note_from_std_in(title: &str, protected: bool) -> bool {
         }
         Some(piped_input) => {
             if !piped_input.trim().is_empty() {
-                add_note(title, &piped_input, protected);
+                add_note(&CrustyPathOperations{}, title, &piped_input, protected);
                 true
             } else {
                 CrustyPrinter{}.print_error(format!("{}", "Input was either empty or flag was not specified, please fix your command."));
@@ -140,7 +140,7 @@ pub(crate) fn open_note(id: usize, protected: bool) {
     } else {
         let draft = edit::edit("").unwrap();
         let title = slice_text(0, 128, &draft);
-        add_note(&title, &draft, protected);
+        add_note(&CrustyPathOperations{}, &title, &draft, protected);
     }
 }
 

@@ -1,6 +1,7 @@
 use std::convert::Infallible;
 use std::fmt::format;
 use std::num::ParseIntError;
+use std::path::PathBuf;
 use std::process::exit;
 use rusqlite::{Connection, MappedRows, named_params, Row};
 use uuid::Uuid;
@@ -8,8 +9,10 @@ use crate::cli::read_from_std_in;
 use crate::errors::Errors;
 use crate::render::{ print_note_summary, print_simple_note, CrustyPrinter, Printer};
 use crate::security::{decrypt_note, prompt_for_password, encrypt_text, get_boss_key, decrypt_dump};
-use crate::setup::{CrustyPathOperations, get_db_conn, PathOperations};
+use crate::setup::{create_crusty_dir, CrustyPathOperations, get_db_conn, init_crusty_db, PathOperations};
 use crate::utils::{make_text_single_line, slice_text};
+#[cfg(test)]
+use tempfile::tempdir;
 
 #[derive(Debug)]
 pub struct NoteSummary {
@@ -58,13 +61,13 @@ pub struct KeyValuePair {
     pub value: String
 }
 
-pub(crate) fn add_note(title: &str, note: &str, protected: bool) {
+pub fn add_note(cpo: &dyn PathOperations, title: &str, note: &str, protected: bool) {
     if protected {
         insert_encrypted_note(title, note);
     } else {
         let formatted_title = make_text_single_line(title);
         let truncated_title = slice_text(0, 128, &formatted_title);
-        insert_note(&CrustyPathOperations{},&truncated_title, &note, false)
+        insert_note(cpo, &truncated_title, &note, false)
     }
 }
 
@@ -107,7 +110,7 @@ pub(crate) fn insert_encrypted_note(title: &str, note: &str) {
     prompt_for_password(encrypted_and_insert_note, true, false);
 }
 
-pub(crate) fn list_note_titles(cpo: &dyn PathOperations) {
+pub fn list_note_titles(cpo: &dyn PathOperations, printer: &dyn Printer) {
     let sql = "SELECT note_id, title, updated, protected FROM notes WHERE TRASHED IS FALSE ORDER BY updated;";
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);
@@ -123,7 +126,7 @@ pub(crate) fn list_note_titles(cpo: &dyn PathOperations) {
     }).unwrap();
 
     for res in results {
-        print_note_summary(&CrustyPrinter{}, res.unwrap());
+        print_note_summary(printer, res.unwrap());
     }
 }
 
@@ -586,4 +589,9 @@ pub(crate) fn update_protected_flag(cpo: &dyn PathOperations, note_id: usize, pr
     }).unwrap_or(0);
 
     code > 0
+}
+
+#[cfg(test)]
+mod tests {
+
 }
