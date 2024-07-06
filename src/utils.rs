@@ -1,8 +1,5 @@
+// use magic_crypt::MagicCryptTrait;
 use unicode_segmentation::UnicodeSegmentation;
-use regex::Regex;
-use crate::sql::{get_value_from_attr_table, SimpleNoteView};
-use magic_crypt::{new_magic_crypt, MagicCryptTrait};
-use crate::setup::get_db_conn;
 
 pub struct CharCount {
     ascii: usize,
@@ -24,7 +21,7 @@ pub(crate) fn slice_text(start: usize, stop: usize, text: &str) -> String {
 
 pub(crate) fn make_text_single_line(text: &str) -> String {
     let lines = text.lines();
-    let mut new_text = lines.map(|ln| {
+    let new_text = lines.map(|ln| {
         let content = ln.trim();
         format!("{} ", content)
     });

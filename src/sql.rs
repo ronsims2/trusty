@@ -1,18 +1,14 @@
-use std::convert::Infallible;
-use std::fmt::format;
-use std::num::ParseIntError;
-use std::path::PathBuf;
 use std::process::exit;
-use rusqlite::{Connection, MappedRows, named_params, Row};
+
+use rusqlite::{Connection, named_params};
 use uuid::Uuid;
+
 use crate::cli::read_from_std_in;
 use crate::errors::Errors;
-use crate::render::{ print_note_summary, print_simple_note, CrustyPrinter, Printer};
-use crate::security::{decrypt_note, prompt_for_password, encrypt_text, get_boss_key, decrypt_dump};
-use crate::setup::{create_crusty_dir, CrustyPathOperations, get_db_conn, init_crusty_db, PathOperations};
+use crate::render::{CrustyPrinter, print_note_summary, Printer};
+use crate::security::{decrypt_dump, decrypt_note, encrypt_text, get_boss_key, prompt_for_password};
+use crate::setup::{CrustyPathOperations, get_db_conn, PathOperations};
 use crate::utils::{make_text_single_line, slice_text};
-#[cfg(test)]
-use tempfile::tempdir;
 
 #[derive(Debug)]
 pub struct NoteSummary {
@@ -165,7 +161,7 @@ pub fn get_note_by_id(cpo: &dyn PathOperations, id: usize) -> SimpleNoteView {
             update_last_touched(&CrustyPathOperations{},id.to_string().as_str());
             res
         },
-        Err(err) => {
+        Err(_) => {
             CrustyPrinter{}.print_error(format!("Could not find note for id: {}", id));
             exit(Errors::NoteIdErr as i32);
         }
@@ -415,7 +411,7 @@ pub fn get_summary(cpo: &dyn PathOperations) -> SummaryStats {
         Ok(data) => {
             Some(data)
         }
-        Err(err) => {
+        Err(_) => {
             errors.push("Error querying to determine largest note for summary.");
             None
         }
@@ -435,7 +431,7 @@ pub fn get_summary(cpo: &dyn PathOperations) -> SummaryStats {
         Ok(data) => {
             Some(data)
         }
-        Err(error) => {
+        Err(_) => {
             errors.push("Error querying oldest note for summary.");
             None
         }
@@ -455,7 +451,7 @@ pub fn get_summary(cpo: &dyn PathOperations) -> SummaryStats {
         Ok(data) => {
             Some(data)
         }
-        Err(error) => {
+        Err(_) => {
             errors.push("Error querying oldest note for summary.");
             None
         }
@@ -471,7 +467,7 @@ pub fn get_summary(cpo: &dyn PathOperations) -> SummaryStats {
         Ok(data) => {
             Some(data)
         }
-        Err(error) => {
+        Err(_) => {
             errors.push("Error querying stats.");
             None
         }
@@ -529,7 +525,7 @@ pub fn get_value_from_attr_table(cpo: &dyn PathOperations, table: &str, key: &st
         Ok(data) => {
             data
         },
-        Err(error) => {
+        Err(_) => {
             CrustyPrinter{}.print_error(format!("{}", "Could not get select val sql."));
             exit(Errors::KeyValSelectErr as i32)
         }

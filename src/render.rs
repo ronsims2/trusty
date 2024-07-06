@@ -1,13 +1,11 @@
-use std::fmt::format;
 use std::io;
 use std::io::Write;
-use crate::sql::{NoteSummary, NoteView, SimpleNoteView, SummaryStats};
-use crate::utils::{slice_text, truncate_rich_text};
 
 #[cfg(test)]
 use mockall::*;
-#[cfg(test)]
-use mockall::predicate::*;
+
+use crate::sql::{NoteSummary, NoteView, SimpleNoteView, SummaryStats};
+use crate::utils::truncate_rich_text;
 
 pub(crate) fn print_note_summary(printer: &dyn Printer, note: NoteSummary) {
     let title = truncate_rich_text(&note.title, 45);
@@ -97,6 +95,7 @@ pub(crate) fn print_app_summary(printer: &dyn Printer, summary: SummaryStats) {
 #[cfg(test)]
 mod tests {
     use crate::sql::{DBStats, LargeNoteSummary};
+
     use super::*;
 
     #[test]

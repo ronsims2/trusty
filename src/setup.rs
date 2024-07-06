@@ -58,9 +58,6 @@ pub fn get_crusty_directory(dir_name: String) -> PathBuf {
     Path::new(&config_loc).to_path_buf()
 }
 
-
-
-
 pub(crate) fn check_for_config(home_dir: &String) -> Option<PathBuf> {
     let config_path = CrustyPathOperations{}.get_crusty_dir();
 
@@ -130,6 +127,7 @@ pub fn create_crusty_sys_tables(db_path: &PathBuf) {
     CrustyPrinter{}.println(format!("{}", "Initialized empty cRusty tables."));
 }
 
+#[allow(unused)]
 pub(crate) fn get_unix_epoch_ts() -> u64 {
     let ts = match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
         Ok(n) => n.as_secs(),

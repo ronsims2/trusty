@@ -2,12 +2,13 @@
 * Add test here that need to check the db
 */
 use std::path::PathBuf;
+
 use mockall::automock;
 use tempfile::tempdir;
-use crusty::setup::{create_crusty_dir, get_db_conn, init_crusty_db, PathOperations};
-use crusty::sql::{get_note_by_id, add_note, list_note_titles, get_note_from_menu_line_by_id, NoteSummary, SimpleNoteView, update_last_touched, get_last_touched_note, update_note_ts_by_note_id, update_note_ts_by_content_id, update_note_by_note_id, update_note_by_content_id, update_title_by_content_id, delete_note, get_summary, set_note_trash, empty_trash, dump_notes, get_value_from_attr_table, add_key_value, update_key_value, update_protected_flag, trash_note, restore_note};
-use crusty::render::Printer;
 
+use crusty::render::Printer;
+use crusty::setup::{create_crusty_dir, get_db_conn, init_crusty_db, PathOperations};
+use crusty::sql::{add_key_value, add_note, delete_note, dump_notes, empty_trash, get_last_touched_note, get_note_by_id, get_note_from_menu_line_by_id, get_summary, get_value_from_attr_table, list_note_titles, restore_note, set_note_trash, SimpleNoteView, trash_note, update_key_value, update_last_touched, update_note_by_content_id, update_note_by_note_id, update_note_ts_by_content_id, update_note_ts_by_note_id, update_protected_flag, update_title_by_content_id};
 
 struct TestPrinter{}
 #[cfg_attr(test, automock)]

@@ -1,14 +1,15 @@
 use std::io;
-use std::io::{BufRead, Read};
+use std::io::Read;
 use std::process::exit;
-use clap::Parser;
-use crate::errors::Errors;
-use crate::security::{decrypt_note, encrypt_note};
-use crate::setup::{CrustyPathOperations, PathOperations};
-use crate::sql::{get_last_touched_note, get_note_by_id, add_note, set_note_trash, update_note_by_content_id, update_note_by_note_id, update_title_by_content_id};
-use crate::utils::{make_text_single_line, slice_text};
-use crate::render::{CrustyPrinter, Printer};
 
+use clap::Parser;
+
+use crate::errors::Errors;
+use crate::render::{CrustyPrinter, Printer};
+use crate::security::encrypt_note;
+use crate::setup::{CrustyPathOperations, PathOperations};
+use crate::sql::{add_note, get_last_touched_note, get_note_by_id, update_note_by_content_id, update_note_by_note_id, update_title_by_content_id};
+use crate::utils::slice_text;
 
 #[derive(Debug, Parser)]
 #[command(author, version, about = "cRusty: a command Line notes app  🦀")]
