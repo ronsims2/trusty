@@ -6,9 +6,9 @@ use std::path::PathBuf;
 use mockall::automock;
 use tempfile::tempdir;
 
-use trusty::render::Printer;
-use trusty::setup::{create_trusty_dir, get_db_conn, init_trusty_db, PathOperations};
-use trusty::sql::{add_key_value, add_note, delete_note, dump_notes, empty_trash, get_last_touched_note, get_note_by_id, get_note_from_menu_line_by_id, get_summary, get_value_from_attr_table, list_note_titles, restore_note, set_note_trash, SimpleNoteView, trash_note, update_key_value, update_last_touched, update_note_by_content_id, update_note_by_note_id, update_note_ts_by_content_id, update_note_ts_by_note_id, update_protected_flag, update_title_by_content_id};
+use tru::render::Printer;
+use tru::setup::{create_trusty_dir, get_db_conn, init_trusty_db, PathOperations};
+use tru::sql::{add_key_value, add_note, delete_note, dump_notes, empty_trash, get_last_touched_note, get_note_by_id, get_note_from_menu_line_by_id, get_summary, get_value_from_attr_table, list_note_titles, restore_note, set_note_trash, SimpleNoteView, trash_note, update_key_value, update_last_touched, update_note_by_content_id, update_note_by_note_id, update_note_ts_by_content_id, update_note_ts_by_note_id, update_protected_flag, update_title_by_content_id};
 
 struct TestPrinter{}
 #[cfg_attr(test, automock)]
