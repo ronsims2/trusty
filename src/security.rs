@@ -266,7 +266,8 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::security::{decrypt_text, encrypt_text, validate_password};
+
     #[test]
     fn test_validate_password() {
         assert!(validate_password("Foobar"));

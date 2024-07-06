@@ -175,7 +175,9 @@ pub fn init_crusty_db(cpo: &dyn PathOperations) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use std::env;
+    use tempfile::tempdir;
+    use super::{create_crusty_dir, CrustyPathOperations, PathOperations, MockPathOperations, get_home_dir, get_win_home_drive, init_crusty_db};
     #[test]
     fn test_get_win_home_drive() {
         let home_drive_value = "FOOBAR";

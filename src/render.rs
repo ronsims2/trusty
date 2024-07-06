@@ -94,9 +94,8 @@ pub(crate) fn print_app_summary(printer: &dyn Printer, summary: SummaryStats) {
 
 #[cfg(test)]
 mod tests {
-    use crate::sql::{DBStats, LargeNoteSummary};
-
-    use super::*;
+    use crate::render::{MockPrinter, print_app_summary, print_dump, print_note_summary, print_simple_note};
+    use crate::sql::{DBStats, LargeNoteSummary, NoteSummary, NoteView, SimpleNoteView, SummaryStats};
 
     #[test]
     fn test_print_note_summary() {

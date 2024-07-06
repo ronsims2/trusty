@@ -53,7 +53,7 @@ pub(crate) fn truncate_rich_text(text: &str, size: usize) -> String {
 
 #[cfg(test)]
 mod test {
-    use crate::utils::{make_text_single_line, slice_text, truncate_rich_text};
+    use crate::utils::{make_text_single_line, truncate_rich_text, slice_text};
 
     #[test]
     fn test_slice_text() {

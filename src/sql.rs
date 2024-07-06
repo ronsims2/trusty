@@ -621,7 +621,7 @@ pub fn delete_note(cpo: &dyn PathOperations, note_id: usize, force: bool) -> boo
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{get_key_val_insert_sql, get_key_val_select_sql, get_key_val_update_sql};
 
     #[test]
     fn test_get_key_val_insert_sql(){
