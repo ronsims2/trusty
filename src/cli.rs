@@ -5,9 +5,9 @@ use std::process::exit;
 use clap::Parser;
 
 use crate::errors::Errors;
-use crate::render::{CrustyPrinter, Printer};
+use crate::render::{TrustyPrinter, Printer};
 use crate::security::encrypt_note;
-use crate::setup::{CrustyPathOperations, PathOperations};
+use crate::setup::{TrustyPathOperations, PathOperations};
 use crate::sql::{add_note, get_last_touched_note, get_note_by_id, update_note_by_content_id, update_note_by_note_id, update_title_by_content_id};
 use crate::utils::slice_text;
 
@@ -85,10 +85,10 @@ pub(crate) fn insert_note_from_std_in(title: &str, protected: bool) -> bool {
         }
         Some(piped_input) => {
             if !piped_input.trim().is_empty() {
-                add_note(&CrustyPathOperations{}, title, &piped_input, protected);
+                add_note(&TrustyPathOperations {}, title, &piped_input, protected);
                 true
             } else {
-                CrustyPrinter{}.print_error(format!("{}", "Input was either empty or flag was not specified, please fix your command."));
+                TrustyPrinter {}.print_error(format!("{}", "Input was either empty or flag was not specified, please fix your command."));
                 exit(Errors::InputFlagErr as i32);
             }
         }
@@ -98,7 +98,7 @@ pub(crate) fn insert_note_from_std_in(title: &str, protected: bool) -> bool {
 }
 
 pub(crate) fn edit_note() {
-    let note = get_last_touched_note(&CrustyPathOperations{});
+    let note = get_last_touched_note(&TrustyPathOperations {});
     let body = note.body.as_str();
     let edited = edit::edit(body).unwrap();
 
@@ -109,12 +109,12 @@ pub(crate) fn edit_note() {
         }
         false => {edited}
     };
-    update_note_by_content_id(&CrustyPathOperations{},&note.content_id, &new_body);
+    update_note_by_content_id(&TrustyPathOperations {}, &note.content_id, &new_body);
 }
 
 pub(crate) fn edit_title(note_id: Option<usize>) {
     let id = note_id.unwrap_or(0);
-    let note = if id > 0  {get_note_by_id(&CrustyPathOperations{},id)} else {get_last_touched_note(&CrustyPathOperations{})};
+    let note = if id > 0  {get_note_by_id(&TrustyPathOperations {}, id)} else {get_last_touched_note(&TrustyPathOperations {})};
     let title = note.title.to_string();
 
     let edited_title = edit::edit(title).unwrap();
@@ -129,12 +129,12 @@ pub(crate) fn edit_title(note_id: Option<usize>) {
         false => {edited_title}
     };
 
-    update_title_by_content_id(&CrustyPathOperations{},&note.content_id, &new_title);
+    update_title_by_content_id(&TrustyPathOperations {}, &note.content_id, &new_title);
 }
 
 pub(crate) fn open_note(cpo: &dyn PathOperations, id: usize, protected: bool) -> bool  {
     if id > 0 {
-        let note = get_note_by_id(&CrustyPathOperations{},id);
+        let note = get_note_by_id(&TrustyPathOperations {}, id);
         let body = note.body.as_str();
         let edited = edit::edit(body).unwrap();
 

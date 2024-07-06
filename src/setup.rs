@@ -6,7 +6,7 @@ use std::time::SystemTime;
 use rusqlite::Connection;
 use uuid::Uuid;
 use crate::errors::Errors;
-use crate::render::{Printer, CrustyPrinter};
+use crate::render::{Printer, TrustyPrinter};
 
 #[cfg(test)]
 use mockall::*;
@@ -19,7 +19,7 @@ fn get_win_home_drive() -> String {
             val.to_string()
         }
         Err(_) => {
-            CrustyPrinter{}.print_error(format!("{}", "Could not determine Windows user drive."));
+            TrustyPrinter {}.print_error(format!("{}", "Could not determine Windows user drive."));
             exit(Errors::WinUserErr as i32)
         }
     };
@@ -42,7 +42,7 @@ pub(crate) fn get_home_dir() -> String {
             }
         }
         Err(_) => {
-            CrustyPrinter{}.print_error(format!("{}", "Could not determine home path during config."));
+            TrustyPrinter {}.print_error(format!("{}", "Could not determine home path during config."));
             exit(Errors::HomePathErr as i32)
         }
     };
@@ -50,14 +50,14 @@ pub(crate) fn get_home_dir() -> String {
     user_home
 }
 
-pub fn get_crusty_directory(dir_name: String) -> PathBuf {
+pub fn get_trusty_directory(dir_name: String) -> PathBuf {
     let user_home = get_home_dir();
     let config_loc = format!("{}/{}", &user_home, dir_name);
     Path::new(&config_loc).to_path_buf()
 }
 
 pub(crate) fn check_for_config(home_dir: &String) -> Option<PathBuf> {
-    let config_path = CrustyPathOperations{}.get_crusty_dir();
+    let config_path = TrustyPathOperations {}.get_trusty_dir();
 
     if config_path.exists() {
         return Some(config_path)
@@ -69,29 +69,29 @@ pub(crate) fn check_for_config(home_dir: &String) -> Option<PathBuf> {
 
 #[cfg_attr(test, automock)]
 pub trait PathOperations {
-    fn get_crusty_dir(&self) -> PathBuf;
-    fn get_crusty_db_path(&self) -> PathBuf;
+    fn get_trusty_dir(&self) -> PathBuf;
+    fn get_trusty_db_path(&self) -> PathBuf;
 }
 
-pub struct CrustyPathOperations {}
-impl PathOperations for CrustyPathOperations {
-    fn get_crusty_dir(&self) -> PathBuf {
-        get_crusty_directory(".trusty".to_string())
+pub struct TrustyPathOperations {}
+impl PathOperations for TrustyPathOperations {
+    fn get_trusty_dir(&self) -> PathBuf {
+        get_trusty_directory(".trusty".to_string())
     }
-    fn get_crusty_db_path(&self) -> PathBuf {
-        let config_path = self.get_crusty_dir();
+    fn get_trusty_db_path(&self) -> PathBuf {
+        let config_path = self.get_trusty_dir();
         config_path.join("trusty.db")
     }
 }
 
-pub fn create_crusty_dir(cpo: &dyn PathOperations) -> bool {
-    let config_path = cpo.get_crusty_dir();
+pub fn create_trusty_dir(cpo: &dyn PathOperations) -> bool {
+    let config_path = cpo.get_trusty_dir();
     match fs::create_dir(&config_path) {
         Ok(_) => {
-            CrustyPrinter{}.println(format!("Created tRusty config at: {:?}", config_path));
+            TrustyPrinter {}.println(format!("Created tRusty config at: {:?}", config_path));
         }
         Err(_) => {
-            CrustyPrinter{}.print_error(format!("{}", "Could not create tRusty config directory."));
+            TrustyPrinter {}.print_error(format!("{}", "Could not create tRusty config directory."));
             exit(Errors::ConfigDirErr as i32)
         }
     }
@@ -102,7 +102,7 @@ pub fn get_db_conn(db_path: &PathBuf) -> Connection {
     Connection::open(db_path.as_path()).unwrap()
 }
 
-pub fn create_crusty_sys_tables(db_path: &PathBuf) {
+pub fn create_trusty_sys_tables(db_path: &PathBuf) {
     let conn = get_db_conn(db_path);
     let create_content_sql = "CREATE TABLE IF NOT EXISTS \
     content (content_id NCHAR(36) PRIMARY KEY, body TEXT);";
@@ -122,7 +122,7 @@ pub fn create_crusty_sys_tables(db_path: &PathBuf) {
     // state inserts
     conn.execute(insert_last_touched_sql, ()).unwrap();
 
-    CrustyPrinter{}.println(format!("{}", "Initialized empty tRusty tables."));
+    TrustyPrinter {}.println(format!("{}", "Initialized empty tRusty tables."));
 }
 
 #[allow(unused)]
@@ -135,35 +135,35 @@ pub(crate) fn get_unix_epoch_ts() -> u64 {
     ts
 }
 
-pub(crate) fn populate_crusty_sys_tables(cpo: &dyn PathOperations) {
+pub(crate) fn populate_trusty_sys_tables(cpo: &dyn PathOperations) {
     let content_id = Uuid::new_v4();
-    let crusty_app_id = Uuid::new_v4();
+    let trusty_app_id = Uuid::new_v4();
     let note_insert_sql = format!("INSERT INTO notes (title, protected, created, updated, content_id) VALUES \
     ('Get Started with tRusty', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '{}');", content_id);
     let content_insert_sql = format!("INSERT INTO content (content_id, body) VALUES ('{}', 'Welcome to tRusty the CLI notes app. -Ron');", content_id);
-    let config_insert_app_id_sql = format!("INSERT INTO config (key, value) VALUES ('crusty_app_id', '{}');", crusty_app_id);
-    let config_insert_version_sql = format!("INSERT INTO config (key, value) VALUES ('crusty_version', '{}');", env!("CARGO_PKG_VERSION"));
+    let config_insert_app_id_sql = format!("INSERT INTO config (key, value) VALUES ('trusty_app_id', '{}');", trusty_app_id);
+    let config_insert_version_sql = format!("INSERT INTO config (key, value) VALUES ('trusty_version', '{}');", env!("CARGO_PKG_VERSION"));
 
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
     conn.execute(&content_insert_sql, ()).unwrap();
     conn.execute(&note_insert_sql, ()).unwrap();
     conn.execute(&config_insert_app_id_sql, ()).unwrap();
     conn.execute(&config_insert_version_sql, ()).unwrap();
 
-    CrustyPrinter{}.println(format!("{}", "Configurations added."));
+    TrustyPrinter {}.println(format!("{}", "Configurations added."));
 }
 
-pub fn init_crusty_db(cpo: &dyn PathOperations) -> bool {
-    let db_path = cpo.get_crusty_db_path();
+pub fn init_trusty_db(cpo: &dyn PathOperations) -> bool {
+    let db_path = cpo.get_trusty_db_path();
     let db_created = fs::File::create(db_path.as_path());
     match db_created {
         Ok(_) => {
-            create_crusty_sys_tables(&db_path);
-            populate_crusty_sys_tables(cpo);
+            create_trusty_sys_tables(&db_path);
+            populate_trusty_sys_tables(cpo);
         }
         Err(_) => {
-            CrustyPrinter{}.println(format!("{}", "Could not create tRusty DB."));
+            TrustyPrinter {}.println(format!("{}", "Could not create tRusty DB."));
             exit(Errors::InitDBErr as i32)
         }
     }
@@ -175,7 +175,7 @@ pub fn init_crusty_db(cpo: &dyn PathOperations) -> bool {
 mod tests {
     use std::env;
     use tempfile::tempdir;
-    use super::{create_crusty_dir, CrustyPathOperations, PathOperations, MockPathOperations, get_home_dir, get_win_home_drive, init_crusty_db};
+    use super::{create_trusty_dir, TrustyPathOperations, PathOperations, MockPathOperations, get_home_dir, get_win_home_drive, init_trusty_db};
     #[test]
     fn test_get_win_home_drive() {
         let home_drive_value = "FOOBAR";
@@ -197,43 +197,43 @@ mod tests {
     }
 
     #[test]
-    fn test_get_crusty_dir() {
-        let crusty_dir = CrustyPathOperations{}.get_crusty_dir();
-        assert!(crusty_dir.to_str().unwrap().contains(".crusty"))
+    fn test_get_trusty_dir() {
+        let trusty_dir = TrustyPathOperations {}.get_trusty_dir();
+        assert!(trusty_dir.to_str().unwrap().contains(".trusty"))
     }
 
     #[test]
-    fn test_create_crusty_dir() {
+    fn test_create_trusty_dir() {
         let mut mock = MockPathOperations::new();
         let mock_dir = tempdir().unwrap();
         // tempdir will create a folder, you need to append a directory to this path
         // to pass to create function
-        let mock_crusty_dir = mock_dir.path().join(".crusty").to_path_buf();
+        let mock_trusty_dir = mock_dir.path().join(".trusty").to_path_buf();
 
         mock
-            .expect_get_crusty_dir()
-            .return_const(mock_crusty_dir);
+            .expect_get_trusty_dir()
+            .return_const(mock_trusty_dir);
 
-        let result = create_crusty_dir(&mock);
+        let result = create_trusty_dir(&mock);
         assert!(result);
     }
 
     #[test]
-    fn test_init_crusty_db() {
+    fn test_init_trusty_db() {
         let mock_dir = tempdir().unwrap();
-        let mock_crusty_dir = mock_dir.path().join(".crusty").to_path_buf();
-        let mock_crusty_db_path = mock_crusty_dir.join("crusty.db").to_path_buf();
+        let mock_trusty_dir = mock_dir.path().join(".trusty").to_path_buf();
+        let mock_trusty_db_path = mock_trusty_dir.join("trusty.db").to_path_buf();
         let mut mock = MockPathOperations::new();
         mock
-            .expect_get_crusty_dir()
-            .return_const(mock_crusty_dir);
+            .expect_get_trusty_dir()
+            .return_const(mock_trusty_dir);
 
         mock
-            .expect_get_crusty_db_path()
-            .return_const(mock_crusty_db_path);
+            .expect_get_trusty_db_path()
+            .return_const(mock_trusty_db_path);
 
-        create_crusty_dir(&mock);
-        let result = init_crusty_db(&mock);
+        create_trusty_dir(&mock);
+        let result = init_trusty_db(&mock);
         assert!(result);
     }
 }

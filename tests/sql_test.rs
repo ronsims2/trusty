@@ -6,9 +6,9 @@ use std::path::PathBuf;
 use mockall::automock;
 use tempfile::tempdir;
 
-use crusty::render::Printer;
-use crusty::setup::{create_crusty_dir, get_db_conn, init_crusty_db, PathOperations};
-use crusty::sql::{add_key_value, add_note, delete_note, dump_notes, empty_trash, get_last_touched_note, get_note_by_id, get_note_from_menu_line_by_id, get_summary, get_value_from_attr_table, list_note_titles, restore_note, set_note_trash, SimpleNoteView, trash_note, update_key_value, update_last_touched, update_note_by_content_id, update_note_by_note_id, update_note_ts_by_content_id, update_note_ts_by_note_id, update_protected_flag, update_title_by_content_id};
+use trusty::render::Printer;
+use trusty::setup::{create_trusty_dir, get_db_conn, init_trusty_db, PathOperations};
+use trusty::sql::{add_key_value, add_note, delete_note, dump_notes, empty_trash, get_last_touched_note, get_note_by_id, get_note_from_menu_line_by_id, get_summary, get_value_from_attr_table, list_note_titles, restore_note, set_note_trash, SimpleNoteView, trash_note, update_key_value, update_last_touched, update_note_by_content_id, update_note_by_note_id, update_note_ts_by_content_id, update_note_ts_by_note_id, update_protected_flag, update_title_by_content_id};
 
 struct TestPrinter{}
 #[cfg_attr(test, automock)]
@@ -27,20 +27,20 @@ pub struct TestPathOperations {
 }
 
 impl PathOperations for TestPathOperations {
-    fn get_crusty_dir(&self) -> PathBuf {
+    fn get_trusty_dir(&self) -> PathBuf {
         self.cached_path.to_path_buf()
     }
-    fn get_crusty_db_path(&self) -> PathBuf {
-        self.get_crusty_dir().join("crusty.db")
+    fn get_trusty_db_path(&self) -> PathBuf {
+        self.get_trusty_dir().join("trusty.db")
     }
 }
 
 pub fn create_test_db<F>(mut test_fun: F) where F: FnMut(&dyn PathOperations) {
-    let fake = TestPathOperations{ cached_path: tempdir().unwrap().into_path().join(".crusty")};
+    let fake = TestPathOperations{ cached_path: tempdir().unwrap().into_path().join(".trusty")};
 
 
-    create_crusty_dir(&fake);
-    init_crusty_db(&fake);
+    create_trusty_dir(&fake);
+    init_trusty_db(&fake);
 
     // Call test
     test_fun(&fake)
@@ -70,12 +70,12 @@ fn test_add_note() {
 
 // Test encrypted paths using python E2E tests
 #[test]
-fn test_populate_crusty_sys_tables() {
+fn test_populate_trusty_sys_tables() {
     // this also test get_note_by_id
     let test = | mock: &dyn PathOperations | {
         let note = get_note_by_id(mock, 1);
         // This tests the setup of the notes and content table from a users perspective
-        // this test both create_crusty_sys_tables and populate_crusty_sys_tables
+        // this test both create_trusty_sys_tables and populate_trusty_sys_tables
         test_default_note(note);
     };
 
@@ -124,7 +124,7 @@ fn test_update_last_touched() {
 #[test]
 fn test_update_note_functions() {
     let test = | mock: &dyn PathOperations | {
-        let conn = get_db_conn(&mock.get_crusty_db_path());
+        let conn = get_db_conn(&mock.get_trusty_db_path());
         let note = get_note_by_id(mock, 1);
         assert!(update_note_ts_by_note_id(1, &conn));
         assert!(update_note_ts_by_content_id(&note.content_id, &conn));

@@ -2,9 +2,9 @@ use std::process::exit;
 use magic_crypt::{MagicCryptTrait, new_magic_crypt};
 use regex::Regex;
 use uuid::Uuid;
-use crate::render::{CrustyPrinter, Printer};
+use crate::render::{TrustyPrinter, Printer};
 use crate::errors::Errors;
-use crate::setup::{CrustyPathOperations, PathOperations};
+use crate::setup::{TrustyPathOperations, PathOperations};
 use crate::sql::{add_key_value, get_note_by_id, get_value_from_attr_table, NoteView, SimpleNoteView, update_key_value, update_note_by_note_id, update_protected_flag, update_title_by_content_id};
 
 /**
@@ -36,11 +36,11 @@ pub(crate) fn prompt_for_password<F>(mut fun: F, compare_password_to_db: bool, c
             }
         }
 
-        CrustyPrinter{}.println("Password incorrect, try again.".to_string());
+        TrustyPrinter {}.println("Password incorrect, try again.".to_string());
         attempts += 1;
     }
 
-    CrustyPrinter{}.println("Password incorrect.".to_string());
+    TrustyPrinter {}.println("Password incorrect.".to_string());
     false
 }
 
@@ -118,55 +118,55 @@ pub(crate) fn decrypt_text(key: &str, text: &str) -> String {
 }
 
 pub(crate) fn check_password(password: &str) -> bool {
-    let saved_encrypted_password = get_value_from_attr_table(&CrustyPathOperations{},"app", "password");
+    let saved_encrypted_password = get_value_from_attr_table(&TrustyPathOperations {}, "app", "password");
     let encrypted_password = encrypt_text(password, password);
     encrypted_password.eq(&saved_encrypted_password.value)
 }
 
 pub(crate) fn recovery_reset_password(recovery_code: &str) {
-    let saved_code = get_value_from_attr_table(&CrustyPathOperations{},"app", "recovery_code");
+    let saved_code = get_value_from_attr_table(&TrustyPathOperations {}, "app", "recovery_code");
     let encrypted_code = encrypt_text(recovery_code, recovery_code);
     let rec_code = Some(recovery_code.to_string());
     if saved_code.value.eq(&encrypted_code) {
          set_password(true, rec_code)
     } else {
-        CrustyPrinter{}.println("Invalid recovery key provided.".to_string());
+        TrustyPrinter {}.println("Invalid recovery key provided.".to_string());
     }
 }
 
 
 pub(crate) fn unprotect_note(note_id: usize) {
-    let note = get_note_by_id(&CrustyPathOperations{},note_id);
+    let note = get_note_by_id(&TrustyPathOperations {}, note_id);
 
     if note.protected {
-        update_title_by_content_id(&CrustyPathOperations{},&note.content_id, &note.title);
-        update_note_by_note_id(&CrustyPathOperations{},note_id, &note.body);
-        update_protected_flag(&CrustyPathOperations{},note_id, false);
+        update_title_by_content_id(&TrustyPathOperations {}, &note.content_id, &note.title);
+        update_note_by_note_id(&TrustyPathOperations {}, note_id, &note.body);
+        update_protected_flag(&TrustyPathOperations {}, note_id, false);
     } else {
-        CrustyPrinter{}.println(format!("Note: {} is not encrypted.", note_id));
+        TrustyPrinter {}.println(format!("Note: {} is not encrypted.", note_id));
         exit(0);
     }
 }
 
 pub(crate) fn get_boss_key(password: &str) -> String {
-    let boss_key = get_value_from_attr_table(&CrustyPathOperations{},"app", "boss_key");
+    let boss_key = get_value_from_attr_table(&TrustyPathOperations {}, "app", "boss_key");
     let decrypted_boss_key = decrypt_text(password, &boss_key.value);
 
     decrypted_boss_key.to_string()
 }
 
 pub(crate) fn protect_note(note_id: usize) {
-    let note = get_note_by_id(&CrustyPathOperations{},note_id);
+    let note = get_note_by_id(&TrustyPathOperations {}, note_id);
 
     if note.protected {
-        CrustyPrinter{}.println(format!("Note: {} is already encrypted", note_id))
+        TrustyPrinter {}.println(format!("Note: {} is already encrypted", note_id))
     } else {
         let encrypted_note = encrypt_note(&note.title, &note.body);
-        update_title_by_content_id(&CrustyPathOperations{},&note.content_id, &encrypted_note.title);
-        update_note_by_note_id(&CrustyPathOperations{},note_id, &encrypted_note.body);
-        update_protected_flag(&CrustyPathOperations{},note_id, true);
+        update_title_by_content_id(&TrustyPathOperations {}, &note.content_id, &encrypted_note.title);
+        update_note_by_note_id(&TrustyPathOperations {}, note_id, &encrypted_note.body);
+        update_protected_flag(&TrustyPathOperations {}, note_id, true);
 
-        CrustyPrinter{}.println(format!("Note: {} is now encrypted.", note_id));
+        TrustyPrinter {}.println(format!("Note: {} is now encrypted.", note_id));
     }
 }
 
@@ -196,10 +196,10 @@ pub(crate) fn decrypt_dump(notes: &Vec<NoteView>) -> Vec<NoteView> {
 }
 
 pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
-    let cpo = CrustyPathOperations{};
-    let cr_printer = CrustyPrinter{};
+    let cpo = TrustyPathOperations {};
+    let cr_printer = TrustyPrinter {};
     if update {
-        CrustyPrinter{}.println("Change your password".to_string());
+        TrustyPrinter {}.println("Change your password".to_string());
         let rrc = &raw_recovery_code.unwrap().to_string();
         let update_password = |pw: &str| -> bool {
             let encrypted_password = encrypt_text(pw, pw);
@@ -261,7 +261,7 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
             return
         } else {
             cr_printer.print_error(format!("Could not setup a password. You need to remove your tRusty config found here: {} to start over.",
-                                           &cpo.get_crusty_dir().display().to_string()));
+                                           &cpo.get_trusty_dir().display().to_string()));
             exit(Errors::CreatePasswordErr as i32)
         }
     }

@@ -9,23 +9,23 @@ mod security;
 use clap::Parser;
 use security::set_password;
 use crate::cli::{Cli, edit_note, edit_title, insert_note_from_std_in, open_note};
-use crate::render::{print_app_summary, print_dump, print_simple_note, CrustyPrinter, Printer};
-use crate::setup::{check_for_config, create_crusty_dir, CrustyPathOperations, PathOperations, get_home_dir, init_crusty_db};
+use crate::render::{print_app_summary, print_dump, print_simple_note, TrustyPrinter, Printer};
+use crate::setup::{check_for_config, create_trusty_dir, TrustyPathOperations, PathOperations, get_home_dir, init_trusty_db};
 use crate::sql::{add_note, delete_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, list_note_titles, restore_note, trash_note};
 use crate::utils::slice_text;
 use crate::security::{protect_note, recovery_reset_password, unprotect_note};
 
 fn main() {
-    // check for a crusty home directory, if it doesn't exist show setup prompt
-    let cpo = CrustyPathOperations{};
-    let cr_print = CrustyPrinter{};
+    // check for a trusty home directory, if it doesn't exist show setup prompt
+    let cpo = TrustyPathOperations {};
+    let cr_print = TrustyPrinter {};
     let home_dir = get_home_dir();
     let conf_loc = match check_for_config(&home_dir) {
         None => {
-            create_crusty_dir(&cpo);
-            init_crusty_db(&cpo);
+            create_trusty_dir(&cpo);
+            init_trusty_db(&cpo);
             set_password(false, None);
-            cpo.get_crusty_db_path()
+            cpo.get_trusty_db_path()
         }
         Some(conf_path) => {
             conf_path
@@ -147,7 +147,7 @@ fn main() {
     }
 
     if clean.is_some() {
-        empty_trash(&CrustyPathOperations{});
+        empty_trash(&TrustyPathOperations {});
         list_note_titles(&cpo, &cr_print);
         return
     }

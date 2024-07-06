@@ -21,9 +21,9 @@ pub trait Printer {
     fn print_error(&self, text: String) -> ();
 }
 
-pub struct CrustyPrinter {}
+pub struct TrustyPrinter {}
 
-impl Printer for CrustyPrinter {
+impl Printer for TrustyPrinter {
     fn println(&self, text: String) {
         let stdout = io::stdout();
         let mut handle = stdout.lock();

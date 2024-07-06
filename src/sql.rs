@@ -5,9 +5,9 @@ use uuid::Uuid;
 
 use crate::cli::read_from_std_in;
 use crate::errors::Errors;
-use crate::render::{CrustyPrinter, print_note_summary, Printer};
+use crate::render::{TrustyPrinter, print_note_summary, Printer};
 use crate::security::{decrypt_dump, decrypt_note, encrypt_text, get_boss_key, prompt_for_password};
-use crate::setup::{CrustyPathOperations, get_db_conn, PathOperations};
+use crate::setup::{TrustyPathOperations, get_db_conn, PathOperations};
 use crate::utils::{make_text_single_line, slice_text};
 
 #[derive(Debug)]
@@ -70,7 +70,7 @@ pub fn add_note(cpo: &dyn PathOperations, title: &str, note: &str, protected: bo
 }
 
 pub(crate)  fn insert_note(cpo: &dyn PathOperations, title: &str, note: &str, protected: bool) {
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
     // create the new note id
     let content_id = Uuid::new_v4().to_string();
@@ -100,7 +100,7 @@ pub(crate) fn insert_encrypted_note(title: &str, note: &str) {
         let decrypted_boss_key = get_boss_key(password);
         let encrypted_title = encrypt_text(&decrypted_boss_key, &formatted_title);
         let encrypt_note = encrypt_text(&decrypted_boss_key, note);
-        insert_note(&CrustyPathOperations{},&encrypted_title, &encrypt_note, true);
+        insert_note(&TrustyPathOperations {}, &encrypted_title, &encrypt_note, true);
 
         return true
     };
@@ -110,7 +110,7 @@ pub(crate) fn insert_encrypted_note(title: &str, note: &str) {
 
 pub fn list_note_titles(cpo: &dyn PathOperations, printer: &dyn Printer) {
     let sql = "SELECT note_id, title, updated, protected FROM notes WHERE TRASHED IS FALSE ORDER BY updated;";
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
     let mut stmt = conn.prepare(sql).unwrap();
     let results = stmt.query_map([], |row| {
@@ -130,7 +130,7 @@ pub fn list_note_titles(cpo: &dyn PathOperations, printer: &dyn Printer) {
 
 pub fn get_note_by_id(cpo: &dyn PathOperations, id: usize) -> SimpleNoteView {
     let sql = "SELECT notes.title, content.body, notes.protected, notes.content_id FROM notes JOIN content on notes.content_id = content.content_id WHERE notes.note_id = :note_id;";
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
     let mut stmt = conn.prepare(sql).unwrap();
     let result = match stmt.query_row(named_params! {":note_id": id as u32}, |row| {
@@ -158,11 +158,11 @@ pub fn get_note_by_id(cpo: &dyn PathOperations, id: usize) -> SimpleNoteView {
         }
     }) {
         Ok(res) => {
-            update_last_touched(&CrustyPathOperations{},id.to_string().as_str());
+            update_last_touched(&TrustyPathOperations {}, id.to_string().as_str());
             res
         },
         Err(_) => {
-            CrustyPrinter{}.print_error(format!("Could not find note for id: {}", id));
+            TrustyPrinter {}.print_error(format!("Could not find note for id: {}", id));
             exit(Errors::NoteIdErr as i32);
         }
     };
@@ -173,13 +173,13 @@ pub fn get_note_by_id(cpo: &dyn PathOperations, id: usize) -> SimpleNoteView {
 pub fn get_note_from_menu_line(cpo: &dyn PathOperations) -> SimpleNoteView {
     let result = match read_from_std_in() {
         None => {
-            CrustyPrinter{}.print_error(format!("{}", "No menu line specified, could not lookup record."));
+            TrustyPrinter {}.print_error(format!("{}", "No menu line specified, could not lookup record."));
             exit(Errors::MenuLineErr as i32);
         }
         Some(ln) => {
             let trimmed_ln = ln.trim();
             if trimmed_ln.is_empty() {
-                CrustyPrinter{}.print_error(format!("{}", "Menu line input is empty, could not lookup record."));
+                TrustyPrinter {}.print_error(format!("{}", "Menu line input is empty, could not lookup record."));
                 exit(Errors::MenuLineEmptyErr as i32);
             } else {
                 get_note_from_menu_line_by_id(cpo, ln.as_str())
@@ -197,7 +197,7 @@ pub fn get_note_from_menu_line_by_id(cpo: &dyn PathOperations, line: &str) -> Si
             get_note_by_id(cpo, id as usize)
         }
         Err(_) => {
-            CrustyPrinter{}.print_error(format!("{}", "Menu line input is malformed, please check your input."));
+            TrustyPrinter {}.print_error(format!("{}", "Menu line input is malformed, please check your input."));
             exit(Errors::MenuLineMalformedErr as i32);
         }
     };
@@ -208,12 +208,12 @@ pub fn update_last_touched(cpo: &dyn PathOperations, note_id:&str){
     let sql = "UPDATE app SET value = :last_touched WHERE key = 'last_touched';";
     match note_id.parse::<i32>() {
         Ok(id) => {
-            let db_path = cpo.get_crusty_db_path();
+            let db_path = cpo.get_trusty_db_path();
             let conn = get_db_conn(&db_path);
             conn.execute(&sql, named_params! {":last_touched": id as usize}).unwrap();
         }
         Err(_) => {
-            CrustyPrinter{}.print_error(format!("{}", "note ID is malformed, please check your input."));
+            TrustyPrinter {}.print_error(format!("{}", "note ID is malformed, please check your input."));
             exit(Errors::NoteIdMalformedErr as i32)
         }
     }
@@ -222,7 +222,7 @@ pub fn update_last_touched(cpo: &dyn PathOperations, note_id:&str){
 pub fn get_last_touched_note(cpo: &dyn PathOperations) -> SimpleNoteView {
     let sql = "SELECT notes.content_id, notes.title, notes.protected, content.body FROM notes JOIN content on notes.content_id = content.content_id \
     WHERE notes.note_id = CAST((SELECT value FROM app WHERE key = 'last_touched') AS INTEGER); ";
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
     let mut stmt = conn.prepare(sql).unwrap();
     let result = match stmt.query_row([], |row| {
@@ -253,7 +253,7 @@ pub fn get_last_touched_note(cpo: &dyn PathOperations) -> SimpleNoteView {
             res
         }
         Err(_) => {
-            CrustyPrinter{}.print_error(format!("{}", "Could not fetch the last touched note."));
+            TrustyPrinter {}.print_error(format!("{}", "Could not fetch the last touched note."));
             exit(Errors::LastTouchFetchErr as i32)
         }
     };
@@ -277,7 +277,7 @@ pub fn update_note_ts_by_note_id(id: usize, conn: &Connection) -> bool {
 }
 
 pub fn update_note_by_content_id(cpo: &dyn PathOperations, id: &str, text: &str) -> bool {
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = "UPDATE content SET body = :body WHERE content_id = :content_id;";
     let stmt = conn.prepare(sql);
@@ -286,7 +286,7 @@ pub fn update_note_by_content_id(cpo: &dyn PathOperations, id: &str, text: &str)
 }
 
 pub fn update_note_by_note_id(cpo: &dyn PathOperations, id: usize, text: &str) -> bool {
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = "UPDATE content SET body = :body WHERE content_id = (SELECT content_id FROM notes WHERE note_id = :note_id);";
     let stmt = conn.prepare(sql);
@@ -298,7 +298,7 @@ pub fn update_note_by_note_id(cpo: &dyn PathOperations, id: usize, text: &str) -
 
 pub fn update_title_by_content_id(cpo: &dyn PathOperations, id: &str, text: &str) -> bool {
     let title = make_text_single_line(&text);
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = "UPDATE notes SET title = :title, updated = CURRENT_TIMESTAMP WHERE content_id = :content_id;";
     let stmt = conn.prepare(sql);
@@ -308,7 +308,7 @@ pub fn update_title_by_content_id(cpo: &dyn PathOperations, id: &str, text: &str
 }
 
 pub fn delete_note_by_id(cpo: &dyn PathOperations, id: usize, force: bool) -> bool {
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = match force {
         true => {
@@ -325,7 +325,7 @@ pub fn delete_note_by_id(cpo: &dyn PathOperations, id: usize, force: bool) -> bo
 }
 
 pub fn empty_trash(cpo: &dyn PathOperations) -> bool {
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = "DELETE FROM notes WHERE trashed is TRUE;";
     let result = conn.execute(&sql, ()).unwrap();
@@ -334,7 +334,7 @@ pub fn empty_trash(cpo: &dyn PathOperations) -> bool {
 }
 
 pub fn set_note_trash(cpo: &dyn PathOperations, id: usize, trash_state: bool) -> bool {
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = "UPDATE notes SET trashed = :trashed WHERE note_id = :note_id;";
     let stmt = conn.prepare(sql);
@@ -344,7 +344,7 @@ pub fn set_note_trash(cpo: &dyn PathOperations, id: usize, trash_state: bool) ->
 }
 
 pub fn dump_notes(cpo: &dyn PathOperations, protected: bool) -> Vec<NoteView> {
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = "SELECT note_id, title, created, updated, notes.content_id, content.body from \
     notes JOIN content on notes.content_id = content.content_id WHERE protected is :protected;";
@@ -397,7 +397,7 @@ pub fn get_summary(cpo: &dyn PathOperations) -> SummaryStats {
 
     let mut errors = vec![];
 
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
     let mut largest_stmt = conn.prepare(largest_note_sql).unwrap();
     let largest_result = match largest_stmt.query_row([], |row| {
@@ -474,7 +474,7 @@ pub fn get_summary(cpo: &dyn PathOperations) -> SummaryStats {
     };
 
     if errors.len() > 0 {
-        CrustyPrinter{}.print_error("Error creating summary.".to_string());
+        TrustyPrinter {}.print_error("Error creating summary.".to_string());
         exit(Errors::SummaryErr as i32);
     }
 
@@ -500,7 +500,7 @@ fn get_key_val_update_sql(table: &str) -> String {
 }
 
 pub fn get_value_from_attr_table(cpo: &dyn PathOperations, table: &str, key: &str) -> KeyValuePair {
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = match table.to_lowercase().as_str() {
         "app" => {
@@ -510,7 +510,7 @@ pub fn get_value_from_attr_table(cpo: &dyn PathOperations, table: &str, key: &st
             get_key_val_select_sql(table)
         }
         _ => {
-            CrustyPrinter{}.print_error(format!("{}", "Could not get select val sql."));
+            TrustyPrinter {}.print_error(format!("{}", "Could not get select val sql."));
             exit(Errors::KeyValSelectErr as i32)
         }
     };
@@ -526,7 +526,7 @@ pub fn get_value_from_attr_table(cpo: &dyn PathOperations, table: &str, key: &st
             data
         },
         Err(_) => {
-            CrustyPrinter{}.print_error(format!("{}", "Could not get select val sql."));
+            TrustyPrinter {}.print_error(format!("{}", "Could not get select val sql."));
             exit(Errors::KeyValSelectErr as i32)
         }
     };
@@ -534,7 +534,7 @@ pub fn get_value_from_attr_table(cpo: &dyn PathOperations, table: &str, key: &st
 }
 
 pub fn add_key_value(cpo: &dyn PathOperations, table: &str, key: &str, value: &str) -> bool {
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
 
     let sql = match table.to_lowercase().as_str() {
@@ -546,7 +546,7 @@ pub fn add_key_value(cpo: &dyn PathOperations, table: &str, key: &str, value: &s
             get_key_val_insert_sql(table)
         }
         _ => {
-            CrustyPrinter{}.print_error(format!("{}", "Could not create key val."));
+            TrustyPrinter {}.print_error(format!("{}", "Could not create key val."));
             exit(Errors::KeyValInsertErr as i32)
         }
     };
@@ -561,7 +561,7 @@ pub fn add_key_value(cpo: &dyn PathOperations, table: &str, key: &str, value: &s
 
 // @todo refactor to reuse/simplify key_val CRUD func logic
 pub fn update_key_value(cpo: &dyn PathOperations, table: &str, key: &str, value: &str) -> bool {
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
 
     let sql = match table.to_lowercase().as_str() {
@@ -574,7 +574,7 @@ pub fn update_key_value(cpo: &dyn PathOperations, table: &str, key: &str, value:
             get_key_val_update_sql(table)
         }
         _ => {
-            CrustyPrinter{}.print_error(format!("{}", "Could not update key val."));
+            TrustyPrinter {}.print_error(format!("{}", "Could not update key val."));
             exit(Errors::KeyValUpdateErr as i32)
         }
     };
@@ -589,7 +589,7 @@ pub fn update_key_value(cpo: &dyn PathOperations, table: &str, key: &str, value:
 }
 
 pub fn update_protected_flag(cpo: &dyn PathOperations, note_id: usize, protected: bool) -> bool {
-    let db_path = cpo.get_crusty_db_path();
+    let db_path = cpo.get_trusty_db_path();
     let conn = get_db_conn(&db_path);
    let sql = "UPDATE notes set protected = :protected WHERE note_id = :note_id;";
 
@@ -612,9 +612,9 @@ pub fn restore_note(cpo: &dyn PathOperations, id: usize) -> bool {
 pub fn delete_note(cpo: &dyn PathOperations, note_id: usize, force: bool) -> bool {
     let result = delete_note_by_id(cpo, note_id, force);
     if result {
-        CrustyPrinter{}.println(format!("Note: {} deleted.", note_id))
+        TrustyPrinter {}.println(format!("Note: {} deleted.", note_id))
     } else {
-        CrustyPrinter{}.println(format!("Could not delete noted: {}, it may be protected or already removed.", note_id));
+        TrustyPrinter {}.println(format!("Could not delete noted: {}, it may be protected or already removed.", note_id));
     }
     return result
 }

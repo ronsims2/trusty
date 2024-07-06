@@ -2,13 +2,7 @@
 A lightweight CLI notes app written in Rust.
 
 ## Download prebuilt binary
-[Windows x86_64](https://rsims2.com/downloads/crusty-0.8.2-win64.zip)
 
-[MacOS Apple Silicon](https://rsims2.com/downloads/crusty-0.8.2-macos.zip)
-
-[MacOS Apple Intel](https://rsims2.com/downloads/crusty-0.8.2-macos-intel.zip)
-
-[Ubuntu x86_64](https://rsims2.com/downloads/crusty-0.8.2-ubuntu.zip)
 
 This simple tool allows people (and scripts) to take notes from a terminal.
 
@@ -169,3 +163,17 @@ Otherwise, you man not have access to your encrypted notes.
 * Version 0.11.0 - Updated the size of the title column to accommodate encrypted messages.
 * Version 0.12.0 - Stable encryption support added.
 * version 1.0.3 - Public tRusty release.
+
+## Archive
+
+### older Versions
+
+FYI: The app's code name was cRusty.
+
+[Windows x86_64](https://rsims2.com/downloads/crusty-0.8.2-win64.zip)
+
+[MacOS Apple Silicon](https://rsims2.com/downloads/crusty-0.8.2-macos.zip)
+
+[MacOS Apple Intel](https://rsims2.com/downloads/crusty-0.8.2-macos-intel.zip)
+
+[Ubuntu x86_64](https://rsims2.com/downloads/crusty-0.8.2-ubuntu.zip)
