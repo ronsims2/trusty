@@ -12,7 +12,7 @@ use crate::sql::{add_note, get_last_touched_note, get_note_by_id, update_note_by
 use crate::utils::slice_text;
 
 #[derive(Debug, Parser)]
-#[command(author, version, about = "cRusty: a command Line notes app  🦀")]
+#[command(author, version, about = "tRusty: a command Line notes app  🦀")]
 pub(crate) struct Cli {
     #[arg(short, long, help = "Use this flag to specify note text (requires a title).")]
     pub note: Option<String>,

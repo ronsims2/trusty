@@ -60,7 +60,7 @@ pub(crate) fn print_app_summary(printer: &dyn Printer, summary: SummaryStats) {
     let stale = summary.state_note_stats;
     let fresh = summary.fresh_note_stats;
     let largest_note = summary.large_note_stats;
-    printer.println(format!("{}", "cRusty 🦀📝 Summary"));
+    printer.println(format!("{}", "tRusty 🦀📝 Summary"));
     printer.println(format!("{}", "=".repeat(80)));
 
     printer.println(format!("Total Notes: {} :: Trashed Notes: {}", total, trashed));
@@ -101,7 +101,7 @@ mod tests {
     fn test_print_note_summary() {
         let test_note_summary = NoteSummary{
             id: 1,
-            title: "Get Started with cRusty".to_string(),
+            title: "Get Started with tRusty".to_string(),
             updated: "2024-07-01 22:56:27".to_string(),
         };
 

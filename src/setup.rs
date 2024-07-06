@@ -88,10 +88,10 @@ pub fn create_crusty_dir(cpo: &dyn PathOperations) -> bool {
     let config_path = cpo.get_crusty_dir();
     match fs::create_dir(&config_path) {
         Ok(_) => {
-            CrustyPrinter{}.println(format!("Created cRusty config at: {:?}", config_path));
+            CrustyPrinter{}.println(format!("Created tRusty config at: {:?}", config_path));
         }
         Err(_) => {
-            CrustyPrinter{}.print_error(format!("{}", "Could not create cRusty config directory."));
+            CrustyPrinter{}.print_error(format!("{}", "Could not create tRusty config directory."));
             exit(Errors::ConfigDirErr as i32)
         }
     }
@@ -122,7 +122,7 @@ pub fn create_crusty_sys_tables(db_path: &PathBuf) {
     // state inserts
     conn.execute(insert_last_touched_sql, ()).unwrap();
 
-    CrustyPrinter{}.println(format!("{}", "Initialized empty cRusty tables."));
+    CrustyPrinter{}.println(format!("{}", "Initialized empty tRusty tables."));
 }
 
 #[allow(unused)]
@@ -139,8 +139,8 @@ pub(crate) fn populate_crusty_sys_tables(cpo: &dyn PathOperations) {
     let content_id = Uuid::new_v4();
     let crusty_app_id = Uuid::new_v4();
     let note_insert_sql = format!("INSERT INTO notes (title, protected, created, updated, content_id) VALUES \
-    ('Get Started with cRusty', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '{}');", content_id);
-    let content_insert_sql = format!("INSERT INTO content (content_id, body) VALUES ('{}', 'Welcome to cRusty the CLI notes app. -Ron');", content_id);
+    ('Get Started with tRusty', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '{}');", content_id);
+    let content_insert_sql = format!("INSERT INTO content (content_id, body) VALUES ('{}', 'Welcome to tRusty the CLI notes app. -Ron');", content_id);
     let config_insert_app_id_sql = format!("INSERT INTO config (key, value) VALUES ('crusty_app_id', '{}');", crusty_app_id);
     let config_insert_version_sql = format!("INSERT INTO config (key, value) VALUES ('crusty_version', '{}');", env!("CARGO_PKG_VERSION"));
 
@@ -163,7 +163,7 @@ pub fn init_crusty_db(cpo: &dyn PathOperations) -> bool {
             populate_crusty_sys_tables(cpo);
         }
         Err(_) => {
-            CrustyPrinter{}.println(format!("{}", "Could not create cRusty DB."));
+            CrustyPrinter{}.println(format!("{}", "Could not create tRusty DB."));
             exit(Errors::InitDBErr as i32)
         }
     }
