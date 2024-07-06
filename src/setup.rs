@@ -76,11 +76,11 @@ pub trait PathOperations {
 pub struct CrustyPathOperations {}
 impl PathOperations for CrustyPathOperations {
     fn get_crusty_dir(&self) -> PathBuf {
-        get_crusty_directory(".crusty".to_string())
+        get_crusty_directory(".trusty".to_string())
     }
     fn get_crusty_db_path(&self) -> PathBuf {
         let config_path = self.get_crusty_dir();
-        config_path.join("crusty.db")
+        config_path.join("trusty.db")
     }
 }
 
