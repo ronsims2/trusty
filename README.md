@@ -1,7 +1,7 @@
 # tRusty 🦀📝
 A lightweight CLI notes app written in Rust.
 
-## Download
+## Download prebuilt binary
 [Windows x86_64](https://rsims2.com/downloads/crusty-0.8.2-win64.zip)
 
 [MacOS Apple Silicon](https://rsims2.com/downloads/crusty-0.8.2-macos.zip)
@@ -18,7 +18,7 @@ This app is designed to give you just enough organization to make your command l
 
 tRusty is meant to be a catalog that allows you to use other CLI tools to create, edit, search and parse your notes.
 
-Its pretty good for:
+tRusty is pretty good for:
 
 * Taking quick notes
 * Bookmarking URLs
@@ -44,86 +44,86 @@ This process will generate recovery code 🛟 that you can use set a new passwor
 
 Add a note with a title.
 
-`trusty -t 'Foobar' -n "Who doesn't take notes in the terminal?🤷🏾"`
+`tru -t 'Foobar' -n "Who doesn't take notes in the terminal?🤷🏾"`
 
 Add a quick note with a derived title.
 
-`trusty -q "The coolest kids use the terminal for everything."`
+`tru -q "The coolest kids use the terminal for everything."`
 
 Pipe a note into tRusty.
 
-`echo "Sometimes you need to save the output of a program | trusty -i"`
+`echo "Sometimes you need to save the output of a program | tru -i"`
 
 ```
-echo "Sometimes you need to save the output of a program with a title | trusty -i -t "Saved Output $(date)"
+echo "Sometimes you need to save the output of a program with a title | tru -i -t "Saved Output $(date)"
 ```
 
 Save a requests response.
 
-`http -b https://dog.ceo/api/breeds/list/all | trusty -i -t 'Dog Breed JSON'`
+`http -b https://dog.ceo/api/breeds/list/all | tru -i -t 'Dog Breed JSON'`
 
 
 ### View notes
 
 List a summary of all your notes.
 
-`trusty` or `trusty -l`
+`tru` or `tru -l`
 
 Get a specific note using its ID:
 
-`trusty -f 10`
+`tru -f 10`
 
 ### Search notes
 
 Use the full power of the command line to filter note titles.
 
-`trusty | grep -i untitled`
+`tru | grep -i untitled`
 
 Open the first note that matches a search.
 
-`trusty | grep -i untitled | trusty -g`
+`tru | grep -i untitled | trusty -g`
 
 Dump all your notes and search:
 
-`trusty --dump | grep -i foobar`
+`tru --dump | grep -i foobar`
 
 Use more or less to page through menu results.
 
-`trusty | less`
+`tru | less`
 
 ### Edit notes
 
 Edit the body of the last note created, read or edited.
 
-`trusty -e`
+`tru -e`
 
 Edit the title and content of the last note touched.
 
-`trusty -e -A`
+`tru -e -A`
 
 Edit a note using the noted ID listed in the menu.
 
-`trusty -o 2`
+`tru -o 2`
 
 Similarly, open an editor to change the title and body of a note.
 
-`trusty -o 2 -A`
+`tru -o 2 -A`
 
 Open a new blank note in an editor.
 
-`trusty -o`
+`tru -o`
 
 ### Encrypt notes
 
 You can create an encrypted note by adding the encrypted flag to any note creation command.
 
-`trusty -o -E`
+`tru -o -E`
 
-`trusty -t 'A new note' -n 'Some text for a note here.' -E`
+`tru -t 'A new note' -n 'Some text for a note here.' -E`
 
 Encrypt an existing note.
 
-`trusty -p 2`
+`tru -p 2`
 
 ### Decrypt notes
 
@@ -131,29 +131,29 @@ When you try to open an encrypted note it will prompt for your password.
 
 Decrypted and save a plain text note.
 
-`trusty --unprotect 4`
+`tru --unprotect 4`
 
 ### Remove notes
 
 Soft delete (trash) an unprotected note by ID.
 
-`trusty --trash 2`
+`tru --trash 2`
 
 Permanently delete an unprotected note by ID.
 
-`trusty --delete 2`
+`tru --delete 2`
 
 Hard delete a protected note by ID.☢️☢️☢️ 
 
-`trusty --force-delete 2`
+`tru --force-delete 2`
 
 Hard delete all notes in the trash.
 
-`trusty --clean`
+`tru --clean`
 
 Untrash a note by ID.
 
-`trusty --restore 2`
+`tru --restore 2`
 
 ### Backing up your notes
 
