@@ -12,8 +12,6 @@ use crate::render::{Printer, CrustyPrinter};
 use mockall::*;
 #[cfg(test)]
 use mockall::predicate::*;
-#[cfg(test)]
-use tempfile::tempdir;
 
 fn get_win_home_drive() -> String {
     let win_home_drive = match env::var("HOMEDRIVE") {

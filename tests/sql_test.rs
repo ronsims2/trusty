@@ -36,7 +36,7 @@ impl PathOperations for TestPathOperations {
 }
 
 pub fn create_test_db<F>(mut test_fun: F) where F: FnMut(&dyn PathOperations) {
-    let mut fake = TestPathOperations{ cached_path: tempdir().unwrap().into_path().join(".crusty")};
+    let fake = TestPathOperations{ cached_path: tempdir().unwrap().into_path().join(".crusty")};
 
 
     create_crusty_dir(&fake);
