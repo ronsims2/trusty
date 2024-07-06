@@ -61,7 +61,7 @@ pub struct KeyValuePair {
     pub value: String
 }
 
-pub fn add_note(cpo: &dyn PathOperations, title: &str, note: &str, protected: bool) {
+pub fn add_note(cpo: &dyn PathOperations, title: &str, note: &str, protected: bool) -> bool {
     if protected {
         insert_encrypted_note(title, note);
     } else {
@@ -69,6 +69,8 @@ pub fn add_note(cpo: &dyn PathOperations, title: &str, note: &str, protected: bo
         let truncated_title = slice_text(0, 128, &formatted_title);
         insert_note(cpo, &truncated_title, &note, false)
     }
+
+    return true
 }
 
 pub(crate)  fn insert_note(cpo: &dyn PathOperations, title: &str, note: &str, protected: bool) {
@@ -309,7 +311,7 @@ pub fn update_title_by_content_id(cpo: &dyn PathOperations, id: &str, text: &str
     result > 0
 }
 
-pub fn delete_note(cpo: &dyn PathOperations, id: usize, force: bool) -> bool {
+pub fn delete_note_by_id(cpo: &dyn PathOperations, id: usize, force: bool) -> bool {
     let db_path = cpo.get_crusty_db_path();
     let conn = get_db_conn(&db_path);
     let sql = match force {
@@ -601,6 +603,24 @@ pub fn update_protected_flag(cpo: &dyn PathOperations, note_id: usize, protected
     }).unwrap_or(0);
 
     code > 0
+}
+
+pub fn trash_note(cpo: &dyn PathOperations, id: usize) -> bool {
+    set_note_trash(cpo, id, true)
+}
+
+pub fn restore_note(cpo: &dyn PathOperations, id: usize) -> bool {
+    set_note_trash(cpo, id, false)
+}
+
+pub fn delete_note(cpo: &dyn PathOperations, note_id: usize, force: bool) -> bool {
+    let result = delete_note_by_id(cpo, note_id, force);
+    if result {
+        CrustyPrinter{}.println(format!("Note: {} deleted.", note_id))
+    } else {
+        CrustyPrinter{}.println(format!("Could not delete noted: {}, it may be protected or already removed.", note_id));
+    }
+    return result
 }
 
 #[cfg(test)]

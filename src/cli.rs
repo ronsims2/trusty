@@ -4,7 +4,7 @@ use std::process::exit;
 use clap::Parser;
 use crate::errors::Errors;
 use crate::security::{decrypt_note, encrypt_note};
-use crate::setup::CrustyPathOperations;
+use crate::setup::{CrustyPathOperations, PathOperations};
 use crate::sql::{get_last_touched_note, get_note_by_id, add_note, set_note_trash, update_note_by_content_id, update_note_by_note_id, update_title_by_content_id};
 use crate::utils::{make_text_single_line, slice_text};
 use crate::render::{CrustyPrinter, Printer};
@@ -131,31 +131,17 @@ pub(crate) fn edit_title(note_id: Option<usize>) {
     update_title_by_content_id(&CrustyPathOperations{},&note.content_id, &new_title);
 }
 
-pub(crate) fn open_note(id: usize, protected: bool) {
+pub(crate) fn open_note(cpo: &dyn PathOperations, id: usize, protected: bool) -> bool  {
     if id > 0 {
         let note = get_note_by_id(&CrustyPathOperations{},id);
         let body = note.body.as_str();
         let edited = edit::edit(body).unwrap();
-        update_note_by_note_id(&CrustyPathOperations{},id, &edited);
+
+        update_note_by_note_id(cpo, id, &edited)
     } else {
         let draft = edit::edit("").unwrap();
         let title = slice_text(0, 128, &draft);
-        add_note(&CrustyPathOperations{}, &title, &draft, protected);
-    }
-}
 
-pub(crate) fn trash_note(id: usize) {
-    set_note_trash(&CrustyPathOperations{},id, true);
-}
-
-pub(crate) fn restore_note(id: usize) {
-    set_note_trash(&CrustyPathOperations{},id, false);
-}
-
-pub(crate) fn delete_note(note_id: usize, force: bool) {
-    if crate::sql::delete_note(&CrustyPathOperations{},note_id, force) {
-        CrustyPrinter{}.println(format!("Note: {} deleted.", note_id))
-    } else {
-        CrustyPrinter{}.println(format!("Could not delete noted: {}, it may be protected or already removed.", note_id));
+        add_note(cpo, &title, &draft, protected)
     }
 }
