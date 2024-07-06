@@ -4,25 +4,28 @@ mod sql;
 mod render;
 mod utils;
 mod errors;
+mod security;
 
-use std::env;
-use std::fmt::Arguments;
-use std::path::Path;
 use clap::Parser;
-use crate::cli::{Cli, edit_note, edit_title, insert_note_from_std_in, open_note, read_from_std_in, restore_note, trash_note};
-use crate::render::{print_app_summary, print_dump, print_note_summary, print_simple_note};
-use crate::setup::{check_for_config, create_crusty_dir, get_crusty_db_path, get_home_dir, init_crusty_db};
-use crate::sql::{delete_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, insert_note, list_note_titles};
+use security::set_password;
+use crate::cli::{Cli, edit_note, edit_title, insert_note_from_std_in, open_note};
+use crate::render::{print_app_summary, print_dump, print_simple_note, CrustyPrinter, Printer};
+use crate::setup::{check_for_config, create_crusty_dir, CrustyPathOperations, PathOperations, get_home_dir, init_crusty_db};
+use crate::sql::{add_note, delete_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, list_note_titles, restore_note, trash_note};
 use crate::utils::slice_text;
+use crate::security::{protect_note, recovery_reset_password, unprotect_note};
 
 fn main() {
     // check for a crusty home directory, if it doesn't exist show setup prompt
+    let cpo = CrustyPathOperations{};
+    let cr_print = CrustyPrinter{};
     let home_dir = get_home_dir();
     let conf_loc = match check_for_config(&home_dir) {
         None => {
-            create_crusty_dir();
-            init_crusty_db();
-            get_crusty_db_path()
+            create_crusty_dir(&cpo);
+            init_crusty_db(&cpo);
+            set_password(false, None);
+            cpo.get_crusty_db_path()
         }
         Some(conf_path) => {
             conf_path
@@ -48,44 +51,69 @@ fn main() {
     let all = args.all;
     let dump = args.dump;
     let summary = args.summary;
+    let encrypted = args.encrypt;
+    let recover = args.recover;
+    let unprotect = args.unprotect;
+    let protect = args.protect;
+    let dump_protected = args.dump_protected;
+
+    let should_encrypt_note = encrypted.unwrap_or(false);
+
+    if find_from.is_some() {
+        let note = get_note_from_menu_line(&cpo);
+        print_simple_note(&cr_print, note);
+        return
+    }
+
+    // reset password flow
+    if recover.is_some() {
+        let recovery_code = recover.unwrap();
+        recovery_reset_password(&recovery_code);
+        return
+    }
+
+    if protect.is_some() {
+        let note_id = protect.unwrap_or(0);
+        protect_note(note_id);
+        return
+    }
+
+    if unprotect.is_some() {
+        let note_id = unprotect.unwrap_or(0);
+        unprotect_note(note_id);
+        return
+    }
 
     if summary.is_some() {
-        let summary = get_summary();
-        print_app_summary(summary);
+        let summary = get_summary(&cpo);
+        print_app_summary(&cr_print, summary);
         return
     }
 
     if input.is_some() {
         let title_val = title.unwrap_or("Untitled");
-        let result = insert_note_from_std_in(title_val);
-        if result {
-            return
-        }
+        insert_note_from_std_in(title_val, should_encrypt_note);
+        return
     }
 
     // if there is a title and note param insert a proper note
+    // @todo this could replace the quick note command if we unwrap+or for the title
     if title.is_some() && note.is_some() {
-        insert_note(title.unwrap(), note.unwrap(), false);
+        add_note(&cpo, title.unwrap(), note.unwrap(), should_encrypt_note);
         return
     }
 
     if find.is_some() {
-        let note = get_note_by_id(find.unwrap());
-        print_simple_note(note);
-        return
-    }
-
-    if find_from.is_some() {
-        let note = get_note_from_menu_line();
-        print_simple_note(note);
+        let note = get_note_by_id(&cpo, find.unwrap());
+        print_simple_note(&cr_print, note);
         return
     }
 
     // add an untitled quick note, this needs to stay near the bottom
     if quick_note.is_some() && title.is_none() && note.is_none() {
         let note = quick_note.unwrap();
-        let title = slice_text(0, 64, note);
-        insert_note(title.as_str(), note, false);
+        let title = slice_text(0, 128, note);
+        add_note(&cpo, title.as_str(), note, should_encrypt_note);
         return
     }
 
@@ -102,52 +130,56 @@ fn main() {
         if all.is_some() {
             edit_title(Some(note_id));
         }
-        open_note(note_id);
-
-        return;
+        open_note(&cpo, note_id, should_encrypt_note);
+        return
     }
 
     if delete.is_some() {
         let note_id = delete.unwrap();
-        delete_note(note_id, false);
-        list_note_titles();
+        delete_note(&cpo, note_id, false);
         return
     }
 
     if force_delete.is_some() {
         let note_id = force_delete.unwrap();
-        delete_note(note_id, true);
-        list_note_titles();
+        delete_note(&cpo, note_id, true);
         return
     }
 
     if clean.is_some() {
-        empty_trash();
-        list_note_titles();
+        empty_trash(&CrustyPathOperations{});
+        list_note_titles(&cpo, &cr_print);
         return
     }
 
     if trash.is_some() {
         let note_id = trash.unwrap();
-        trash_note(note_id);
-        list_note_titles();
+        trash_note(&cpo, note_id);
+        list_note_titles(&cpo, &cr_print);
         return
     }
 
     if restore.is_some() {
         let note_id = restore.unwrap();
-        restore_note(note_id);
-        list_note_titles();
+        restore_note(&cpo, note_id);
+        cr_print.println(format!("Note: {} restored", note_id));
         return
     }
 
     if dump.is_some() {
-        let notes = dump_notes();
-        print_dump(notes);
+        let notes = dump_notes(&cpo,false);
+        print_dump(&cr_print, notes);
+        return
+    }
+
+    if dump_protected.is_some() {
+        let notes = dump_notes(&cpo,true);
+        print_dump(&cr_print, notes);
         return
     }
 
 
     // if there is no input at all show the menu
-    list_note_titles()
+    // @todo pass flag encrypt message here
+    list_note_titles(&cpo, &cr_print)
 }

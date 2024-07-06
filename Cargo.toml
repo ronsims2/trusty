@@ -1,6 +1,6 @@
 [package]
 name = "crusty"
-version = "0.9.2"
+version = "0.15.0"
 edition = "2021"
 authors = ["Ron Sims II", "Bisky"]
 
@@ -10,7 +10,15 @@ authors = ["Ron Sims II", "Bisky"]
 clap = { version = "4.5.4", features = ["derive"] }
 edit = "0.1.5"
 homedir = "0.2.1"
+magic-crypt = "3.1.13"
+rpassword = "7.3.1"
 rusqlite = {version = "0.31.0", features = ["bundled"]}
 termcolor = "1.4.1"
 unicode-segmentation = "1.11.0"
 uuid = { version = "1.8.0", features = ["serde", "v4"] }
+regex = "1.10.4"
+
+
+[dev-dependencies]
+mockall = "0.12.1"
+tempfile = "3.10.1"

@@ -7,7 +7,13 @@ pub enum Errors {
     MenuLineErr = 506,
     MenuLineEmptyErr = 507,
     NoteIdMalformedErr = 508,
-    lastTouchFetchErr = 509,
+    LastTouchFetchErr = 509,
     SummaryErr =  510,
-    MenuLineMalformedErr = 511
+    MenuLineMalformedErr = 511,
+    SetPasswordErr = 512,
+    CreatePasswordErr = 513,
+    KeyValInsertErr = 514,
+    KeyValSelectErr = 515,
+    KeyValUpdateErr = 516,
+    InitDBErr = 517
 }

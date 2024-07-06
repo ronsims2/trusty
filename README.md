@@ -28,9 +28,19 @@ Its pretty good for:
 * Cataloging small base64 data (files/images)
 * Drafting haikus
 
+## getting started
+
+When you first set up cRusty, it will create a `.crusty` directory in your home folder.
+This is where configurations and your data are stored.
+
+The CLI will also ask you to set a password.  This is used to encrypt notes.
+This process will generate recovery code 🛟 that you can use set a new password if you forget yours.
+
+⚠️ Save this recovery code in a safe place or else you protected notes will be lost forever!
+
 ## Usage
 
-### Add a Note
+### Add a note
 
 Add a note with a title.
 
@@ -53,7 +63,7 @@ Save a requests response.
 `http -b https://dog.ceo/api/breeds/list/all | crusty -i -t 'Dog Breed JSON'`
 
 
-### View Notes
+### View notes
 
 List a summary of all your notes.
 
@@ -63,7 +73,7 @@ Get a specific note using its ID:
 
 `crusty -f 10`
 
-### Search Notes
+### Search notes
 
 Use the full power of the command line to filter note titles.
 
@@ -81,7 +91,7 @@ Use more or less to page through menu results.
 
 `crusty | less`
 
-### Edit Notes
+### Edit notes
 
 Edit the body of the last note created, read or edited.
 
@@ -103,7 +113,27 @@ Open a new blank note in an editor.
 
 `crusty -o`
 
-### Remove Notes
+### Encrypt notes
+
+You can create an encrypted note by adding the encrypted flag to any note creation command.
+
+`crusty -o -E`
+
+`crusty -t 'A new note' -n 'Some text for a note here.' -E`
+
+Encrypt an existing note.
+
+`crusty -p 2`
+
+### Decrypt notes
+
+When you try to open an encrypted note it will prompt for your password.
+
+Decrypted and save a plain text note.
+
+`crusty --unprotect 4`
+
+### Remove notes
 
 Soft delete (trash) an unprotected note by ID.
 
@@ -124,3 +154,17 @@ Hard delete all notes in the trash.
 Untrash a note by ID.
 
 `crusty --restore 2`
+
+### Backing up your notes
+
+You can back up your notes by copying and saving your crusty database wherever you like.
+
+`cp ~/.crusty/crusty.db ~/crusty.db.bak`
+
+⚠️ If you change you password, make sure you retain the recovery code(s) that matches your the snapshot(s) you have saved.
+Otherwise, you man not have access to your encrypted notes.
+
+### Release notes
+
+* Version 0.11.0 updated the size of the title column to accommodate encrypted messages.
+* Version 0.12.0 
