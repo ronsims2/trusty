@@ -48,8 +48,8 @@ pub fn create_test_db<F>(mut test_fun: F) where F: FnMut(&dyn PathOperations) {
 
 
 fn test_default_note(note: SimpleNoteView) {
-    assert!(note.title.eq("Get Started with cRusty"));
-    assert!(note.body.eq("Welcome to cRusty the CLI notes app. -Ron"));
+    assert!(note.title.eq("Get Started with tRusty"));
+    assert!(note.body.eq("Welcome to tRusty the CLI notes app. -Ron"));
 }
 
 
@@ -98,7 +98,7 @@ fn test_list_note_titles() {
 #[test]
 fn test_get_note_from_menu_line_by_id() {
     let test = | mock: &dyn PathOperations | {
-        let test_line = "        1 | 2024-07-01 22:56:27 | Get Started with cRusty";
+        let test_line = "        1 | 2024-07-01 22:56:27 | Get Started with tRusty";
         let note = get_note_from_menu_line_by_id(mock, test_line);
         test_default_note(note);
     };

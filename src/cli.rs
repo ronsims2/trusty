@@ -12,11 +12,11 @@ use crate::sql::{add_note, get_last_touched_note, get_note_by_id, update_note_by
 use crate::utils::slice_text;
 
 #[derive(Debug, Parser)]
-#[command(author, version, about = "tRusty: a command Line notes app  🦀")]
+#[command(author, version, about = "tRusty: a command line notes app  🦀📝")]
 pub(crate) struct Cli {
     #[arg(short, long, help = "Use this flag to specify note text (requires a title).")]
     pub note: Option<String>,
-    #[arg(short, long, help = "Use this flag to a title for a note.")]
+    #[arg(short, long, help = "Use this flag to add a note title.")]
     pub title: Option<String>,
     #[arg(short, long, help = "Use this flag to specify a quick note without a title.")]
     pub quick: Option<String>,
@@ -26,23 +26,23 @@ pub(crate) struct Cli {
     pub(crate) input: Option<bool>,
     #[arg(short, long, help = "Use this flag to specify an ID to print a saved note.")]
     pub find: Option<usize>,
-    #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Prints a summary list of all note (default behavior if no flags are specified.")]
+    #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Prints a summary list of all note (default behavior if no flag(s) specified.")]
     pub list: Option<bool>,
     #[arg(short = 'g', long, default_missing_value = "true", num_args = 0, help = "Use this flag to find a note by piping in a menu row. Think -g like grep.")]
     pub find_from: Option<bool>,
     #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Use this flag to edit the last touched note.")]
     pub edit: Option<bool>,
-    #[arg(short, long, default_missing_value = "0", num_args(0..=1), help = "Use this flag to open a note by its ID.")]
+    #[arg(short, long, default_missing_value = "0", num_args(0..=1), help = "Use this flag to open a note by ID.")]
     pub open: Option<usize>,
-    #[arg(short = 'D', long, help = "Use this flag to delete an unprotected note by its ID.")]
+    #[arg(short = 'D', long, help = "Use this flag to delete an unprotected note by ID.")]
     pub delete: Option<usize>,
-    #[arg(short = 'F', long, help = "DANGER: This is a will indiscriminately delete a note. Use this flag to force delete a note by its ID.")]
+    #[arg(short = 'F', long, help = "DANGER: This is a will indiscriminately delete a note. Use this flag to force delete a note by ID.")]
     pub force_delete: Option<usize>,
-    #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Permanently delete all notes that have place din the trash.")]
+    #[arg(short, long, default_missing_value = "true", num_args = 0, help = "Permanently delete all notes that are in the trash.")]
     pub clean: Option<bool>,
-    #[arg(long, help = "Use this flag to soft delete a note by its ID.")]
+    #[arg(long, help = "Use this flag to soft delete (trash) a note by ID.")]
     pub trash: Option<usize>,
-    #[arg(long, help = "Use this flag to restore a soft deleted a note by its ID.")]
+    #[arg(long, help = "Use this flag to restore a soft deleted (trashed) note by ID.")]
     pub restore: Option<usize>,
     #[arg(short = 'A', long, default_missing_value = "true", num_args = 0, help = "When editing, this modifier will allow you to edit a title.")]
     pub all: Option<bool>,

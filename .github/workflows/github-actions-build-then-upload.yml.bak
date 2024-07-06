@@ -1,5 +1,5 @@
 name: Build and Upload
-run-name: Build cRusty and upload to rsims2.com/downloads
+run-name: Build tRusty and upload to rsims2.com/downloads
 on: [push]
 env:
   CARGO_TERM_COLOR: always

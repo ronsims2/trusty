@@ -1,6 +1,6 @@
 [package]
-name = "trusty"
-version = "1.0.1"
+name = "tru"
+version = "1.0.3"
 edition = "2021"
 authors = ["Ron Sims II", "Bisky"]
 

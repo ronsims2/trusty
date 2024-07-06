@@ -8,7 +8,7 @@ import shutil
 user_home = environ.get('HOME')
 
 if user_home is None or user_home.strip() == '':
-    print('Error: HOME not set. Set you HOME environment variable so that this script can find your cRusty database.')
+    print('Error: HOME not set. Set you HOME environment variable so that this script can find your tRusty database.')
     exit(1)
 
 crusty_home = path.join(user_home, '.crusty')
@@ -17,15 +17,15 @@ crusty_bak = f'crusty.db.pre0.12x.bak'
 crusty_bak_path = path.join(crusty_home, crusty_bak)
 
 if path.exists(crusty_db_path):
-    print(f'cRusty database found at: {crusty_db_path}')
+    print(f'tRusty database found at: {crusty_db_path}')
 else:
-    print(f'Error: Could not find cRusty DB at: {crusty_db_path}')
+    print(f'Error: Could not find tRusty DB at: {crusty_db_path}')
     exit(2)
 
 
 shutil.copyfile(crusty_db_path, crusty_bak_path)
-print(f'cRusty database backed up to: {crusty_bak_path}')
-print('Attempting to update cRusty database.')
+print(f'tRusty database backed up to: {crusty_bak_path}')
+print('Attempting to update tRusty database.')
 
 create_temp_col_sql = 'ALTER TABLE notes ADD COLUMN temp_title TEXT;'
 copy_col_data_sql = 'UPDATE notes SET temp_title = CAST(title as temp_title);'
@@ -49,6 +49,6 @@ except Exception as err:
 
 print('Cleaning up workspace 🧹')
 remove(crusty_bak_path)
-print('Success, cRusty 🦀📝 database updated!')
+print('Success, tRusty 🦀📝 database updated!')
 
 

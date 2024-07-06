@@ -4,7 +4,7 @@ use regex::Regex;
 use uuid::Uuid;
 use crate::render::{CrustyPrinter, Printer};
 use crate::errors::Errors;
-use crate::setup::CrustyPathOperations;
+use crate::setup::{CrustyPathOperations, PathOperations};
 use crate::sql::{add_key_value, get_note_by_id, get_value_from_attr_table, NoteView, SimpleNoteView, update_key_value, update_note_by_note_id, update_protected_flag, update_title_by_content_id};
 
 /**
@@ -196,6 +196,8 @@ pub(crate) fn decrypt_dump(notes: &Vec<NoteView>) -> Vec<NoteView> {
 }
 
 pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
+    let cpo = CrustyPathOperations{};
+    let cr_printer = CrustyPrinter{};
     if update {
         CrustyPrinter{}.println("Change your password".to_string());
         let rrc = &raw_recovery_code.unwrap().to_string();
@@ -203,23 +205,23 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
             let encrypted_password = encrypt_text(pw, pw);
             let recovery_code = Uuid::new_v4().to_string();
             let encrypted_recovery_code = encrypt_text(&recovery_code, &recovery_code);
-            let old_encrypted_boss_key = get_value_from_attr_table(&CrustyPathOperations{},"app", "recovery_boss_key");
+            let old_encrypted_boss_key = get_value_from_attr_table(&cpo,"app", "recovery_boss_key");
             let old_recovery_key = rrc;
             let old_decrypted_boss_key = decrypt_text(&old_recovery_key, &old_encrypted_boss_key.value);
             let new_boss_key = encrypt_text(pw, &old_decrypted_boss_key);
             let new_recovery_boss_key = encrypt_text(&recovery_code, &old_decrypted_boss_key);
 
-            if update_key_value(&CrustyPathOperations{},"app", "password", &encrypted_password) &&
-                update_key_value(&CrustyPathOperations{},"app", "recovery_code", &encrypted_recovery_code) &&
-                update_key_value(&CrustyPathOperations{},"app", "boss_key", &new_boss_key) &&
-                update_key_value(&CrustyPathOperations{},"app", "recovery_boss_key", &new_recovery_boss_key) {
-                CrustyPrinter{}.println("Password set".to_string());
-                CrustyPrinter{}.println(format!("🛟 Recovery code generated: {}", recovery_code));
-                CrustyPrinter{}.println("Save your recovery code and use it to change your password if you forget it...again.".to_string());
+            if update_key_value(&cpo,"app", "password", &encrypted_password) &&
+                update_key_value(&cpo,"app", "recovery_code", &encrypted_recovery_code) &&
+                update_key_value(&cpo,"app", "boss_key", &new_boss_key) &&
+                update_key_value(&cpo,"app", "recovery_boss_key", &new_recovery_boss_key) {
+                cr_printer.println("Password set".to_string());
+                cr_printer.println(format!("🛟 Recovery code generated: {}", recovery_code));
+                cr_printer.println("Save your recovery code and use it to change your password if you forget it...again.".to_string());
 
                 return true
             } else {
-                CrustyPrinter{}.print_error(format!("{}", "Could not set password."));
+                cr_printer.print_error(format!("{}", "Could not set password."));
                 exit(Errors::SetPasswordErr as i32)
             }
         };
@@ -227,7 +229,7 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
         if prompt_for_password(update_password, false, true) {
             return
         } else {
-            CrustyPrinter{}.print_error(format!("{}", "Invalid password."));
+            cr_printer.print_error(format!("{}", "Invalid password."));
             exit(Errors::CreatePasswordErr as i32)
         }
     } else {
@@ -239,26 +241,27 @@ pub(crate) fn set_password(update: bool, raw_recovery_code: Option<String>) {
             let boss_key = encrypt_text(pw, &raw_boss_key);
             let recovery_boss_key = encrypt_text(&recovery_code, &raw_boss_key);
 
-            if add_key_value(&CrustyPathOperations{},"app", "password", &encrypted_password) &&
-                add_key_value(&CrustyPathOperations{},"app", "recovery_code", &encrypted_recovery_code) &&
-                add_key_value(&CrustyPathOperations{},"app", "boss_key", &boss_key) &&
-                add_key_value(&CrustyPathOperations{},"app", "recovery_boss_key", &recovery_boss_key) {
-                CrustyPrinter{}.println("Password set".to_string());
-                CrustyPrinter{}.println(format!("🛟 Recovery code generated: {}", recovery_code));
-                CrustyPrinter{}.println("Save your recovery code and use it to change your password if you forget it.".to_string());
+            if add_key_value(&cpo,"app", "password", &encrypted_password) &&
+                add_key_value(&cpo,"app", "recovery_code", &encrypted_recovery_code) &&
+                add_key_value(&cpo,"app", "boss_key", &boss_key) &&
+                add_key_value(&cpo,"app", "recovery_boss_key", &recovery_boss_key) {
+                cr_printer.println("Password set".to_string());
+                cr_printer.println(format!("🛟 Recovery code generated: {}", recovery_code));
+                cr_printer.println("Save your recovery code and use it to change your password if you forget it.".to_string());
 
                 return true
             } else {
-                CrustyPrinter{}.print_error(format!("{}", "Could not set password."));
+                cr_printer.print_error(format!("{}", "Could not set password."));
                 exit(Errors::SetPasswordErr as i32)
             }
         };
 
-        CrustyPrinter{}.println("Set up an alpha-numeric password so that you can encrypt things 🤐".to_string());
+        cr_printer.println("Set up an alpha-numeric password so that you can encrypt things 🤐".to_string());
         if prompt_for_password(insert_password, false, true) {
             return
         } else {
-            CrustyPrinter{}.print_error(format!("{}", "Invalid password."));
+            cr_printer.print_error(format!("Could not setup a password. You need to remove your tRusty config found here: {} to start over.",
+                                           &cpo.get_crusty_dir().display().to_string()));
             exit(Errors::CreatePasswordErr as i32)
         }
     }
