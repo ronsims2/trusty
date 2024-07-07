@@ -158,6 +158,10 @@ You can back up your notes by copying and saving your crusty database wherever y
 ⚠️ If you change you password, make sure you retain the recovery code(s) that matches your the snapshot(s) you have saved.
 Otherwise, you man not have access to your encrypted notes.
 
+## Configuration
+
+Specify a custom home directory by setting the `TRUSTY_HOME` environment variable.
+
 ### Release notes
 
 * Version 0.11.0 - Updated the size of the title column to accommodate encrypted messages.

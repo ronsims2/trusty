@@ -1,4 +1,5 @@
 use std::{env, fs};
+use std::env::VarError;
 use std::path::{Path, PathBuf};
 use std::process::exit;
 use std::string::ToString;
@@ -27,7 +28,24 @@ fn get_win_home_drive() -> String {
     win_home_drive
 }
 
+fn get_alt_trusty_dir() -> Result<String, VarError> {
+    env::var("TRUSTY_HOME")
+}
+
 pub(crate) fn get_home_dir() -> String {
+    let trusty_dir = match get_alt_trusty_dir() {
+        Ok(trusty_dir) => {
+            Some(trusty_dir)
+        }
+        Err(_) => {
+            None
+        }
+    };
+
+    if trusty_dir.is_some() {
+        return trusty_dir.unwrap()
+    }
+
     let windows_os = "windows";
     // assume we are in a *nix env but update home path for windows if detected
     let os_fam = env::consts::FAMILY;
@@ -56,7 +74,8 @@ pub fn get_trusty_directory(dir_name: String) -> PathBuf {
     Path::new(&config_loc).to_path_buf()
 }
 
-pub(crate) fn check_for_config(home_dir: &String) -> Option<PathBuf> {
+pub(crate) fn check_for_config(alt_trusty_dir: &String) -> Option<PathBuf> {
+
     let config_path = TrustyPathOperations {}.get_trusty_dir();
 
     if config_path.exists() {
