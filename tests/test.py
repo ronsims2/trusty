@@ -28,7 +28,7 @@ if not path.exists(trusty_config_dir):
 
     # clean up old database
 if path.isfile(trusty_db_path):
-    print('Cleaning up previous workspace.🧹')
+    print('Cleaning up previous workspace🧹')
     remove(trusty_db_path)
 
 
@@ -78,13 +78,22 @@ Vivamus semper ligula id felis pulvinar 🥷 venenatis. Aliquam urna risus, cons
 Nulla tincidunt, sem vitae luctus dignissim, 🥷 lacus nibh consequat erat, nec tristique ipsum dui et ex.\r\n
 '''
 
+# Test adding a note
 Popen(f'{tru} -t "{control_title}" -n "{control_body}"', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
 menu_output = Popen(f'{tru}', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
 note_output = Popen(f'{tru} -f 2', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
 assert control_body in note_output
 assert '🤣Foobar Barbaz 🥷 Bazbez Lorem ipsum dolor s' in menu_output
 print('✅ -n -t test passed')
-print(menu_output)
+
+# Test adding a quick note
+control_quick_note = '''🥷🤣🐶Nulla tincidunt, sem vitae luctus dignissim, 🥷 
+lacus nibh consequat erat, nec tristique ipsum dui et ex.\r\n
+Lorem  🤣 ipsum dolor sit amet, consectetur adipiscing elit.'''
+Popen(f'{tru} -q "{control_quick_note}"', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
+menu_output = Popen(f'{tru}', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
+assert '🥷🤣🐶Nulla tincidunt, sem vitae luctus digni' in menu_output
+print('✅ -q test passed')
 
 
 
