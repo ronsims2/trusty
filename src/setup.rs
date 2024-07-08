@@ -32,7 +32,7 @@ fn get_alt_trusty_dir() -> Result<String, VarError> {
     env::var("TRUSTY_HOME")
 }
 
-pub(crate) fn get_home_dir() -> String {
+pub fn get_home_dir() -> String {
     let trusty_dir = match get_alt_trusty_dir() {
         Ok(trusty_dir) => {
             Some(trusty_dir)
@@ -76,7 +76,7 @@ pub fn get_trusty_directory(dir_name: String) -> PathBuf {
 
 pub(crate) fn check_for_config(alt_trusty_dir: &String) -> Option<PathBuf> {
 
-    let config_path = TrustyPathOperations {}.get_trusty_dir();
+    let config_path = TrustyPathOperations{}.get_trusty_dir();
 
     if config_path.exists() {
         return Some(config_path)
