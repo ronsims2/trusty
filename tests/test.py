@@ -126,4 +126,6 @@ encrypted_quick_note = '🐶🐶🐶 Foobar Dog 🐶🐶🐶'
 child = pexpect.spawn(f'{tru} -q "{encrypted_quick_note}" -E')
 child.expect('Enter password:')
 result = child.sendline(TEST_PASSWORD)
-print(get_menu_output())
+menu_output = get_menu_output()
+assert '🔒 ENCRYPTED' in menu_output
+print('✅ -q -E test passed')
