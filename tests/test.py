@@ -7,6 +7,7 @@ from subprocess import Popen, PIPE, run
 import tempfile
 import pathlib
 import shutil
+import pexpect
 
 TEST_PASSWORD = '1234'
 TEST_RECOVERY_CODE = '7e85e714-60fd-4e8c-a58e-73674314101c'
@@ -121,6 +122,8 @@ assert piped_title in menu_output
 print('✅ -i -t test passed')
 
 # Add an encrypted quicknote
-# encrypted_quick_note = '🐶🐶🐶 Foobar Dog 🐶🐶🐶'
-# proc = Popen(f'{tru} -q "{encrypted_quick_note}" -E',
-#              shell=True, stdin=PIPE, stderr=None, stdout=PIPE)
+encrypted_quick_note = '🐶🐶🐶 Foobar Dog 🐶🐶🐶'
+child = pexpect.spawn(f'{tru} -q "{encrypted_quick_note}" -E')
+child.expect('Enter password:')
+result = child.sendline(TEST_PASSWORD)
+print(get_menu_output())
