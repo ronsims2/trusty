@@ -2,6 +2,7 @@
 # Test password: 1234
 # test recovery code: 7e85e714-60fd-4e8c-a58e-73674314101c
 import os
+from io import BytesIO
 from os import environ, path, mkdir, getcwd, curdir, remove
 from subprocess import Popen, PIPE, run
 import tempfile
@@ -19,6 +20,18 @@ def get_menu_output():
 
 def get_note_by_id(id):
     return Popen(f'{tru} -f {id}', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
+
+
+def get_encrypted_note_by_id(id, pwd):
+    # buf = BytesIO()
+    proc = pexpect.spawn(f'{tru} -f {id}')
+    # proc.logfile = buf
+    proc.expect('Enter password:')
+    proc.sendline(pwd)
+
+    return proc.read().decode()
+
+
 
 
 curr_dir = getcwd()
@@ -121,11 +134,28 @@ menu_output = get_menu_output()
 assert piped_title in menu_output
 print('✅ -i -t test passed')
 
+
+control_encrypted_title = '🔒 ENCRYPTED'
+# Add an encrypted note with title
+encrypted_note_title = '🥷🏽❤️🗡️'
+encrypted_note_body = 'Ninjas loves swords'
+child = pexpect.spawn(f'{tru} -t "{encrypted_note_title}" -n "{encrypted_note_body}" -E')
+child.expect('Enter password:')
+result = child.sendline(TEST_PASSWORD)
+menu_output = get_menu_output()
+assert control_encrypted_title in menu_output
+assert encrypted_note_body in get_encrypted_note_by_id(6, TEST_PASSWORD)
+print('✅ -t -n -E test passed')
+
+
+
+
 # Add an encrypted quicknote
 encrypted_quick_note = '🐶🐶🐶 Foobar Dog 🐶🐶🐶'
 child = pexpect.spawn(f'{tru} -q "{encrypted_quick_note}" -E')
 child.expect('Enter password:')
 result = child.sendline(TEST_PASSWORD)
 menu_output = get_menu_output()
-assert '🔒 ENCRYPTED' in menu_output
+assert control_encrypted_title in menu_output
+assert encrypted_quick_note in get_encrypted_note_by_id(7, TEST_PASSWORD)
 print('✅ -q -E test passed')
