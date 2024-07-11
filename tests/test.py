@@ -32,8 +32,6 @@ def get_encrypted_note_by_id(id, pwd):
     return proc.read().decode()
 
 
-
-
 curr_dir = getcwd()
 # look for cargo.toml to make sure we are in the project root execution context
 if not path.isfile(pathlib.Path(path.join(curdir, 'Cargo.toml'))):
@@ -134,28 +132,57 @@ menu_output = get_menu_output()
 assert piped_title in menu_output
 print('✅ -i -t test passed')
 
-
 control_encrypted_title = '🔒 ENCRYPTED'
 # Add an encrypted note with title
 encrypted_note_title = '🥷🏽❤️🗡️'
 encrypted_note_body = 'Ninjas loves swords'
 child = pexpect.spawn(f'{tru} -t "{encrypted_note_title}" -n "{encrypted_note_body}" -E')
 child.expect('Enter password:')
-result = child.sendline(TEST_PASSWORD)
+child.sendline(TEST_PASSWORD)
 menu_output = get_menu_output()
 assert control_encrypted_title in menu_output
 assert encrypted_note_body in get_encrypted_note_by_id(6, TEST_PASSWORD)
 print('✅ -t -n -E test passed')
 
-
-
-
 # Add an encrypted quicknote
 encrypted_quick_note = '🐶🐶🐶 Foobar Dog 🐶🐶🐶'
 child = pexpect.spawn(f'{tru} -q "{encrypted_quick_note}" -E')
 child.expect('Enter password:')
-result = child.sendline(TEST_PASSWORD)
+child.sendline(TEST_PASSWORD)
 menu_output = get_menu_output()
 assert control_encrypted_title in menu_output
 assert encrypted_quick_note in get_encrypted_note_by_id(7, TEST_PASSWORD)
 print('✅ -q -E test passed')
+
+# Add an encrypted piped note
+encrypted_piped_note = '👀 peek-a-boo'
+child = pexpect.spawn(f'{tru} -i -E')
+child.sendline(encrypted_piped_note)
+child.sendeof()
+child.expect('Enter password:')
+child.sendline(TEST_PASSWORD)
+menu_output = get_menu_output()
+assert control_encrypted_title in menu_output
+assert encrypted_piped_note in get_encrypted_note_by_id(8, TEST_PASSWORD)
+print('✅ -i -E test')
+
+# Add an encrypted piped note with title
+encrypted_piped_id = 9
+encrypted_piped_title = '👀👀👀 LOOKEY HERE'
+child = pexpect.spawn(f'{tru} -i -t "{encrypted_piped_title}" -E')
+child.sendline(encrypted_piped_note)
+child.sendeof()
+child.expect('Enter password:')
+child.sendline(TEST_PASSWORD)
+menu_output = get_menu_output()
+assert control_encrypted_title in menu_output
+assert encrypted_piped_note in get_encrypted_note_by_id(encrypted_piped_id, TEST_PASSWORD)
+print('✅ -i -E test')
+
+
+# Hard delete an encrypted note
+Popen(f'{tru} -F {encrypted_piped_id}', shell=True, stderr=PIPE, stdout=PIPE).stdout.read().decode()
+result = Popen(f'{tru} -f {encrypted_piped_id}', shell=True, stderr=PIPE, stdout=PIPE).stderr.read().decode()
+assert 'Could not find note for id: 9' == result.strip()
+print('✅ -D test')
+
