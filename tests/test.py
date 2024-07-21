@@ -182,7 +182,7 @@ child.sendline(TEST_PASSWORD)
 menu_output = get_menu_output(trusty)
 assert control_encrypted_title in menu_output
 assert encrypted_piped_note in get_encrypted_note_by_id(trusty, 8, TEST_PASSWORD)
-print('✅ -i -E test')
+print('✅ -i -E test passed')
 hard_delete_by_id(trusty, 8)
 
 # Add an encrypted piped note with title
@@ -196,13 +196,13 @@ child.sendline(TEST_PASSWORD)
 menu_output = get_menu_output(trusty)
 assert control_encrypted_title in menu_output
 assert encrypted_piped_note in get_encrypted_note_by_id(trusty, encrypted_piped_id, TEST_PASSWORD)
-print('✅ -i -E test')
+print('✅ -i -E test passed')
 
 
 # Hard delete an encrypted note
 result = hard_delete_by_id(trusty, 9)
 assert 'Could not find note for id: 9' == result.strip()
-print('✅ -D test')
+print('✅ -D test passed')
 
 # test find from grep
 search_term = 'whodiwho'
@@ -210,7 +210,12 @@ search_note = f'Falafel and waffles and {search_term} and drizzle'
 Popen(f'{trusty} -q "{search_note}"', shell=True, stderr=None, stdout=PIPE)
 result = Popen(f'echo "       10 | 2024-07-12 03:16:27 | Falafel and waffles and whodiwho and drizzle" | {trusty} -g', shell=True, stderr=None, stdout=PIPE).stdout.read().decode().strip()
 assert search_note == result
-print('✅ -g test')
+print('✅ -g test passed')
 
+# test dump feature
+result = Popen(f'{trusty} --dump', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
+lines = result.strip().split('\n')
+assert (len(lines) == 33)
+print('✅ --dump test passed')
 
 
