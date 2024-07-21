@@ -18,8 +18,11 @@ def get_menu_output(tru):
     return Popen(f'{tru}', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
 
 
-def get_note_by_id(tru, id):
-    return Popen(f'{tru} -f {id}', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
+def get_note_by_id(tru, id, should_err=False):
+    if not should_err:
+        return Popen(f'{tru} -f {id}', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
+    else:
+        return Popen(f'{tru} -f {id}', shell=True, stderr=PIPE, stdout=None).stderr.read().decode()
 
 
 def get_encrypted_note_by_id(tru, note_id, pwd):
@@ -112,6 +115,11 @@ note_output = get_note_by_id(trusty, 2)
 assert control_body in note_output
 assert '🤣Foobar Barbaz 🥷 Bazbez Lorem ipsum dolor s' in menu_output
 print('✅ -n -t test passed')
+test_id = 9999
+# test find failure too
+result = get_note_by_id(trusty, test_id, True)
+assert f'Could not find note for id: {test_id}' == result.strip()
+print('✅ -f test passed')
 
 # Test adding a quick note
 control_quick_note = '''🥷🤣🐶Nulla tincidunt, sem vitae luctus dignissim, 🥷 
