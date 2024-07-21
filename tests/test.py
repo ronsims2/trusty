@@ -12,6 +12,10 @@ import pexpect
 
 TEST_PASSWORD = '1234'
 TEST_RECOVERY_CODE = '7e85e714-60fd-4e8c-a58e-73674314101c'
+TERM = 'xterm'
+
+# Set this so that we can edit
+environ['TERM'] = TERM
 
 
 def get_menu_output(tru):
@@ -217,5 +221,15 @@ result = Popen(f'{trusty} --dump', shell=True, stderr=None, stdout=PIPE).stdout.
 lines = result.strip().split('\n')
 assert (len(lines) == 33)
 print('✅ --dump test passed')
+
+# test edit
+Popen(f'{trusty} -f 1', shell=True, stderr=None, stdout=PIPE)
+cmd = f'{trusty} -e'
+proc = Popen(cmd, shell=True, stderr=None, stdout=PIPE)
+result = Popen(f'ps {proc.pid}', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
+Popen(f'kill {proc.pid}', shell=True, stderr=None, stdout=PIPE)
+assert f'{trusty} -e' in result
+print('✅ -e passed')
+
 
 
