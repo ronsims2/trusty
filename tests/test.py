@@ -60,9 +60,8 @@ trusty_db_path = path.join(trusty_config_dir, 'trusty.db')
 
 trusty_test_dir = path.join(getcwd(), 'tests')
 # set the pseudo-editor
-editor_path = path.join(trusty_test_dir, 'mock_editor.py')
-EDITOR = editor_path
-environ['EDITOR'] = f'python {EDITOR}'
+EDITOR = f'truncate -s 0'
+environ['EDITOR'] = EDITOR
 print(f'$EDITOR env var set to: {EDITOR}')
 
 if not path.exists(trusty_config_dir):
@@ -231,17 +230,10 @@ print('✅ --dump test passed')
 Popen(f'{trusty} -f 1', shell=True, stderr=None, stdout=PIPE)
 cmd = f'{trusty} -e'
 proc = Popen(cmd, shell=True, stderr=None, stdout=PIPE)
-result = Popen(f'ps {proc.pid}', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
-# not needed using python mock editor
-# Popen(f'kill {proc.pid}', shell=True, stderr=None, stdout=PIPE)
-assert f'{trusty} -e' in result
-print(result)
-# Can't get tRusty to pick up the tmp file changes....
-# check that editor added the phrase 'Hip Hop'
-# result = get_note_by_id(trusty, 1)
-# print(result)
-# assert 'Hip Hop' in result
-print('✅ -e passed')
+Popen(f'ps {proc.pid}', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
+result = get_note_by_id(trusty, 1)
+assert result.strip() == ''
+print('✅ -e test passed')
 
 
 
