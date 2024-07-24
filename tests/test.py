@@ -13,10 +13,8 @@ import pexpect
 TEST_PASSWORD = '1234'
 TEST_RECOVERY_CODE = '7e85e714-60fd-4e8c-a58e-73674314101c'
 TERM = 'xterm'
-
-# Set this so that we can edit
+# set this so that we can edit
 environ['TERM'] = TERM
-
 
 def get_menu_output(tru):
     return Popen(f'{tru}', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
@@ -60,6 +58,13 @@ trusty_config_dir = path.join(trusty_home_dir, '.trusty')
 
 trusty_db_path = path.join(trusty_config_dir, 'trusty.db')
 
+trusty_test_dir = path.join(getcwd(), 'tests')
+# set the pseudo-editor
+editor_path = path.join(trusty_test_dir, 'mock_editor.py')
+EDITOR = editor_path
+environ['EDITOR'] = f'python {EDITOR}'
+print(f'$EDITOR env var set to: {EDITOR}')
+
 if not path.exists(trusty_config_dir):
     mkdir(trusty_config_dir)
 
@@ -68,7 +73,7 @@ if path.isfile(trusty_db_path):
     print('Cleaning up previous workspace🧹')
     remove(trusty_db_path)
 
-shutil.copyfile(path.join(getcwd(), 'tests', 'trusty.db'), trusty_db_path)
+shutil.copyfile(path.join(trusty_test_dir, 'trusty.db'), trusty_db_path)
 print('Initialized database 🧑🏽‍💻')
 print(f'Database location: {trusty_db_path}')
 
@@ -227,8 +232,15 @@ Popen(f'{trusty} -f 1', shell=True, stderr=None, stdout=PIPE)
 cmd = f'{trusty} -e'
 proc = Popen(cmd, shell=True, stderr=None, stdout=PIPE)
 result = Popen(f'ps {proc.pid}', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
-Popen(f'kill {proc.pid}', shell=True, stderr=None, stdout=PIPE)
+# not needed using python mock editor
+# Popen(f'kill {proc.pid}', shell=True, stderr=None, stdout=PIPE)
 assert f'{trusty} -e' in result
+print(result)
+# Can't get tRusty to pick up the tmp file changes....
+# check that editor added the phrase 'Hip Hop'
+# result = get_note_by_id(trusty, 1)
+# print(result)
+# assert 'Hip Hop' in result
 print('✅ -e passed')
 
 
