@@ -1,5 +1,8 @@
-# tRusty 🦀📝
-A lightweight CLI notes app written in Rust.
+
+# Get started with tRusty 🦀📝
+
+![tRusty logo](../../images/trusty-logo.png){width=350}
+A lightweight open source CLI notes app written in Rust.
 
 ## Build from source
 
@@ -29,7 +32,7 @@ tRusty is pretty good for:
 * Cataloging small base64 data (files/images)
 * Drafting haikus
 
-## Getting started
+## Setup
 
 When you first set up tRusty, it will create a `.trusty` directory in your home folder.
 This is where configurations and your data are stored.
@@ -81,7 +84,7 @@ List a summary of all your notes.
 tru
 ```
 
-or
+or 
 
 ```Shell
 tru -l
@@ -240,11 +243,12 @@ Specify a custom home directory by setting the `TRUSTY_HOME` environment variabl
 ### Older versions
 
 FYI: The app's code name was cRusty thus the binary was called `crusty`.
+These versions are stable but do not support encryption.
 
-[Windows x86_64](https://rsims2.com/downloads/crusty-0.8.2-win64.zip)
+[Windows x86_64](https://orangemantis.net/trusty/downloads/crusty-0.8.2-win64.zip)
 
-[MacOS Apple Silicon](https://rsims2.com/downloads/crusty-0.8.2-macos.zip)
+[MacOS Apple Silicon](https://orangemantis.net/trusty/downloads/crusty-0.8.2-macos.zip)
 
-[MacOS Apple Intel](https://rsims2.com/downloads/crusty-0.8.2-macos-intel.zip)
+[MacOS Apple Intel](https://orangemantis.net/trusty/downloads/crusty-0.8.2-macos-intel.zip)
 
-[Ubuntu x86_64](https://rsims2.com/downloads/crusty-0.8.2-ubuntu.zip)
+[Ubuntu x86_64](https://orangemantis.net/trusty/downloads/crusty-0.8.2-ubuntu.zip)
