@@ -35,12 +35,15 @@ tRusty is pretty good for:
 ## Setup
 
 When you first set up tRusty, it will create a `.trusty` directory in your home folder.
-This is where configurations and your data are stored.
+This is where configuration files and your data are stored.
 
-The CLI will also ask you to set a password.  This is used to encrypt notes.
-The process will generate recovery code 🛟 that you can use set a new password if you forget yours.
+> You may set the `TRUSTY_HOME` environment variable to specify an alternative location for the `.trusty` directory.
+{style="note"}
 
-> Save this recovery code in a safe place or else your protected notes will be lost forever!
+During initialization, you will be asked to set a password.  It is used to encrypt notes.
+The process will generate a recovery code 🛟 that you can use to set a new password.
+
+> Save this recovery code in a safe place or else your protected notes could be lost forever if you forget your password!
 {style="warning"}
 
 ## Usage
@@ -90,7 +93,7 @@ or
 tru -l
 ```
 
-Get a specific note using its ID:
+Get a specific note using its ID.
 
 ```Shell
 tru -f 10
@@ -107,7 +110,7 @@ tru | grep -i untitled
 Open the first note that matches a search.
 
 ```Shell
-tru | grep -i untitled | trusty -g
+tru | grep -i untitled | tru -g
 ```
 
 Dump all your notes and search.
@@ -224,19 +227,16 @@ cp ~/.trusty/trusty.db ~/trusty.db.bak
 ```
 
 
-> If you change your password, make sure you retain the recovery code(s) that match the snapshot(s) you have saved.
-> Otherwise, you man not have access to your encrypted notes.
+> If you backup you database, make sure you retain the recovery code(s) that match the snapshot(s) you have saved.
+> Otherwise, you man not have access to your encrypted notes if you forget the snapshot's password.
 {style="warning"}
 
-## Configuration
-
-Specify a custom home directory by setting the `TRUSTY_HOME` environment variable.
-
 ### Release notes
-
-* Version 0.11.0 - Updated the size of the title column to accommodate encrypted messages.
-* Version 0.12.0 - Stable encryption support added.
-* version 1.0.3 - Public tRusty release.
+* version 0.8.2 -  Stable CRUD features for notes.
+* version 0.11.0 - Updated the size of the title column to accommodate encrypted messages.
+* version 0.12.0 - Stable encryption support added.
+* version 1.0.3 -  Public tRusty release.
+* version 1.0.5 -  Added `TRUSTY_HOME` support.
 
 ## Archive
 
