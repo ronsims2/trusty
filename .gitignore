@@ -20,3 +20,6 @@ Cargo.lock
 # Added by cargo
 
 /target
+
+# ignor doc artifacts
+/documents/*.zip
