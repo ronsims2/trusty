@@ -8,7 +8,7 @@ mod security;
 
 use clap::Parser;
 use security::set_password;
-use crate::cli::{Cli, edit_note, edit_title, insert_note_from_std_in, open_note};
+use crate::cli::{Cli, edit_note, edit_title, insert_note_from_std_in, open_note, cat_note};
 use crate::render::{print_app_summary, print_dump, print_simple_note, TrustyPrinter, Printer};
 use crate::setup::{check_for_config, create_trusty_dir, TrustyPathOperations, PathOperations, get_home_dir, init_trusty_db};
 use crate::sql::{add_note, delete_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, list_note_titles, restore_note, trash_note};
@@ -56,7 +56,10 @@ fn main() {
     let unprotect = args.unprotect;
     let protect = args.protect;
     let dump_protected = args.dump_protected;
+    let cat = args.cat;
 
+    // default of zero means unspecified
+    let cat_note_id = cat.unwrap_or(0);
     let should_encrypt_note = encrypted.unwrap_or(false);
 
     if find_from.is_some() {
@@ -92,6 +95,13 @@ fn main() {
 
     if input.is_some() {
         let title_val = title.unwrap_or("Untitled");
+
+        // check for cat and append if found
+        if cat_note_id > 0 {
+            cat_note(&cpo, cat_note_idm should_encrypt_note, true);
+            return
+        }
+        
         insert_note_from_std_in(title_val, should_encrypt_note);
         return
     }

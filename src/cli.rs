@@ -59,7 +59,9 @@ pub(crate) struct Cli {
     #[arg(short, long, help = "Decrypt a note and save it as plain text.")]
     pub unprotect: Option<usize>,
     #[arg(short, long, help = "Encrypt and save an existing note.")]
-    pub protect: Option<usize>
+    pub protect: Option<usize>,
+    #[arg(long, help = "Use this flag to specify an ID to concatenate new text to an existing note.")]
+    pub cat: Option<usize>,
 }
 
 pub(crate) fn read_from_std_in() -> Option<String> {
@@ -144,5 +146,12 @@ pub(crate) fn open_note(cpo: &dyn PathOperations, id: usize, protected: bool) ->
         let title = slice_text(0, 128, &draft);
 
         add_note(cpo, &title, &draft, protected)
+    }
+}
+
+pub(crate) fn cat_note(cpo: &dyn PathOperations, id: usize, protected: bool, from_std_in: bool) -> bool  {
+    if id > 0 {
+        let note = get_note_by_id(&TrustyPathOperations {}, id);
+        let body = note.body.as_str();
     }
 }
