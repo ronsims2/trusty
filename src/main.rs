@@ -8,7 +8,7 @@ mod security;
 
 use clap::Parser;
 use security::set_password;
-use crate::cli::{Cli, edit_note, edit_title, insert_note_from_std_in, open_note, cat_note};
+use crate::cli::{Cli, edit_note, edit_title, insert_note_from_std_in, open_note, cat_note_from_stdin};
 use crate::render::{print_app_summary, print_dump, print_simple_note, TrustyPrinter, Printer};
 use crate::setup::{check_for_config, create_trusty_dir, TrustyPathOperations, PathOperations, get_home_dir, init_trusty_db};
 use crate::sql::{add_note, delete_note, dump_notes, empty_trash, get_note_by_id, get_note_from_menu_line, get_summary, list_note_titles, restore_note, trash_note};
@@ -98,7 +98,7 @@ fn main() {
 
         // check for cat and append if found
         if cat_note_id > 0 {
-            cat_note(&cpo, cat_note_idm should_encrypt_note, true);
+            cat_note_from_stdin(&cpo, cat_note_id, should_encrypt_note);
             return
         }
         

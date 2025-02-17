@@ -149,9 +149,29 @@ pub(crate) fn open_note(cpo: &dyn PathOperations, id: usize, protected: bool) ->
     }
 }
 
-pub(crate) fn cat_note(cpo: &dyn PathOperations, id: usize, protected: bool, from_std_in: bool) -> bool  {
+pub(crate) fn cat_note_from_stdin(cpo: &dyn PathOperations, id: usize, protected: bool) -> bool  {
     if id > 0 {
         let note = get_note_by_id(&TrustyPathOperations {}, id);
         let body = note.body.as_str();
+        
+        let result = match read_from_std_in() { 
+            None => {
+                false
+            }
+            Some(piped_input) => {
+                if !piped_input.trim().is_empty() {
+                    let updated_body = format!("{}\n{}", &body, &piped_input);
+                    update_note_by_note_id(cpo, id, &updated_body);
+                    true
+                } else {
+                    TrustyPrinter {}.print_error(format!("{}", "Input was either empty or flag was not specified, please fix your command."));
+                    exit(Errors::InputFlagErr as i32);
+                }
+            }
+        };
+        result
+    } else {
+        TrustyPrinter {}.print_error(format!("{}", "Invalid note ID, cannot append note."));
+        exit(Errors::NoteIdErr as i32);
     }
 }
