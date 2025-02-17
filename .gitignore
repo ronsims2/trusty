@@ -23,3 +23,5 @@ Cargo.lock
 
 # ignor doc artifacts
 /documents/*.zip
+/venv/
+/.venv/
