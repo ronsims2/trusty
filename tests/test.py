@@ -142,10 +142,11 @@ print('✅ -q test passed')
 piped_note = '''🥷Nulla tincidunt, sem vitae luctus dignissim, 🥷 
 lacus nibh consequat erat, 🤣🐶nec tristique ipsum dui et ex.
 Lorem  🤣 ipsum dolor sit amet, consectetur adipiscing elit.🥷'''
+piped_id = 4
 Popen(f'echo "{piped_note}" | {trusty} -i', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
 menu_output = get_menu_output(trusty)
 assert 'Untitled' in menu_output
-note_output = get_note_by_id(trusty, 4)
+note_output = get_note_by_id(trusty, piped_id)
 assert piped_note.strip() == note_output.strip()
 print('✅ -i test passed')
 # test pipe dnote with title
@@ -155,6 +156,14 @@ Popen(f'echo "{piped_note}" | {trusty} -i -t "{piped_title}"',
 menu_output = get_menu_output(trusty)
 assert piped_title in menu_output
 print('✅ -i -t test passed')
+
+# Test catting a note from stdin (pipping)
+catted_note = 'I ❤️ 🌮'
+Popen(f'echo "{catted_note}" | {trusty} -i --cat {piped_id}', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
+note_output = get_note_by_id(trusty, piped_id)
+expected_note = f'{piped_note}\n\n{catted_note}'
+assert note_output.strip() == expected_note
+print('✅ -i --cat test passed')
 
 control_encrypted_title = '🔒 ENCRYPTED'
 # Add an encrypted note with title
@@ -223,7 +232,8 @@ print('✅ -g test passed')
 # test dump feature
 result = Popen(f'{trusty} --dump', shell=True, stderr=None, stdout=PIPE).stdout.read().decode()
 lines = result.strip().split('\n')
-assert (len(lines) == 33)
+# Modify the count below if we add more text
+assert (len(lines) == 35)
 print('✅ --dump test passed')
 
 # test edit
