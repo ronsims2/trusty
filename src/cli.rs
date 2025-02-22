@@ -151,6 +151,7 @@ pub(crate) fn open_note(cpo: &dyn PathOperations, id: usize, protected: bool) ->
 }
 
 pub(crate) fn cat_note_from_stdin(cpo: &dyn PathOperations, id: usize) -> bool  {
+    //@todo, handle encryptions
     if id > 0 {
         let note = get_note_by_id(&TrustyPathOperations {}, id);
         let body = note.body.as_str();
