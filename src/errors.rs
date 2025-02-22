@@ -15,5 +15,6 @@ pub enum Errors {
     KeyValInsertErr = 514,
     KeyValSelectErr = 515,
     KeyValUpdateErr = 516,
-    InitDBErr = 517
+    InitDBErr = 517,
+    EmptyNoteErr = 518
 }

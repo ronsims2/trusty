@@ -1,3 +1,4 @@
+use std::fmt::format;
 use std::io;
 use std::io::Read;
 use std::process::exit;
@@ -149,7 +150,7 @@ pub(crate) fn open_note(cpo: &dyn PathOperations, id: usize, protected: bool) ->
     }
 }
 
-pub(crate) fn cat_note_from_stdin(cpo: &dyn PathOperations, id: usize, protected: bool) -> bool  {
+pub(crate) fn cat_note_from_stdin(cpo: &dyn PathOperations, id: usize) -> bool  {
     if id > 0 {
         let note = get_note_by_id(&TrustyPathOperations {}, id);
         let body = note.body.as_str();
@@ -173,5 +174,31 @@ pub(crate) fn cat_note_from_stdin(cpo: &dyn PathOperations, id: usize, protected
     } else {
         TrustyPrinter {}.print_error(format!("{}", "Invalid note ID, cannot append note."));
         exit(Errors::NoteIdErr as i32);
+    }
+}
+
+pub(crate) fn cat_note_by_id(id: usize, text: &str) -> bool  {
+    if (id == 0) {
+        TrustyPrinter {}.print_error(format!("{}", "Invalid note ID, cannot append note."));
+        exit(Errors::NoteIdErr as i32);
+    }
+    
+    if !text.is_empty() {
+        let note = get_note_by_id(&TrustyPathOperations {}, id);
+        let body = note.body.as_str();
+        let new_body_text = format!("{}\n{}", &body, &text);
+
+        let new_body = match note.protected {
+            true => {
+                // @todo is it a bug not to set the title?
+                let encrypted_note = encrypt_note("", &new_body_text);
+                encrypted_note.body
+            }
+            false => {new_body_text}
+        };
+        update_note_by_note_id(&TrustyPathOperations {}, id, &new_body)
+    } else {
+        TrustyPrinter {}.print_error(format!("{}", "Cannot append an empty note."));
+        exit(Errors::EmptyNoteErr as i32);
     }
 }

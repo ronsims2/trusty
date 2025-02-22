@@ -98,7 +98,7 @@ fn main() {
 
         // check for cat and append if found
         if cat_note_id > 0 {
-            cat_note_from_stdin(&cpo, cat_note_id, should_encrypt_note);
+            cat_note_from_stdin(&cpo, cat_note_id);
             return
         }
         
@@ -122,6 +122,11 @@ fn main() {
     // add an untitled quick note, this needs to stay near the bottom
     if quick_note.is_some() && title.is_none() && note.is_none() {
         let note = quick_note.unwrap();
+        
+        if cat_note_id > 0 {
+            
+        }
+        
         let title = slice_text(0, 128, note);
         add_note(&cpo, title.as_str(), note, should_encrypt_note);
         return

@@ -66,7 +66,13 @@ echo "Sometimes you need to save the output of a program | tru -i"
 echo "Sometimes you need to save the output of a program with a title | tru -i -t "Saved Output $(date)"
 ```
 
-Save a requests response.
+Append to an existing note by ID.
+
+```Shell
+echo "Add some more to a note | tru -i --cat 42"
+```
+
+Save a request's response.
 
 ```Shell
 http -b https://dog.ceo/api/breeds/list/all | tru -i -t 'Dog Breed JSON'
